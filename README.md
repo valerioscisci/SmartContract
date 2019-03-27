@@ -22,5 +22,7 @@ b) Installare python https://www.python.org/downloads/__
     ...
 
 c) Da Terminale:
+    npm install -g solc
     pip install django
     pip install web3
+    pip install py-solc
