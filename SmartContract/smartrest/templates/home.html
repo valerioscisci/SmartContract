@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ block.super }} - Homepage{% endblock title %}
+
+{% block css %}
+
+{% endblock css %}
+
+{% block content %}
+
+<main role="main">
+    <!-- Header -->
+    <header class="section-top-padding">
+    </header>
+
+    <section class="section-top-padding background-white">
+        <div class="line text-center">
+            <h2 class="text-dark text-size-50 text-m-size-40">General Information</h2>
+            <hr class="break background-primary break-small break-center margin-bottom-50">
+        </div>
+        <div class="line">
+            <div class="margin2x">
+                <div class="s-12 m-6 l-6 margin-bottom-30">
+                    <div class="float-left">
+                        <i class="icon-sli-user text-primary text-size-40 text-line-height-1"></i>
+                    </div>
+                    <div class="margin-left-60">
+                        <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20">Ministry User</h3>
+                        <p>As a Ministry User you will be able to do the following actions:</p>
+                        <ul>
+                            <li>Create a project</li>
+                            <li>Edit and save the project</li>
+                            <li>Submit the project for SID feedback</li>
+                            <li>Check the status of the project</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="s-12 m-6 l-6 margin-bottom-60">
+                    <div class="float-left">
+                        <i class="icon-sli-user text-primary text-size-40 text-line-height-1"></i>
+                    </div>
+                    <div class="margin-left-60">
+                        <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20">SID User</h3>
+                        <p>As a SID User you will be in charge of:</p>
+                        <ul>
+                            <li>Checking the status of submitted projects</li>
+                            <li>Deem the project idea comprehensive/satisfactory or unsatisfactory</li>
+                            <li>Download pdf reports</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <hr class="break background-primary break-small break-center">
+    {% if not user.is_authenticated %}
+    <a class="text-more-info text-center text-primary text-s-size-20 text-l-size-20 text-xl-size-20 text-xxl-size-20" href="">Log In</a>
+    {% else %}
+    <a class="text-more-info text-center text-primary text-s-size-20 text-l-size-20 text-xl-size-20 text-xxl-size-20" href="">Project Area</a>
+    {% endif %}
+    <hr class="break background-primary break-center">
+    <section class="padding-2x background-white">
+        <div class="line text-center">
+            <i class="icon-sli-book-open text-primary text-size-40"></i>
+            <h2 class="text-dark text-size-50 text-m-size-40">Documentation and Training</h2>
+            <hr class="break background-primary break-small break-center margin-bottom-50">
+        </div>
+        <div class="line">
+            <div class="margin2x">
+                <div class="s-12 m-6 l-6 margin-bottom-60">
+                    <div class="float-left">
+                        <i class="icon-sli-question text-primary text-size-40 text-line-height-1"></i>
+                    </div>
+                    <div class="margin-left-60">
+                        <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20">Documentation</h3>
+                        <p>Get all the information needed about the new system and the application form in the <a class="text-more-info text-primary text-s-size-20 text-l-size-20 text-xl-size-20 text-xxl-size-20" href="">Documentation Section</a></p>
+                    </div>
+                </div>
+                <div class="s-12 m-6 l-6 margin-bottom-60">
+                    <div class="float-left">
+                        <i class="icon-sli-graduation text-primary text-size-40 text-line-height-1"></i>
+                    </div>
+                    <div class="margin-left-60">
+                        <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20">Training</h3>
+                        <p>Access the training section and learn how to go through the application form if you are a Ministry User or how to review projects if you are a SID User <a class="text-more-info text-primary text-s-size-20 text-l-size-20 text-xl-size-20 text-xxl-size-20" href="">Training</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <hr class="break background-primary break-center">
+    <section class="padding-2x background-white">
+        <div class="line text-center">
+            <i class="icon-sli-info text-primary text-size-40"></i>
+            <h2 class="text-dark text-size-50 text-m-size-40">Disclaimer</h2>
+            <hr class="break background-primary break-small break-center margin-bottom-50">
+        </div>
+        <div class="line">
+            <div class="margin2x">
+                <div class="s-12 m-12 l-12 margin-bottom-60">
+                    <p class="text-dark padding-2x margin-left-right text-center background-grey border-radius-2x">
+                        The submission of project ideas or information provided by SID as part of this web application does not constitute in any way, approval in terms of EU funding, and does not pre-judge the decisions or feedback provided by designated funding evaluation entities, should the project proposal be submitted for funding. In this regard, any feedback provided by the SID team should be considered as an advisory feedback with the aim of improving capacity in terms of drafting project proposals.
+                        Also, it should be noticed that proposals submitted to SID through the web application will need to be further revisited at EU funding application submission stage taking into consideration the applicable requirements of the call and also taking into consideration the time span between the ‘accepted proposal’ and the submitted application since needs, context etc. may change. Furthermore, calls would have additional requirements strictly relating to the OPs/funding policy. Therefore, it should not be assumed that the information provided through this web application would be enough to fill in an application for funding.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% endblock content %}
+
+{% block js %}
+
+{% endblock js %}
