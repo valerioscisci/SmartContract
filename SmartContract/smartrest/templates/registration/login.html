@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{{ block.super }} - Login{% endblock title %}
+
+{% block css %}
+
+{% endblock css %}
+
+{% block content %}
+
+<main role="main">
+    <!-- Header -->
+    <header class="padding-3x background-image text-center head-colour">
+
+    </header>
+
+    <section class="padding-2x background-white">
+        <div class="line text-center">
+            <h2 class="text-dark text-size-50 text-m-size-40">Autenticazione</h2>
+        </div>
+    </section>
+
+    <!-- Authentication Form -->
+
+    <section>
+        <div class="line">
+            <div class="margin padding-2x">
+                <div class="s-12 m-10 l-8 center background-grey padding">
+                    <h3 class="text-size-30 margin-bottom-40 text-center"><b>Log In Form</b></h3>
+                    <form class="customform" method="post" enctype="multipart/form-data" action="{% url 'login' %}">{% csrf_token %}
+                        <div class="line">
+                            <div class="margin">
+                                <div class="s-12 m-12 l-6">
+                                    <input name="username" class="required" placeholder="Username" title="Username" type="text" />
+                                </div>
+                                <div class="s-12 m-12 l-6">
+                                    <input name="password" class="required" placeholder="Password" title="Password" type="password" />
+                                </div>
+                            </div>
+                        </div>
+                        {% if form.errors %}
+                        <div class="line">
+                            <p class="s-6 m-6 l-6 text-error">Lo username o la password sono sbagliati. Inseriscili di nuovo.</p>
+                        </div>
+                        {% endif %}
+                        <div class="line">
+                            <div class="s-6 center"><button class="button border-radius text-white background-primary" type="submit" value="login">Log In</button></div>
+                            <input type="hidden" name="next" value="{{ next }}" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+{% endblock content %}
+
+{% block js %}
+
+{% endblock js %}

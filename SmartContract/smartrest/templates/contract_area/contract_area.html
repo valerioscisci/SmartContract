@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% load groups_extra %}
+
+{% block title %}{{ block.super }} - Area Contratti{% endblock title %}
+
+{% block css %}
+
+{% endblock css %}
+
+{% block content %}
+
+<main role="main">
+    <!-- Header -->
+    <header class="padding-3x background-image text-center head-colour">
+
+    </header>
+
+    <section class="padding-2x background-white">
+        <div class="line text-center">
+            <h2 class="text-dark text-size-50 text-m-size-40">Area Contratti</h2>
+        </div>
+    </section>
+
+    {% if request.user|has_group:"DirettoreLavori" %}
+
+    <!-- Sezione Area Contratti Direttore -->
+
+    <section class="padding-2x">
+        <div class="line">
+            <div class="margin">
+                <div class="menucol s-12 m-3 l-3 xl-3 xxl-3 margin-bottom-50 float-left">
+                    <div class="aside-nav minimize-on-small">
+                        <p class="aside-nav-text">Projects Ideas Navigation</p>
+                        <ul>
+                            <li class="minimize hidden"><span class="minimizespan">Hide</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
+                            <li>Projects Ideas List</li>
+                            <ul>
+                                <li id="review"><a href="{% url 'review_project' %}">Review Projects Ideas</a></li>
+                                <li id="counter"><a href="{% url 'proposal_counter' %}">Unsatisfactory Proposals Counter</a></li>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+                <div class="contentcol s-12 m-9 l-9 xl-9 xxl-9 float-right">
+                    {% block meae_panel %}
+                    <div class="margin-s-left-10 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80">
+                        <p>
+                            Use the navigation menu on the side to access the list of projects ideas to be reviewed or to know more about the unsatisfactory proposals.
+                        </p>
+                    </div>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% elif request.user|has_group:"DittaAppaltatrice" %}
+
+    <!-- Sezione Area Contratti Ditta Appaltatrice -->
+
+    <section class="padding-2x">
+        <div class="line">
+            <div class="margin">
+                <div class="menucol s-12 m-3 l-3 xl-3 xxl-3 margin-bottom-50 float-left">
+                    <div class="aside-nav minimize-on-small">
+                        <p class="aside-nav-text">Projects Navigation</p>
+                        <ul>
+                            <li class="minimize hidden"><span class="minimizespan">Hide</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
+                            <li>Create Project</li>
+                            <ul>
+                                <li id="new_project"><a href="{% url 'new_project' %}">New Project Form</a></li>
+                            </ul>
+                            <li>Projects List</li>
+                            <ul>
+                                <li id="consult_and_edit"><a href="{% url 'edit_project' %}">Consult and Edit Projects</a></li>
+                                <li id="delete_project"><a href="{% url 'delete_project' %}">Delete Concept Note Drafts</a></li>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+                <div class="contentcol s-12 m-9 l-9 xl-9 xxl-9 float-right">
+                    {% block ministry_panel %}
+                    <div class="margin-s-left-10 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-bottom-20">
+                        <p>
+                            In this area you will be able to create, modify and delete your projects. Use the navigation menu on the left to access the possible options.
+                        </p>
+                    </div>
+                    <div class="line">
+                        <div class="margin-s-left-10 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80">
+                            <div class="s-12 m-12 l-12">
+                                <h2 class="text-strong">Disclaimer <i class="icon-sli-info text-primary text-size-20"></i></h2>
+                                <p class="text-dark padding text-center background-grey border-radius-2x">
+                                    The submission of project ideas or information provided by SID as part of this web application does not constitute in any way, approval in terms of EU funding, and does not pre-judge the decisions or feedback provided by designated funding evaluation entities, should the project proposal be submitted for funding. In this regard, any feedback provided by the SID team should be considered as an advisory feedback with the aim of improving capacity in terms of drafting project proposals.
+                                    Also, it should be noticed that proposals submitted to SID through the web application will need to be further revisited at EU funding application submission stage taking into consideration the applicable requirements of the call and also taking into consideration the time span between the ‘satisfactory proposal’ and the submitted application since needs, context etc. may change. Furthermore, calls would have additional requirements strictly relating to the OPs/funding policy. Therefore, it should not be assumed that the information provided through this web application would be enough to fill in an application for funding.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% elif request.user|has_group:"StazioneAppaltante" %}
+
+    <!-- Sezione Area Contratti Stazione Appaltante -->
+
+    <section class="padding-2x">
+        <div class="line">
+            <div class="margin">
+                <div class="menucol s-12 m-3 l-3 xl-3 xxl-3 margin-bottom-50 float-left">
+                    <div class="aside-nav minimize-on-small">
+                        <p class="aside-nav-text">Projects Navigation</p>
+                        <ul>
+                            <li class="minimize hidden"><span class="minimizespan">Hide</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
+                            <li>Create Project</li>
+                            <ul>
+                                <li id="new_project"><a href="{% url 'new_project' %}">New Project Form</a></li>
+                            </ul>
+                            <li>Projects List</li>
+                            <ul>
+                                <li id="consult_and_edit"><a href="{% url 'edit_project' %}">Consult and Edit Projects</a></li>
+                                <li id="delete_project"><a href="{% url 'delete_project' %}">Delete Concept Note Drafts</a></li>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+                <div class="contentcol s-12 m-9 l-9 xl-9 xxl-9 float-right">
+                    {% block ministry_panel %}
+                    <div class="margin-s-left-10 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-bottom-20">
+                        <p>
+                            In this area you will be able to create, modify and delete your projects. Use the navigation menu on the left to access the possible options.
+                        </p>
+                    </div>
+                    <div class="line">
+                        <div class="margin-s-left-10 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80">
+                            <div class="s-12 m-12 l-12">
+                                <h2 class="text-strong">Disclaimer <i class="icon-sli-info text-primary text-size-20"></i></h2>
+                                <p class="text-dark padding text-center background-grey border-radius-2x">
+                                    The submission of project ideas or information provided by SID as part of this web application does not constitute in any way, approval in terms of EU funding, and does not pre-judge the decisions or feedback provided by designated funding evaluation entities, should the project proposal be submitted for funding. In this regard, any feedback provided by the SID team should be considered as an advisory feedback with the aim of improving capacity in terms of drafting project proposals.
+                                    Also, it should be noticed that proposals submitted to SID through the web application will need to be further revisited at EU funding application submission stage taking into consideration the applicable requirements of the call and also taking into consideration the time span between the ‘satisfactory proposal’ and the submitted application since needs, context etc. may change. Furthermore, calls would have additional requirements strictly relating to the OPs/funding policy. Therefore, it should not be assumed that the information provided through this web application would be enough to fill in an application for funding.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% endif %}
+
+    {% if request.user.is_staff %}
+
+    <!-- Section used by Admin -->
+
+    <meta http-equiv="REFRESH" content="0;url=/admin">
+
+    {% endif %}
+
+</main>
+
+<a href="#" id="backTop"><i class="icon-sli-arrow-up-circle text-strong text-error"></i></a>
+
+{% endblock content %}
+
+{% block js %}
+
+<script type="text/javascript">
+    $(function(){
+        $('.aside-nav a').filter(function(){return this.href==location.href}).parent().addClass('aside-active-item text-white').siblings().removeClass('aside-active-item text-white')
+        $('.aside-nav a').click(function(){
+            $(this).parent().addClass('aside-active-item text-white').siblings().removeClass('aside-active-item text-white')
+        })
+    })
+    $( document ).ready(function() {
+        $('#linkCN, #linkPF, #linkPS').hide(0);
+        $('.left-menu li:nth-child(4)').addClass('active-item')
+
+        //minimize menu function
+        $('.minimize').click(function(){
+            minimizeMenu();
+        });
+
+        if ($('#backTop').length) {
+            var scrollTrigger = 500, // px
+                backToTop = function () {
+                    var scrollTop = $(window).scrollTop();
+                    var docHeight = $(document).height();
+                    var windowHeight = $(window).height();
+                    var scrollTriggerDoc = 100;
+                     if (scrollTop > scrollTriggerDoc) {
+                        $('#linkCN, #linkPF, #linkPS').show(400);
+                    } else {
+                        $('#linkCN, #linkPF, #linkPS').hide(400);
+                    }
+                    if (scrollTop > scrollTrigger) {
+                        $('#backTop').show(400);
+                    } else {
+                        $('#backTop').hide(400);
+                    }
+                    if (scrollTop < scrollTrigger-50) {
+                        if (!$('.minimize').hasClass('minimizefixed') && $('.minimizespan').text() == "Show") {
+                            $('.minimize').trigger("click");
+                        }
+                    }
+                    if (scrollTop > scrollTrigger && (docHeight - (scrollTop + windowHeight)) > 600) {
+                        if (!$('.minimize').hasClass('minimizefixed') && $('.minimizespan').text() != "Show") {
+                            $('.minimize').trigger("click");
+                        }
+                        $('.minimize').addClass('minimizefixed');
+                    } else {
+                        $('.minimize').removeClass('minimizefixed');
+                    }
+                };
+            backToTop();
+            $(window).on('scroll', function () {
+                backToTop();
+            });
+            $('#backTop').on('click', function (e) {
+                e.preventDefault();
+                $('html,body').animate({
+                    scrollTop: 100
+                }, 700);
+            });
+        }
+    });
+
+    //function used to minimize menu
+    var minimizeMenu = function(){
+        $('.menucol').toggle(550);
+        $('.contentcol').toggleClass('m-9 l-9 xl-9 xxl-9 m-12 l-12 xl-12 xxl-12', 500);
+        $('.aside-nav ul li:not(.minimize)').fadeToggle(500);
+
+        var text = $('.minimizespan').text();
+        $('.minimizespan').text(text == 'Hide' ? 'Show' : 'Hide');
+        $('.minimize i').toggleClass('icon-sli-arrow-down icon-sli-arrow-right');
+    }
+</script>
+
+{% endblock js %}

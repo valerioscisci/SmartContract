@@ -14,6 +14,11 @@ class HomePageView(TemplateView):
     def get(self, request, **kwargs):
         return render(request, 'home.html', context=None)
 
+# Vista per la Contract Area
+
+class ContractAreaView(TemplateView):
+    template_name = "contract_area/contract_area.html"
+
 # Vista predisposta alla creazione e all'inizializzazione di un nuovo insieme di smartcontract
 
 def creacontratto(request):

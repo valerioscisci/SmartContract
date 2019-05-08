@@ -61,10 +61,7 @@
                     <!-- logo -->
                     <ul class="logo-menu">
                         <a href="{% url 'home' %}" class="logo">
-                            <!-- Logo White Version -->
-                            <img class="logo-white" src="{% static 'smartrest/img/logodark.png' %}" alt="logo">
-                            <!-- Logo Dark Version -->
-                            <img class="logo-dark" src="{% static 'smartrest/img/logo.png' %}" alt="logo">
+                            <img src="{% static 'smartrest/img/logo.png' %}" alt="logo">
                         </a>
                     </ul>
 
@@ -73,7 +70,7 @@
                         <ul class="right top-ul chevron">
                             <li><a href="{% url 'home' %}">Home</a></li>
                             {% if user.is_authenticated %}
-                            <li><a href="">Project Area</a></li>
+                            <li><a href="{% url 'contract_area' %}">Area Contratti</a></li>
                             {% endif %}
                         </ul>
                     </div>
@@ -81,10 +78,10 @@
                     <div class="top-nav right-menu">
                         <ul class="top-ul chevron">
                             {% if user.is_authenticated %}
-                            <li><a href="">Password Change</a></li>
-                            <li><a href="">Log Out</a></li>
+                            <li><a href="{% url 'password_change' %}">Cambio Password</a></li>
+                            <li><a href="{% url 'logout' %}">Log Out</a></li>
                             {% else %}
-                            <li><a href="">Log In</a></li>
+                            <li><a href="{% url 'login' %}">Log In</a></li>
                             {% endif %}
                             {% if user.is_staff %}
                             <li><a href="/admin/">Admin</a></li>
@@ -92,7 +89,7 @@
                         </ul>
                         {% if user.is_authenticated %}
                         <div class="float-right username">
-                            <span class="text-dark text-strong">You are logged in as:&nbsp&nbsp {{ user.username }}</span>
+                            <span class="text-dark text-strong">Sei loggato come:&nbsp&nbsp {{ user.username }}</span>
                         </div>
                         {% endif %}
                     </div>
