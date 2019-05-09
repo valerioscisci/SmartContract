@@ -30,22 +30,24 @@
             <div class="margin">
                 <div class="menucol s-12 m-3 l-3 xl-3 xxl-3 margin-bottom-50 float-left">
                     <div class="aside-nav minimize-on-small">
-                        <p class="aside-nav-text">Projects Ideas Navigation</p>
+                        <p class="aside-nav-text">Menù Direttore Lavori</p>
                         <ul>
-                            <li class="minimize hidden"><span class="minimizespan">Hide</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
-                            <li>Projects Ideas List</li>
+                            <li class="minimize hidden"><span class="minimizespan">Nascondi</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
+                            <li>Lista Attività</li>
                             <ul>
-                                <li id="review"><a href="{% url 'review_project' %}">Review Projects Ideas</a></li>
-                                <li id="counter"><a href="{% url 'proposal_counter' %}">Unsatisfactory Proposals Counter</a></li>
+                                <li id="libretto"><a href="">Libretto delle Misure</a></li>
+                                <li id="avanzamento"><a href="">Stato Avanzamento Lavori</a></li>
+                                <li id="registro"><a href="">Registro Contabilità</a></li>
+                                <li id="giornale"><a href="">Giornale dei Lavori</a></li>
                             </ul>
                         </ul>
                     </div>
                 </div>
                 <div class="contentcol s-12 m-9 l-9 xl-9 xxl-9 float-right">
-                    {% block meae_panel %}
+                    {% block pannello_direttore %}
                     <div class="margin-s-left-10 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80">
                         <p>
-                            Use the navigation menu on the side to access the list of projects ideas to be reviewed or to know more about the unsatisfactory proposals.
+                            Usa il pannello di navigazione laterale per scegliere l'operazione da eseguire.
                         </p>
                     </div>
                     {% endblock %}
@@ -63,38 +65,24 @@
             <div class="margin">
                 <div class="menucol s-12 m-3 l-3 xl-3 xxl-3 margin-bottom-50 float-left">
                     <div class="aside-nav minimize-on-small">
-                        <p class="aside-nav-text">Projects Navigation</p>
+                        <p class="aside-nav-text">Menù Ditta Appaltatrice</p>
                         <ul>
-                            <li class="minimize hidden"><span class="minimizespan">Hide</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
-                            <li>Create Project</li>
+                            <li class="minimize hidden"><span class="minimizespan">Nascondi</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
+                            <li>Lista Attività</li>
                             <ul>
-                                <li id="new_project"><a href="{% url 'new_project' %}">New Project Form</a></li>
-                            </ul>
-                            <li>Projects List</li>
-                            <ul>
-                                <li id="consult_and_edit"><a href="{% url 'edit_project' %}">Consult and Edit Projects</a></li>
-                                <li id="delete_project"><a href="{% url 'delete_project' %}">Delete Concept Note Drafts</a></li>
+                                <li id="libretto_ditta"><a href="">Libretto delle Misure</a></li>
+                                <li id="registro_ditta"><a href="">Registro Contabilità</a></li>
+                                <li id="giornale_ditta"><a href="">Giornale dei Lavori</a></li>
                             </ul>
                         </ul>
                     </div>
                 </div>
                 <div class="contentcol s-12 m-9 l-9 xl-9 xxl-9 float-right">
-                    {% block ministry_panel %}
+                    {% block pannello_ditta %}
                     <div class="margin-s-left-10 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-bottom-20">
                         <p>
-                            In this area you will be able to create, modify and delete your projects. Use the navigation menu on the left to access the possible options.
+                            Usa il pannello di navigazione laterale per scegliere l'operazione da eseguire.
                         </p>
-                    </div>
-                    <div class="line">
-                        <div class="margin-s-left-10 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80">
-                            <div class="s-12 m-12 l-12">
-                                <h2 class="text-strong">Disclaimer <i class="icon-sli-info text-primary text-size-20"></i></h2>
-                                <p class="text-dark padding text-center background-grey border-radius-2x">
-                                    The submission of project ideas or information provided by SID as part of this web application does not constitute in any way, approval in terms of EU funding, and does not pre-judge the decisions or feedback provided by designated funding evaluation entities, should the project proposal be submitted for funding. In this regard, any feedback provided by the SID team should be considered as an advisory feedback with the aim of improving capacity in terms of drafting project proposals.
-                                    Also, it should be noticed that proposals submitted to SID through the web application will need to be further revisited at EU funding application submission stage taking into consideration the applicable requirements of the call and also taking into consideration the time span between the ‘satisfactory proposal’ and the submitted application since needs, context etc. may change. Furthermore, calls would have additional requirements strictly relating to the OPs/funding policy. Therefore, it should not be assumed that the information provided through this web application would be enough to fill in an application for funding.
-                                </p>
-                            </div>
-                        </div>
                     </div>
                     {% endblock %}
                 </div>
@@ -111,38 +99,26 @@
             <div class="margin">
                 <div class="menucol s-12 m-3 l-3 xl-3 xxl-3 margin-bottom-50 float-left">
                     <div class="aside-nav minimize-on-small">
-                        <p class="aside-nav-text">Projects Navigation</p>
+                        <p class="aside-nav-text">Menu Stazione Appaltante</p>
                         <ul>
-                            <li class="minimize hidden"><span class="minimizespan">Hide</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
-                            <li>Create Project</li>
+                            <li class="minimize hidden"><span class="minimizespan">Nascondi</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
+                            <li>Lista Attività</li>
                             <ul>
-                                <li id="new_project"><a href="{% url 'new_project' %}">New Project Form</a></li>
-                            </ul>
-                            <li>Projects List</li>
-                            <ul>
-                                <li id="consult_and_edit"><a href="{% url 'edit_project' %}">Consult and Edit Projects</a></li>
-                                <li id="delete_project"><a href="{% url 'delete_project' %}">Delete Concept Note Drafts</a></li>
+                                <li id="new_project"><a href="">Nuovo Contratto</a></li>
+                                <li id="libretto_stazione"><a href="">Libretto delle Misure</a></li>
+                                <li id="avanzamento_stazione"><a href="">Stato Avanzamento Lavori</a></li>
+                                <li id="registro_stazione"><a href="">Registro Contabilità</a></li>
+                                <li id="giornale_stazione"><a href="">Giornale dei Lavori</a></li>
                             </ul>
                         </ul>
                     </div>
                 </div>
                 <div class="contentcol s-12 m-9 l-9 xl-9 xxl-9 float-right">
-                    {% block ministry_panel %}
+                    {% block pannello_stazione %}
                     <div class="margin-s-left-10 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-bottom-20">
                         <p>
-                            In this area you will be able to create, modify and delete your projects. Use the navigation menu on the left to access the possible options.
+                            Usa il pannello di navigazione laterale per scegliere l'operazione da eseguire.
                         </p>
-                    </div>
-                    <div class="line">
-                        <div class="margin-s-left-10 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80">
-                            <div class="s-12 m-12 l-12">
-                                <h2 class="text-strong">Disclaimer <i class="icon-sli-info text-primary text-size-20"></i></h2>
-                                <p class="text-dark padding text-center background-grey border-radius-2x">
-                                    The submission of project ideas or information provided by SID as part of this web application does not constitute in any way, approval in terms of EU funding, and does not pre-judge the decisions or feedback provided by designated funding evaluation entities, should the project proposal be submitted for funding. In this regard, any feedback provided by the SID team should be considered as an advisory feedback with the aim of improving capacity in terms of drafting project proposals.
-                                    Also, it should be noticed that proposals submitted to SID through the web application will need to be further revisited at EU funding application submission stage taking into consideration the applicable requirements of the call and also taking into consideration the time span between the ‘satisfactory proposal’ and the submitted application since needs, context etc. may change. Furthermore, calls would have additional requirements strictly relating to the OPs/funding policy. Therefore, it should not be assumed that the information provided through this web application would be enough to fill in an application for funding.
-                                </p>
-                            </div>
-                        </div>
                     </div>
                     {% endblock %}
                 </div>
@@ -154,7 +130,7 @@
 
     {% if request.user.is_staff %}
 
-    <!-- Section used by Admin -->
+    <!-- Redirect dell'Admin -->
 
     <meta http-equiv="REFRESH" content="0;url=/admin">
 
@@ -228,14 +204,14 @@
         }
     });
 
-    //function used to minimize menu
+    //funzione usata per minimizzare il menu
     var minimizeMenu = function(){
         $('.menucol').toggle(550);
         $('.contentcol').toggleClass('m-9 l-9 xl-9 xxl-9 m-12 l-12 xl-12 xxl-12', 500);
         $('.aside-nav ul li:not(.minimize)').fadeToggle(500);
 
         var text = $('.minimizespan').text();
-        $('.minimizespan').text(text == 'Hide' ? 'Show' : 'Hide');
+        $('.minimizespan').text(text == 'Nascondi' ? 'Mostra' : 'Nascondi');
         $('.minimize i').toggleClass('icon-sli-arrow-down icon-sli-arrow-right');
     }
 </script>
