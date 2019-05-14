@@ -16,3 +16,8 @@ urlpatterns += [
     path('password_change/', auth_views.password_change, {'template_name': 'registration/password_change.html'} , name='password_change'),  #Password Change
     path('password-change-done/', auth_views.password_change_done, {'template_name': 'registration/password_change_done.html'}, name='password_change_done'),  #Password Change
 ]
+
+# Contract Area
+urlpatterns += [
+    path('contract_area/libretto_misure/', views.librettomisure, name='libretto_misure'),  #Contract Area - Libretto Misure
+]

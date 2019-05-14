@@ -1,8 +1,10 @@
 # DJANGO IMPORTS
 from django.views.generic import TemplateView
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse
+# FORMS IMPORTS
+from .forms import librettoForm
 # OTHER IMPORTS
 import json
 from web3 import Web3
@@ -14,10 +16,24 @@ class HomePageView(TemplateView):
     def get(self, request, **kwargs):
         return render(request, 'home.html', context=None)
 
+# Vista per l'Authentication System
+
+class AuthenticationView(TemplateView):
+    template_name = "login.html"
+
 # Vista per la Contract Area
 
 class ContractAreaView(TemplateView):
     template_name = "contract_area/contract_area.html"
+
+# Vista per il Libretto delle Misure
+
+def librettomisure(request):
+    if request.method == "POST":
+        template_name = "contract_area/libretto_misure.html"
+    else:
+        form = librettoForm()
+    return render(request, 'contract_area/libretto_misure.html', {'form': form})
 
 # Vista predisposta alla creazione e all'inizializzazione di un nuovo insieme di smartcontract
 
