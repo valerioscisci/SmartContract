@@ -26,6 +26,21 @@ class AuthenticationView(TemplateView):
 class ContractAreaView(TemplateView):
     template_name = "contract_area/contract_area.html"
 
+# Vista per lo Stato Avanzamento Lavori
+
+class statoavanzamento(TemplateView):
+    template_name = "contract_area/stato_avanzamento.html"
+
+# Vista per il Registro Contabilità
+
+class registrocont(TemplateView):
+    template_name = "contract_area/registro_cont.html"
+
+# Vista per il Giornale dei Lavori
+
+class giornalelavori(TemplateView):
+    template_name = "contract_area/giornale_lavori.html"
+
 # Vista per il Libretto delle Misure
 
 def librettomisure(request):

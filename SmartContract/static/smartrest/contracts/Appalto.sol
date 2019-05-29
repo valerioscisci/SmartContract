@@ -90,8 +90,8 @@ contract Appalto {
         committenza = msg.sender;
         
         //MODIFICA accounts
-        ditta=0x0fBDc686b912d7722dc86510934589E0AAf3b55A;
-        direttore_lavori=0xcA843569e3427144cEad5e4d5999a3D0cCF92B8e;
+        ditta=1646cb6e97b3846ffefb233eb07fffae22c5f776;
+        direttore_lavori=d65d65a23fae7fe9ffe23c16dcf7a2170a2bfdcd;
         
         requisiti[0].nome="Materiali innovativi";
         requisiti[0].si_no=false;

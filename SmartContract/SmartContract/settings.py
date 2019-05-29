@@ -124,6 +124,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-#User Authentication
+# User Authentication
 
 LOGIN_REDIRECT_URL = 'contract_area'
+
+# Used to Extend User Model
+AUTH_USER_MODEL = 'core.User'
