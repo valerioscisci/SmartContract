@@ -4,6 +4,7 @@ from django.contrib.auth import views as auth_views
 
 # Link Generali
 urlpatterns = [
+    path('contract_area/set_contratti/', views.setcontratti, name='set_contratti'), # Url per il settaggio iniziale dei contratti
     path('StazioneAppaltante/CreaContratto/', views.creacontratto, name='crea_contratto'),  # Url per la creazione di un nuovo contratto
     path('', views.HomePageView.as_view(), name='home'),  #Home
     path('contract_area/', views.ContractAreaView.as_view(), name='contract_area'),  #Contract Area

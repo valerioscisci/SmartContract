@@ -1,4 +1,4 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.5.0;
 
 import "./Conforme.sol";
 import "./Valore.sol";
@@ -39,12 +39,12 @@ contract Appalto {
     
     bool[] public conf;
     
-    address public committenza;
-    address public ditta;
-    address public direttore_lavori;
+    address payable public committenza;
+    address payable public ditta;
+    address payable public direttore_lavori;
     
-    address indirizzoConforme;
-    address indirizzoValore;
+    address payable indirizzoConforme;
+    address payable indirizzoValore;
     Conforme c;
     Valore v;
 
@@ -90,8 +90,8 @@ contract Appalto {
         committenza = msg.sender;
         
         //MODIFICA accounts
-        ditta=0x0fbdc686b912d7722dc86510934589e0aaf3b55a;
-        direttore_lavori=0xca843569e3427144cead5e4d5999a3d0ccf92b8e;
+        ditta=0x1e48E466739ffC526318a0c7CF284A821D5ef566;
+        direttore_lavori=0x93AC1AdEF950f31b9e302271F82DF6aDC7934379;
         
         requisiti[0].nome="Materiali innovativi";
         requisiti[0].si_no=false;
@@ -117,18 +117,18 @@ contract Appalto {
     function () external payable {} //invia l'ether specificato nel value della transazione al contratto
     
     
-    function setIndirizzoConforme (address _indirizzo) {
+    function setIndirizzoConforme (address payable _indirizzo) public {
         indirizzoConforme = _indirizzo;
         c = Conforme(indirizzoConforme);
     }
     
-    function setIndirizzoValore (address _indirizzo) {
+    function setIndirizzoValore (address payable _indirizzo) public {
         indirizzoValore = _indirizzo;
         v = Valore(indirizzoValore);
     }
     
-    function addLavoro (string _nome) public onlyDirettoreLavori {
-        var lavoro = lavori[numero_lavori];
+    function addLavoro (string memory _nome) public onlyDirettoreLavori {
+        Lavoro storage lavoro = lavori[numero_lavori];
         for (uint256 i = 0; i < numero_lavori; i++) {
             //controllo per impedire di inserire un lavoro precedentemente inserito
             require(
@@ -188,7 +188,7 @@ contract Appalto {
         require(_costo >= 0, "Non pu� essere inserito un pagamento negativo.");
         require(_percentuale > 0, "Non pu� essere inserita una soglia nulla o negativa.");
         require(_percentuale <= 100, "Non pu� essere inserita una percentuale superiore a 100.");
-        var soglia = soglie[numero_soglie];
+        Soglia storage soglia = soglie[numero_soglie];
         soglia.costo = _costo;
         soglia.percentuale = _percentuale;
         numero_soglie = numero_soglie + 1;
@@ -237,7 +237,7 @@ contract Appalto {
         msg.sender.transfer(address(this).balance);
     }
     
-    function getBilancio() constant public returns (uint256) {
+    function getBilancio() view public returns (uint256) {
          return address(this).balance;
     }
     
@@ -286,7 +286,7 @@ contract Appalto {
         lavori[_numerolavoro].conformi[8].si_no=_otto;
     }
     
-    function getRequisitiLavoro (uint256 _numerolavoro) returns (bool[]) {
+    function getRequisitiLavoro (uint256 _numerolavoro) public returns (bool[] memory) {
         delete conf;
         //conf.length = 0;
         for (uint256 i = 0; i < numero_requisiti; i++) {

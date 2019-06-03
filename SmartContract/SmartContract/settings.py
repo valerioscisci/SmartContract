@@ -129,4 +129,4 @@ STATICFILES_DIRS = [
 LOGIN_REDIRECT_URL = 'contract_area'
 
 # Used to Extend User Model
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = 'smartrest.User'

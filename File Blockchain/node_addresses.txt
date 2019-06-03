@@ -1,0 +1,22 @@
+addresses:
+
+stazione=e0afe6352a1095b44acbebe39ebbf0324859ec38
+ditta=1e48e466739ffc526318a0c7cf284a821d5ef566
+direttore_lavori=93ac1adef950f31b9e302271f82df6adc7934379
+
+node_launch command:
+
+geth --datadir ./datadir --networkid 2019 --port 30301 --nodiscover --ipcdisable --rpc --rpcapi "db,personal,eth,net,web3,debug" --rpccorsdomain="*" --rpcaddr="localhost" --rpcport 8545 console
+geth --datadir ./datadir_new --networkid 2019 --port 30302 --nodiscover --ipcdisable --rpc --rpcapi "db,personal,eth,net,web3,debug" --rpccorsdomain="*" --rpcaddr="localhost" --rpcport 8546 console
+geth --datadir ./datadir_new2 --networkid 2019 --port 30303 --nodiscover --ipcdisable --rpc --rpcapi "db,personal,eth,net,web3,debug" --rpccorsdomain="*" --rpcaddr="localhost" --rpcport 8547 console
+
+allow nodes to do transactions:
+
+personal.unlockAccount(eth.accounts[0], "password", 0)
+
+contract adresses:
+
+StringUtils: 0xA00A77E67Af013B988605cfC53f6Ef7aB71Ef029
+Appalto: 0x1e1331c08cf1C77BF6a36E9914D396Ddd764f1C3
+Conforme: 0x96d052064cDC36A2487D42294A9b98bf13E21650
+Valore: 0x30Df9891606b7b45B2A8123a4cBfb7d35CAf8d86

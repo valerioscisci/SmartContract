@@ -3,6 +3,8 @@ from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse
+# MODELS IMPORTS
+from .models import Contracts
 # FORMS IMPORTS
 from .forms import librettoForm
 # OTHER IMPORTS
@@ -85,17 +87,39 @@ def creacontratto(request):
             # per ogni valore del dict JSON_contracts, w3.eth.contract(contractAddress, abi) genera un'istanza del relativo contratto
             contract_instance.append(w3.eth.contract(contract["contractAddress"], contract["abi"])) # Aggiunge al vettore l'istanza del contratto in questione
             contract_addresses.append(contract["contractAddress"]) # Aggiunge al vettore l'indirizzo del contratto in quetione
-        # la seguente sezione setta i valori iniziali per i vari contratti prima di poterli salvare
-        #tx_Appalto_1 = contract_instance[0].functions.setIndirizzoConforme(contract_addresses[1], "{gas: 0x99999}").transact()
-        #contract_instance[0].functions.setIndirizzoValore(contract_addresses[3], "{gas: 0x99999}").transact()
-       # contract_instance[1].functions.setIndirizzoAppalto(contract_addresses[0], "{gas: 0x99999}").transact()
-       # contract_instance[1].functions.setIndirizzoValore(contract_addresses[3], "{gas: 0x99999}").transact()
-        #contract_instance[3].functions.setIndirizzoAppalto(contract_addresses[0], "{gas: 0x99999}").transact()
-       # contract_instance[3].functions.setIndirizzoConforme(contract_addresses[1], "{gas: 0x99999}").transact()
         # a questo punto bisogna salvare i nuovi contratti sulla blockchain e bisogna salvare i nuovi indirizzi ottenuti
-       # w3.eth.waitForTransactionReceipt(tx_Appalto_1)
         response = JsonResponse({'status': 'true', 'message': "La creazione dei nuovi contratti è andata a buon fine"})
         return response # Ritorna un messaggio di sucesso qualora la creazione dia andata bene
     else:
         response = JsonResponse({'status': 'false', 'message': "Questo endpoint può essere chiamato solo tramite una request di tipo POST"}, status=500)
         return response # Ritorna un errore se la request non usa il metodo POST
+
+# Vista predisposta alla inizializzazione dei contratti
+
+def setcontratti(request):
+    if request.method != "POST":
+        w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
+        w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'acount della stazione è quello che farà le transazioni
+        contracts = Contracts.objects.filter(Username='stazione')
+        i = 0
+        indirizzi = [0] * 4
+        istanze_contratti = [0] * 4
+        for contract in contracts:
+            indirizzi[i] = contract.Contract_Address
+            istanze_contratti[i] = w3.eth.contract(address=contract.Contract_Address,abi=contract.Contract_Abi.Abi_Value)  # Cre un'istanza del contratto per porte eseguire i metodi
+            i = i+1
+
+
+        # la seguente sezione setta i valori iniziali per i vari contratti prima di poterli salvare
+
+        tx_Appalto_1 = istanze_contratti[0].functions.setIndirizzoConforme(indirizzi[1]).transact()
+        w3.eth.waitForTransactionReceipt(tx_Appalto_1)
+
+        return JsonResponse(tx_Appalto_1,
+                            safe=False)
+        #    contract_instance[0].functions.setIndirizzoValore(contract_addresses[3], "{gas: 0x99999}").transact()
+    else:
+        response = JsonResponse(
+        {'status': 'false', 'message': "Questo endpoint può essere chiamato solo tramite una request di tipo POST"},
+        status=500)
+        return response  # Ritorna un errore se la request non usa il metodo POST

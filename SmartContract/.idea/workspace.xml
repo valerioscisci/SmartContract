@@ -2,19 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="76552703-d1cf-4781-bbbb-207a8846d17e" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/giornale_lavori.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/registro_cont.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/stato_avanzamento.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SmartContract/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/SmartContract/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smartrest/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/libretto_misure.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/libretto_misure.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smartrest/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smartrest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/smartrest/contracts/Appalto.sol" beforeDir="false" afterPath="$PROJECT_DIR$/static/smartrest/contracts/Appalto.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/smartrest/utils/contracts.json" beforeDir="false" afterPath="$PROJECT_DIR$/static/smartrest/utils/contracts.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../azure-pipelines.yml" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -24,11 +19,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/smartrest/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="721">
-              <caret line="41" column="50" selection-start-line="41" selection-start-column="50" selection-end-line="41" selection-end-column="50" />
+            <state relative-caret-position="347">
+              <caret line="114" column="8" lean-forward="true" selection-start-line="114" selection-start-column="8" selection-end-line="114" selection-end-column="8" />
               <folding>
                 <element signature="e#17#62#0" expanded="true" />
               </folding>
@@ -37,19 +32,31 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/static/smartrest/utils/contracts.json">
+        <entry file="file://$PROJECT_DIR$/smartrest/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="125">
-              <caret line="5" column="7" lean-forward="true" selection-start-line="4" selection-start-column="15" selection-end-line="5" selection-end-column="7" />
+            <state relative-caret-position="150">
+              <caret line="6" column="10" lean-forward="true" selection-start-line="6" selection-start-column="10" selection-end-line="6" selection-end-column="38" />
+              <folding>
+                <element signature="e#0#28#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/static/smartrest/utils/contracts.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="500">
+              <caret line="20" column="70" selection-start-line="20" selection-start-column="28" selection-end-line="20" selection-end-column="70" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/smartrest/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="625">
-              <caret line="25" lean-forward="true" selection-start-line="25" selection-end-line="25" />
+            <state relative-caret-position="175">
+              <caret line="7" column="13" selection-start-line="7" selection-start-column="4" selection-end-line="7" selection-end-column="13" />
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
               </folding>
@@ -75,6 +82,7 @@
       <find>.logo</find>
       <find>.required</find>
       <find>0x835dfbc7</find>
+      <find>.background-grey</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -84,28 +92,29 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/SmartContract/urls.py" />
-        <option value="$PROJECT_DIR$/smartrest/templates/home.html" />
         <option value="$PROJECT_DIR$/smartrest/templates/base.html" />
         <option value="$PROJECT_DIR$/smartrest/templates/registration/password_change_done.html" />
         <option value="$PROJECT_DIR$/smartrest/templates/registration/password_change.html" />
         <option value="$PROJECT_DIR$/smartrest/templates/registration/login.html" />
         <option value="$PROJECT_DIR$/static/smartrest/js/jquery-ui.min.js" />
         <option value="$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html" />
-        <option value="$PROJECT_DIR$/smartrest/views.py" />
         <option value="$PROJECT_DIR$/smartrest/templates/contract_area/giornale_lavori.html" />
-        <option value="$PROJECT_DIR$/smartrest/urls.py" />
         <option value="$PROJECT_DIR$/smartrest/templates/contract_area/stato_avanzamento.html" />
         <option value="$PROJECT_DIR$/smartrest/templates/contract_area/registro_cont.html" />
         <option value="$PROJECT_DIR$/smartrest/templates/contract_area/libretto_misure.html" />
         <option value="$PROJECT_DIR$/smartrest/forms.py" />
-        <option value="$PROJECT_DIR$/static/smartrest/css/template-smart.css" />
         <option value="$PROJECT_DIR$/static/smartrest/utils/contracts.json" />
         <option value="$PROJECT_DIR$/smartrest/models.py" />
         <option value="$PROJECT_DIR$/SmartContract/settings.py" />
+        <option value="$PROJECT_DIR$/smartrest/templates/home.html" />
+        <option value="$PROJECT_DIR$/static/smartrest/css/template-smart.css" />
+        <option value="$PROJECT_DIR$/smartrest/admin.py" />
+        <option value="$PROJECT_DIR$/smartrest/urls.py" />
+        <option value="$PROJECT_DIR$/smartrest/views.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-12" />
     <option name="y" value="-12" />
     <option name="width" value="1944" />
@@ -271,7 +280,7 @@
     <frame x="-11" y="-11" width="1942" height="1042" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16489926" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22269353" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -283,7 +292,7 @@
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32857144" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32738096" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.3297619" />
-      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.3297619" />
       <window_info anchor="bottom" id="Python Console" order="10" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -300,25 +309,8 @@
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/package-lock.json" />
-    <entry file="file://$PROJECT_DIR$/SmartContract/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="475">
-          <caret line="19" selection-start-line="19" selection-end-line="19" selection-end-column="15" />
-          <folding>
-            <element signature="e#637#669#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/smartrest/templatetags/groups_extra.py">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/smartrest/templates/home.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1325">
-          <caret line="53" column="14" selection-start-line="53" selection-start-column="14" selection-end-line="53" selection-end-column="14" />
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/static/smartrest/css/components.css">
       <provider selected="true" editor-type-id="text-editor">
@@ -370,23 +362,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/smartrest/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="568">
-          <caret line="24" column="63" selection-start-line="24" selection-start-column="63" selection-end-line="24" selection-end-column="63" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/smartrest/templates/contract_area/stato_avanzamento.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="350">
-          <caret line="14" selection-start-line="14" selection-end-line="20" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/smartrest/templates/contract_area/registro_cont.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="625">
@@ -412,13 +387,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/static/smartrest/css/template-smart.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="329">
-          <caret line="908" column="45" lean-forward="true" selection-start-line="908" selection-start-column="45" selection-end-line="908" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/smartrest/forms.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="550">
@@ -426,43 +394,94 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/smartrest/views.py">
+    <entry file="file://$PROJECT_DIR$/SmartContract/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="721">
-          <caret line="41" column="50" selection-start-line="41" selection-start-column="50" selection-end-line="41" selection-end-column="50" />
+        <state relative-caret-position="475">
+          <caret line="19" selection-start-line="19" selection-end-line="19" selection-end-column="15" />
           <folding>
-            <element signature="e#17#62#0" expanded="true" />
+            <element signature="e#637#669#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html">
+    <entry file="file://$PROJECT_DIR$/smartrest/templates/contract_area/stato_avanzamento.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1325">
-          <caret line="40" column="82" selection-start-line="40" selection-start-column="82" selection-end-line="40" selection-end-column="82" />
+        <state relative-caret-position="168">
+          <caret line="11" column="118" lean-forward="true" selection-start-line="11" selection-start-column="4" selection-end-line="11" selection-end-column="118" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/smartrest/templates/home.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="400">
+          <caret line="21" selection-start-line="21" selection-end-line="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/static/smartrest/css/template-smart.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="259">
+          <caret line="465" column="26" selection-start-line="465" selection-start-column="26" selection-end-line="465" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/smartrest/admin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="12" column="126" selection-start-line="12" selection-start-column="126" selection-end-line="12" selection-end-column="126" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/static/smartrest/utils/contracts.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="125">
-          <caret line="5" column="7" lean-forward="true" selection-start-line="4" selection-start-column="15" selection-end-line="5" selection-end-column="7" />
+        <state relative-caret-position="500">
+          <caret line="20" column="70" selection-start-line="20" selection-start-column="28" selection-end-line="20" selection-end-column="70" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/SmartContract/settings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="668">
-          <caret line="130" column="27" selection-start-line="130" selection-start-column="27" selection-end-line="130" selection-end-column="27" />
+        <state relative-caret-position="593">
+          <caret line="130" column="27" selection-start-line="125" selection-end-line="131" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="475">
+          <caret line="37" column="82" selection-start-line="37" selection-start-column="67" selection-end-line="37" selection-end-column="82" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/smartrest/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="6" column="10" lean-forward="true" selection-start-line="6" selection-start-column="10" selection-end-line="6" selection-end-column="38" />
+          <folding>
+            <element signature="e#0#28#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/smartrest/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="625">
-          <caret line="25" lean-forward="true" selection-start-line="25" selection-end-line="25" />
+        <state relative-caret-position="175">
+          <caret line="7" column="13" selection-start-line="7" selection-start-column="4" selection-end-line="7" selection-end-column="13" />
           <folding>
             <element signature="e#0#28#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/smartrest/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="347">
+          <caret line="114" column="8" lean-forward="true" selection-start-line="114" selection-start-column="8" selection-end-line="114" selection-end-column="8" />
+          <folding>
+            <element signature="e#17#62#0" expanded="true" />
           </folding>
         </state>
       </provider>

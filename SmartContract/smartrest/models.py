@@ -17,7 +17,7 @@ class Contracts(models.Model):
     Username = models.CharField(max_length=75, default='', blank=True)  # Nome Utente del creatore del contratto
     Contract_Type = models.CharField(max_length=50) # Indica il tipo di contratto (Appalto, Valore, Conforme, StringUtils)
     Contract_Address = models.CharField(max_length=100) # Indirizzo dove è deployato il contratto sulla blockchain
-    Contract_Abi = models.ForeignKey(Contracts_Abis.Abi_ID, on_delete=models.CASCADE) # Riferimento al relativo Abi
+    Contract_Abi = models.ForeignKey(Contracts_Abis, on_delete=models.CASCADE) # Riferimento al relativo Abi
 
 # Estendiamo il modello base dell'utente per poter aggiungere l'indirizzo dell'account associato sulla blockchain
 

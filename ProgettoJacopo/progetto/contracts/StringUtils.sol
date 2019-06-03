@@ -1,7 +1,7 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.5.0;
 
 library StringUtils {
-    function compare(string _a, string _b) returns (int) {
+    function compare(string memory _a, string memory _b) public returns (int) {
         bytes memory a = bytes(_a);
         bytes memory b = bytes(_b);
         uint minLength = a.length;
@@ -19,7 +19,7 @@ library StringUtils {
             return 0;
     }
     
-    function equal(string _a, string _b) returns (bool) {
+    function equal(string memory _a, string memory _b) public returns (bool) {
         return compare(_a, _b) == 0;
     }
 }
