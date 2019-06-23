@@ -1,0 +1,58 @@
+{% extends "contract_area/contract_area.html" %}
+
+{% block title %}Smart Contract - Nuovo Contratto{% endblock title %}
+
+{% block css %}
+
+{% endblock css %}
+
+{% block pannello_stazione %}
+
+<div class="margin-s-left-0 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-right-20 margin-s-right-0">
+    <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Inserisci Nuova Misura</h3>
+    <p class="text-error">
+        * I campi segnati in rosso sulla sinistra sono obbligatori.
+    </p>
+    <form method="POST" enctype="multipart/form-data" class="post-form customform" action="">{% csrf_token %}
+        <table class="row-override">
+            <tr>
+                <td>
+                    {{form.as_p}}
+                </td>
+            <tr>
+                <td colspan="2">
+                    <button id="save" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+    <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-30 margin-top-30 text-center">Libretto delle Misure</h3>
+    <table>
+        <tr>
+            <td class="text-strong">N. Ordine</td>
+            <td class="text-strong">Codice di Tariffa</td>
+            <td class="text-strong">Data</td>
+            <td class="text-strong">Designazione dei Lavori</td>
+            <td class="text-strong">Parti Uguali</td>
+            <td class="text-strong">Larghezza</td>
+            <td class="text-strong">Lunghezza</td>
+            <td class="text-strong">Altezza/Peso</td>
+            <td class="text-strong">Positivi</td>
+            <td class="text-strong">Negativi</td>
+            <td class="text-strong">Annotazioni</td>
+            <td class="text-strong">Stato</td>
+        </tr>
+    </table>
+</div>
+
+{% endblock pannello_stazione %}
+
+{% block js %}
+
+{{ block.super }}  <!--contract_area.html js import-->
+
+<script type="text/javascript">
+
+</script>
+
+{% endblock js %}

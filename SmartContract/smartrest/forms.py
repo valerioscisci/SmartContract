@@ -1,4 +1,34 @@
 from django import forms
+from .models import Contratto, User
+
+# Definisce il form che servirà per l'inserimento di un nuovo contratto da parte della stazione appaltante
+
+class ContrattoForm(forms.ModelForm):
+
+    # Metodo  per inizializzare il valore del campo utente in automatico
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # if dict kwargs has no key 'user', user is assigned None
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['Ditta'] = forms.ModelChoiceField(
+                queryset=User.objects.filter(groups__name='DittaAppaltatrice')
+            )
+            self.fields['Direttore'] = forms.ModelChoiceField(
+                queryset=User.objects.filter(groups__name='DirettoreLavori')
+            )
+            self.fields['Utente'].initial = user.id  # Foreing Key dell'utente loggato che sta creando il contratto
+
+    class Meta:
+        model = Contratto
+        fields = '__all__'
+        widgets = {
+            'Utente': forms.HiddenInput(),
+            'Nome': forms.TextInput(attrs={'class': 'required'}),
+            'Importo': forms.Select(attrs={'class': 'required'}),
+            'Ditta': forms.Select(attrs={'class': 'required'}),
+            'Direttore': forms.Select(attrs={'class': 'required'}),
+        }
 
 # Definisce il form che servirà per l'inserimento di nuove misure nel libretto delle misure
 
