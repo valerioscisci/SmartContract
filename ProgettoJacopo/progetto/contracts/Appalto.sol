@@ -17,12 +17,21 @@ contract Appalto {
         string nome;
         bool si_no;
     }
+
+    struct Misure {
+        string nome;                        //Id della misura all'interno del db
+        bool confermata;
+        string nome_lavoro;                 //Nome del lavoro associato
+
+    }
     
     struct Lavoro {
+
         string nome;
         uint256 percentuale_completamento;
         uint256 percentuale_controllata;
         RequisitoConformita[] conformi;
+
     }
     
     mapping (uint256 => Soglia) soglie;
@@ -202,6 +211,19 @@ contract Appalto {
     function updateValore (uint256 _valore) public onlyValoreContract {
         valore += _valore;
     }
+
+
+    function addMisura (string nomelavoro, string nomemisura,bool conferma) public {     //Nome del lavoro
+
+        Misure storage misura;                          //Creo una nuova struttura misura e setto le variabili
+        misura.nome = nomemisura;
+        misura.confermata =  conferma;
+        misura.nome_lavoro =  nomelavoro;
+
+    }
+
+    //function getAllMisureByLavoro(string)  //TODO FUNZIONE CHE MI RITORNA TUTTE LE MISURE DI UN LAVORO
+
     
     function checkValore() public onlyDirettoreLavori returns (bool) {
         if (valore < soglie[soglia_corrente].percentuale) {
