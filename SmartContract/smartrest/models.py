@@ -23,3 +23,27 @@ class Contracts(models.Model):
 
 class User(AbstractUser):
     Account = models.CharField(max_length=100)
+
+
+class Lavoro(models.Model):  # Tabella per identificare il lavoro singolo
+
+    Id_Lavoro = models.AutoField(primary_key=True)
+    Nome = models.CharField(max_length=100)
+    Perc_Completamento = models.IntegerField()
+    Commento = models.CharField(
+        max_length=255)  # TODO bisogna mettere la chiave esterna per il contratto, poichè il contratto ha + lavori, ogni lavoro ha + misure
+
+
+class Misure(models.Model):  # Tabella per identificare la singola misura
+    Id_Misura = models.AutoField(primary_key=True)
+    Nome = models.CharField(max_length=100)
+    Perc_Completamento = models.IntegerField()
+    Commento = models.CharField(max_length=255)
+    lavoro = models.ForeignKey(Lavoro, on_delete=models.CASCADE)  # chiave esterna per lavoro
+
+
+
+
+
+
+
