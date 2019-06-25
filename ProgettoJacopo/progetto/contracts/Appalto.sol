@@ -3,15 +3,16 @@ pragma solidity ^0.5.0;
 import "./Conforme.sol";
 import "./Valore.sol";
 import "./StringUtils.sol";
+import "./Misure.sol";
 
 contract Appalto {
     using StringUtils for string;
-    
+
     struct Soglia {
         uint256 costo; //prezzo da pagare per ogni soglia
         uint256 percentuale; //percentuale di completamento della soglia
     }
-    
+
     struct RequisitoConformita {
         //int num;
         string nome;
@@ -22,22 +23,22 @@ contract Appalto {
         string nome;                        //Id della misura all'interno del db
         bool confermata;
         string nome_lavoro;                 //Nome del lavoro associato
-
     }
-    
+
     struct Lavoro {
 
         string nome;
         uint256 percentuale_completamento;
         uint256 percentuale_controllata;
         RequisitoConformita[] conformi;
-
     }
-    
-    mapping (uint256 => Soglia) soglie;
-    mapping (uint256 => RequisitoConformita) requisiti;
-    mapping (uint256 => Lavoro) public lavori;
-    
+
+    mapping(uint256 => Soglia) soglie;
+    mapping(uint256 => RequisitoConformita) requisiti;
+    mapping(uint256 => Lavoro) public lavori;
+    mapping(uint256 => Misure) public misurazioni;
+    mapping(uint256 => Misure) public Misure_Lavoro;//Lista misurazioni di un determinato lavoro
+
     //sono tutte variabili salvate nello storadge del contratto
     uint256 public totale;
     uint256 public valore;
@@ -45,103 +46,107 @@ contract Appalto {
     uint256 public soglia_corrente = 0;
     uint256 public numero_requisiti = 0; //numero di requisiti settati inizialmente
     uint256 public numero_lavori = 0;
-    
+    uint256 public numero_misure = 0;
+    uint256 public numero_misure_lavoro = 0;
+
     bool[] public conf;
-    
+
     address payable public committenza;
     address payable public ditta;
     address payable public direttore_lavori;
-    
+
     address payable indirizzoConforme;
     address payable indirizzoValore;
     Conforme c;
     Valore v;
 
-    enum stato {inizio, lavorazione, avanzamento,liquidazione,fine}
+    enum stato {inizio, lavorazione, avanzamento, liquidazione, fine}
     stato public sta;
-    
+
     modifier onlyDirettoreLavori {
         require(
             msg.sender == direttore_lavori,
             "Solo il Direttore dei Lavori pu� utilizzare questa funzione!"
         );
-        _; //indica dove deve essere posta la funzione chiamata
-    } 
-    
+        _;
+        //indica dove deve essere posta la funzione chiamata
+    }
+
     modifier onlyCommittenza {
         require(
             msg.sender == committenza,
             "Solo il committente pu� utilizzare questa funzione!"
         );
-        _; //indica dove deve essere posta la funzione chiamata
-    }  
-    
+        _;
+        //indica dove deve essere posta la funzione chiamata
+    }
+
     //per verificare che un operazione venga fatta nello stato giusto
     modifier onlyStato (stato _sta) {
         require(sta == _sta, "L'operazione non pu� essere fatta in questo stato.");
-         _;
+        _;
     }
-    
+
     modifier onlyConformeContract {
         require(msg.sender == indirizzoConforme, "Non puoi modificare lo stato.");
         _;
     }
-    
+
     modifier onlyValoreContract {
         require(msg.sender == indirizzoValore, "Solamente il contratto Valore pu� utilizzare la funzione");
         _;
     }
-    
+
     constructor() public payable {
         totale = 100;
         valore = 0;
         sta = stato.inizio;
         committenza = msg.sender;
-        
+
         //MODIFICA accounts
-        ditta=0x1e48E466739ffC526318a0c7CF284A821D5ef566;
-        direttore_lavori=0x93AC1AdEF950f31b9e302271F82DF6aDC7934379;
-        
-        requisiti[0].nome="Materiali innovativi";
-        requisiti[0].si_no=false;
-        requisiti[1].nome="Qualit� servizio";
-        requisiti[1].si_no=false;
-        requisiti[2].nome="Risparmio energetico";
-        requisiti[2].si_no=false;
-        requisiti[3].nome="Normativa sicurezza";
-        requisiti[3].si_no=false;
-        requisiti[4].nome="Normativa tracciabilit� flussi finanziari";
-        requisiti[4].si_no=false;
-        requisiti[5].nome="Normativa ambientale";
-        requisiti[5].si_no=false;
-        requisiti[6].nome="Normativa salute dei lavoratori";
-        requisiti[6].si_no=false;
-        requisiti[7].nome="Adeguata reportistica";
-        requisiti[7].si_no=false;
-        requisiti[8].nome="Vincoli architettonici, storicoartistici, conservativi";
-        requisiti[8].si_no=false;
-        numero_requisiti=9;
+        ditta = 0x1e48E466739ffC526318a0c7CF284A821D5ef566;
+        direttore_lavori = 0x93AC1AdEF950f31b9e302271F82DF6aDC7934379;
+
+        requisiti[0].nome = "Materiali innovativi";
+        requisiti[0].si_no = false;
+        requisiti[1].nome = "Qualit� servizio";
+        requisiti[1].si_no = false;
+        requisiti[2].nome = "Risparmio energetico";
+        requisiti[2].si_no = false;
+        requisiti[3].nome = "Normativa sicurezza";
+        requisiti[3].si_no = false;
+        requisiti[4].nome = "Normativa tracciabilit� flussi finanziari";
+        requisiti[4].si_no = false;
+        requisiti[5].nome = "Normativa ambientale";
+        requisiti[5].si_no = false;
+        requisiti[6].nome = "Normativa salute dei lavoratori";
+        requisiti[6].si_no = false;
+        requisiti[7].nome = "Adeguata reportistica";
+        requisiti[7].si_no = false;
+        requisiti[8].nome = "Vincoli architettonici, storicoartistici, conservativi";
+        requisiti[8].si_no = false;
+        numero_requisiti = 9;
     }
-    
-    function () external payable {} //invia l'ether specificato nel value della transazione al contratto
-    
-    
-    function setIndirizzoConforme (address payable _indirizzo) public {
+
+    function() external payable {} //invia l'ether specificato nel value della transazione al contratto
+
+
+    function setIndirizzoConforme(address payable _indirizzo) public {
         indirizzoConforme = _indirizzo;
         c = Conforme(indirizzoConforme);
     }
-    
-    function setIndirizzoValore (address payable _indirizzo) public {
+
+    function setIndirizzoValore(address payable _indirizzo) public {
         indirizzoValore = _indirizzo;
         v = Valore(indirizzoValore);
     }
-    
-    function addLavoro (string memory _nome) public onlyDirettoreLavori {
+
+    function addLavoro(string memory _nome) public onlyDirettoreLavori {
         Lavoro storage lavoro = lavori[numero_lavori];
         for (uint256 i = 0; i < numero_lavori; i++) {
             //controllo per impedire di inserire un lavoro precedentemente inserito
             require(
-                !StringUtils.equal(lavori[i].nome, _nome) , 
+                !StringUtils.equal(lavori[i].nome, _nome),
                 "E' gi� stato inserito un lavoro con questo nome");
         }
         lavoro.nome = _nome;
@@ -153,7 +158,25 @@ contract Appalto {
         numero_lavori = numero_lavori + 1;
         sta = stato.lavorazione;
     }
-    
+
+    function addMisura(string memory nome_misura, string memory nome_lavoro, bool conferma) public onlyDirettoreLavori {//TODO limitazione a solo direttore dei lavori da rivedere
+
+        Misure storage misure = misurazioni[numero_misure];
+        for (uint256 i = 0; i < numero_misure; i++) {
+            //controllo per impedire di inserire una misura precedentemente inserita
+            require(
+                !StringUtils.equal(misurazioni[i].nome, nome_misura),
+                "E' gi� stato inserito un lavoro con questo nome");
+        }
+
+        misure.nome = _nome;
+        misure.confermata = conferma;
+        misure.nome_lavoro = nome_lavoro;
+        numero_misure = numero_misure + 1;
+
+    }
+
+
     //nel caso in cui si voglia implementare un overriding di funzioni,
     //in cui � possibile anche specificare la percentuale di completamento del lavoro
     /*
@@ -180,7 +203,7 @@ contract Appalto {
         }
     }
     */
-    
+
     function setRequisiti(uint256 i) private {
         lavori[i].conformi.push(requisiti[0]);
         lavori[i].conformi.push(requisiti[1]);
@@ -192,8 +215,8 @@ contract Appalto {
         lavori[i].conformi.push(requisiti[7]);
         lavori[i].conformi.push(requisiti[8]);
     }
-    
-    function addSoglia (uint256 _costo, uint256 _percentuale) public onlyDirettoreLavori {
+
+    function addSoglia(uint256 _costo, uint256 _percentuale) public onlyDirettoreLavori {
         require(_costo >= 0, "Non pu� essere inserito un pagamento negativo.");
         require(_percentuale > 0, "Non pu� essere inserita una soglia nulla o negativa.");
         require(_percentuale <= 100, "Non pu� essere inserita una percentuale superiore a 100.");
@@ -203,67 +226,76 @@ contract Appalto {
         numero_soglie = numero_soglie + 1;
         sta = stato.lavorazione;
     }
-    
-    function setUgualePercentuale (uint256 i) public onlyValoreContract {
+
+    function setUgualePercentuale(uint256 i) public onlyValoreContract {
         lavori[i].percentuale_controllata = lavori[i].percentuale_completamento;
     }
-    
-    function updateValore (uint256 _valore) public onlyValoreContract {
+
+    function updateValore(uint256 _valore) public onlyValoreContract {
         valore += _valore;
     }
 
 
-    function addMisura (string nomelavoro, string nomemisura,bool conferma) public {     //Nome del lavoro
+    function getAllMisureByLavoro(string nomeLavoro) public returns (misure)  {
 
-        Misure storage misura;                          //Creo una nuova struttura misura e setto le variabili
-        misura.nome = nomemisura;
-        misura.confermata =  conferma;
-        misura.nome_lavoro =  nomelavoro;
+        numero_misure_lavoro = 0;
+
+        for (uint256 i = 0; i < numero_misure; i++) {//Controllo tutto il vettore delle misure
+
+            if (misurazioni[i].nome_lavoro = nomeLavoro) {//Per ogni elemento controllo se il nome del lavoro è quello cercato
+
+                Misure_Lavoro[numero_misure_lavoro] = misurazioni[i];
+                //inserisco all'interno del vettore il nuovo membro
+                numero_misure_lavoro++;
+                //Incremento il contatore delle misure del lavoro
+
+            }
+        }
+        return Misure_Lavoro;
 
     }
 
-    //function getAllMisureByLavoro(string)  //TODO FUNZIONE CHE MI RITORNA TUTTE LE MISURE DI UN LAVORO
 
-    
     function checkValore() public onlyDirettoreLavori returns (bool) {
         if (valore < soglie[soglia_corrente].percentuale) {
             return false;
-        } else if (valore >= soglie[soglia_corrente].percentuale){
+        } else if (valore >= soglie[soglia_corrente].percentuale) {
             sta = stato.avanzamento;
             //require((soglia_corrente + 1) <= numero_soglie, "Non ci sono pi� soglie fissate." );
             soglia_corrente = soglia_corrente + 1;
             return true;
         }
     }
-    
-    function sendPagamento() public payable{
-        require (sta == stato.avanzamento, "Non si � ancora arrivati alla soglia prestabilita.");
-        require (c.checkConformitaLavoro(), "I lavori non sono tutti conformi.");
-        require (msg.sender.balance >= soglie[soglia_corrente - 1].costo, "Non si hanno soglie a sufficienza per il pagamento.");
-        ditta.transfer(soglie[soglia_corrente - 1].costo); //-1 perch� con checkValore viene incrementata la soglia corrente
+
+    function sendPagamento() public payable {
+        require(sta == stato.avanzamento, "Non si � ancora arrivati alla soglia prestabilita.");
+        require(c.checkConformitaLavoro(), "I lavori non sono tutti conformi.");
+        require(msg.sender.balance >= soglie[soglia_corrente - 1].costo, "Non si hanno soglie a sufficienza per il pagamento.");
+        ditta.transfer(soglie[soglia_corrente - 1].costo);
+        //-1 perch� con checkValore viene incrementata la soglia corrente
         sta = stato.liquidazione;
     }
-    
-    function checkRimanente () public onlyStato(stato.liquidazione) returns (bool) {
-        if (totale-valore > 0) {
+
+    function checkRimanente() public onlyStato(stato.liquidazione) returns (bool) {
+        if (totale - valore > 0) {
             sta = stato.lavorazione;
             return false;
-        } else if (totale-valore == 0) {
+        } else if (totale - valore == 0) {
             sta = stato.fine;
             killContratto();
             return true;
         }
     }
-    
+
     function ritiraFondi() public onlyCommittenza payable {
         msg.sender.transfer(address(this).balance);
     }
-    
+
     function getBilancio() view public returns (uint256) {
-         return address(this).balance;
+        return address(this).balance;
     }
-    
-    function updateLavoro (uint256 _numero, uint256 _percentuale_completamento) public onlyDirettoreLavori {
+
+    function updateLavoro(uint256 _numero, uint256 _percentuale_completamento) public onlyDirettoreLavori {
         require(_numero >= 0, "Non esistono lavori con un numero negativo.");
         require(_numero <= numero_lavori, "Non � ancora stato inserito un lavoro con questo numero.");
         require(_percentuale_completamento >= 0, "Non pu� essere inserita una percentuale di completamento negativa.");
@@ -274,16 +306,16 @@ contract Appalto {
         setRequisitiFalse(_numero);
         checkValore();
     }
-    
-    function setRequisitiFalse (uint256 _numero) private onlyDirettoreLavori{
+
+    function setRequisitiFalse(uint256 _numero) private onlyDirettoreLavori {
         for (uint256 i = 0; i < numero_requisiti; i++) {
-            lavori[_numero].conformi[i].si_no=false;
+            lavori[_numero].conformi[i].si_no = false;
         }
     }
-    
-    function setRequisitoConformitaLavoro(uint256 _numerolavoro, bool _zero, bool _uno, bool _due, bool _tre, bool _quattro, bool _cinque, bool _sei, bool _sette, bool _otto) 
-    public onlyDirettoreLavori{
-        require(sta==stato.avanzamento, "Non si � ancora arrivati alla soglia per poter valutare la conformit�.");
+
+    function setRequisitoConformitaLavoro(uint256 _numerolavoro, bool _zero, bool _uno, bool _due, bool _tre, bool _quattro, bool _cinque, bool _sei, bool _sette, bool _otto)
+    public onlyDirettoreLavori {
+        require(sta == stato.avanzamento, "Non si � ancora arrivati alla soglia per poter valutare la conformit�.");
         require(numero_lavori != 0, "Non � ancora stato inserito alcun lavoro.");
         require(_numerolavoro >= 0, "Non esiste un lavoro con questo numero.");
         require(_numerolavoro <= numero_lavori, "Non esiste un lavoro con questo numero.");
@@ -296,19 +328,19 @@ contract Appalto {
         require(_sei == false || _sei == true, "Il ottavo campo pu� assumere come valori 0 o 1.");
         require(_sette == false || _sette == true, "Il nono campo pu� assumere come valori 0 o 1.");
         require(_otto == false || _otto == true, "Il decimo campo pu� assumere come valori 0 o 1.");
-        
-        lavori[_numerolavoro].conformi[0].si_no=_zero;
-        lavori[_numerolavoro].conformi[1].si_no=_uno;
-        lavori[_numerolavoro].conformi[2].si_no=_due;
-        lavori[_numerolavoro].conformi[3].si_no=_tre;
-        lavori[_numerolavoro].conformi[4].si_no=_quattro;
-        lavori[_numerolavoro].conformi[5].si_no=_cinque;
-        lavori[_numerolavoro].conformi[6].si_no=_sei;
-        lavori[_numerolavoro].conformi[7].si_no=_sette;
-        lavori[_numerolavoro].conformi[8].si_no=_otto;
+
+        lavori[_numerolavoro].conformi[0].si_no = _zero;
+        lavori[_numerolavoro].conformi[1].si_no = _uno;
+        lavori[_numerolavoro].conformi[2].si_no = _due;
+        lavori[_numerolavoro].conformi[3].si_no = _tre;
+        lavori[_numerolavoro].conformi[4].si_no = _quattro;
+        lavori[_numerolavoro].conformi[5].si_no = _cinque;
+        lavori[_numerolavoro].conformi[6].si_no = _sei;
+        lavori[_numerolavoro].conformi[7].si_no = _sette;
+        lavori[_numerolavoro].conformi[8].si_no = _otto;
     }
-    
-    function getRequisitiLavoro (uint256 _numerolavoro) public returns (bool[] memory) {
+
+    function getRequisitiLavoro(uint256 _numerolavoro) public returns (bool[] memory) {
         delete conf;
         //conf.length = 0;
         for (uint256 i = 0; i < numero_requisiti; i++) {
@@ -316,7 +348,7 @@ contract Appalto {
         }
         return conf;
     }
-    
+
     function killContratto() public payable {
         c.killContratto();
         v.killContratto();
