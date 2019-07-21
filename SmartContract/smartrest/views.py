@@ -2,11 +2,11 @@
 from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.contrib.staticfiles.templatetags.staticfiles import static
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 # MODELS IMPORTS
-from .models import Contracts
+from .models import Contracts, Contratto
 # FORMS IMPORTS
-from .forms import librettoForm, ContrattoForm
+from .forms import librettoForm, ContrattoForm, LavoroForm
 # OTHER IMPORTS
 import json
 from web3 import Web3
@@ -56,10 +56,26 @@ def librettomisure(request):
 
 def nuovocontratto(request):
     if request.method == "POST":
-        template_name = "contract_area/nuovo_contratto.html"
+        response_data = {} # invieremo con questa variabile la risposta positiva o negativa dell'inserimento parziale/totale del contratto
+
+        if request.POST.get("Utente") is not None:
+            form = ContrattoForm(request.POST, user=request.user)
+
+            if form.is_valid():
+                nuovo_contratto = form.save()
+                response_data["msg"] = "Successo_1"
+                response_data["contratto"] = nuovo_contratto.pk
+            else:
+                response_data["msg"] = "Errore_1"
+
+        return HttpResponse(
+            json.dumps(response_data),
+            content_type='application/json'
+        )
     else:
-        form = ContrattoForm()
-    return render(request, 'contract_area/nuovo_contratto.html', {'form': form})
+        form = ContrattoForm(user=request.user)
+        form2 = LavoroForm()
+        return render(request, 'contract_area/nuovo_contratto.html', {'form': form, 'form2': form2})
 
 # Vista predisposta alla creazione e all'inizializzazione di un nuovo insieme di smartcontract
 

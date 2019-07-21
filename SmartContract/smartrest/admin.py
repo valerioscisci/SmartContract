@@ -1,12 +1,15 @@
 from django.contrib import admin
-from smartrest.models import Contracts_Abis, Contracts, User
+from smartrest.models import Contracts_Abis, Contracts, User, Contratto, Lavoro, Misure
 
 # Registra i modelli nell'interfaccia dell'admin così da poterli modificare e interagirci
 
 admin.site.register(Contracts_Abis)
 admin.site.register(Contracts)
+admin.site.register(Contratto)
+admin.site.register(Lavoro)
+admin.site.register(Misure)
 
-# Class that prevents the admin to edit the username and the password of the users
+# Classe che impedisce all'amministratore di cambiare le password degli utenti
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ('username', 'first_name', 'last_name', 'email')
@@ -26,4 +29,4 @@ class UserAdmin(admin.ModelAdmin):
             user.set_password(raw_password)
             user.save()
 
-admin.site.register(User, UserAdmin) # Allows the admin to edit the users
+admin.site.register(User, UserAdmin) # Permette all'admi di editare gli utenti a meno della password

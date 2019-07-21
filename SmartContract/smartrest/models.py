@@ -54,7 +54,7 @@ class Misure(models.Model):
     Larghezza = models.FloatField() # Dimensioni
     Lunghezza = models.FloatField() # Dimensioni
     Altezza_Peso = models.FloatField() # Dimensioni
-    Positivi = models.IntegerField(max_length=10) # Numero/percentuale misurazioni positive
+    Positivi = models.IntegerField() # Numero/percentuale misurazioni positive
     Negativi = models.CharField(max_length=10) # Numero/percentuale misurazioni negative (di solito a zero)
     Riserva = models.BooleanField() # Campo di tipo booleano per indicare la riserva o meno da parte del direttore
     Annotazioni = models.CharField(max_length=1000) # Commenti aggiuntivi del direttore dei lavori

@@ -1,5 +1,20 @@
 from django import forms
-from .models import Contratto, User
+from .models import Contratto, User, Lavoro
+
+# Definisce il form che servirà per l'inserimento di un nuovo lavoro da parte della stazione appaltante
+
+class LavoroForm(forms.ModelForm):
+
+    class Meta:
+        model = Lavoro
+        fields = '__all__'
+        widgets = {
+            'Contratto': forms.HiddenInput(),
+            'Codice_Tariffa': forms.TextInput(attrs={'class': 'required'}),
+            'Nome': forms.TextInput(attrs={'class': 'required'}),
+            'Importo': forms.NumberInput(attrs={'class': 'required'}),
+            'Costo_Unitario': forms.Select(attrs={'class': 'notrequired'}),
+        }
 
 # Definisce il form che servirà per l'inserimento di un nuovo contratto da parte della stazione appaltante
 
@@ -11,12 +26,8 @@ class ContrattoForm(forms.ModelForm):
         user = kwargs.pop('user', None)  # if dict kwargs has no key 'user', user is assigned None
         super().__init__(*args, **kwargs)
         if user:
-            self.fields['Ditta'] = forms.ModelChoiceField(
-                queryset=User.objects.filter(groups__name='DittaAppaltatrice')
-            )
-            self.fields['Direttore'] = forms.ModelChoiceField(
-                queryset=User.objects.filter(groups__name='DirettoreLavori')
-            )
+            self.fields['Ditta'].widget = forms.Select(choices=( (x.id, x.username) for x in User.objects.filter(groups__name='DittaAppaltatrice')))
+            self.fields['Direttore'].widget = forms.Select(choices=( (x.id, x.username) for x in User.objects.filter(groups__name='DirettoreLavori')))
             self.fields['Utente'].initial = user.id  # Foreing Key dell'utente loggato che sta creando il contratto
 
     class Meta:
@@ -25,7 +36,7 @@ class ContrattoForm(forms.ModelForm):
         widgets = {
             'Utente': forms.HiddenInput(),
             'Nome': forms.TextInput(attrs={'class': 'required'}),
-            'Importo': forms.Select(attrs={'class': 'required'}),
+            'Importo': forms.NumberInput(attrs={'class': 'required'}),
             'Ditta': forms.Select(attrs={'class': 'required'}),
             'Direttore': forms.Select(attrs={'class': 'required'}),
         }
