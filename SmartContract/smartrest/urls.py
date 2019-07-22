@@ -21,6 +21,7 @@ urlpatterns += [
 # Contract Area
 urlpatterns += [
     path('contract_area/nuovo_contratto/', views.nuovocontratto, name='nuovo_contratto'), # Contract Area - Nuovo Contratto
+    path('contract_area/nuovo_contratto_redirect/', views.nuovocontrattoredirect.as_view(), name='nuovo_contratto_redirect'), # Contract Area - Nuovo Contratto Redirect
     path('contract_area/libretto_misure/', views.librettomisure, name='libretto_misure'),  #Contract Area - Libretto Misure
     path('contract_area/stato_avanzamento/', views.statoavanzamento.as_view(), name='stato_avanzamento'),  #Contract Area - Stato Avanzamento Lavori
     path('contract_area/registro_contabilita/', views.registrocont.as_view(), name='registro_cont'),  #Contract Area - Registro Contabilità

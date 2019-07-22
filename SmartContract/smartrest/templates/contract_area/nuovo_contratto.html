@@ -9,14 +9,15 @@
 {% block pannello_stazione %}
 
 <div class="margin-s-left-0 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-right-20 margin-s-right-0">
-    <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Inserisci Nuovo Contratto</h3>
+    <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center form1">Inserisci Nuovo Contratto</h3>
+    <h4 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center form2 hidden">Inserisci Nuovo Lavoro</h4>
     <p id="messaggi_ajax" class="hidden text-dark background-error border-radius margin-bottom-20">
 
     </p>
-    <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform" action="">{% csrf_token %}
-        <p class="text-error">
-            * I campi segnati in rosso sulla sinistra sono obbligatori.
-        </p>
+    <p class="text-error">
+        * I campi segnati in rosso sulla sinistra sono obbligatori.
+    </p>
+    <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform form1" action="">{% csrf_token %}
         <table class="row-override">
             <tr>
                 <td>
@@ -29,11 +30,7 @@
             </tr>
         </table>
     </form>
-    <form id="form2" method="POST" enctype="multipart/form-data" class="hidden post-form customform" action="">{% csrf_token %}
-        <h4 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Inserisci Nuovo Lavoro</h4>
-        <p class="text-error">
-            * I campi segnati in rosso sulla sinistra sono obbligatori.
-        </p>
+    <form id="form2" method="POST" enctype="multipart/form-data" class="post-form customform form2 hidden" action="">{% csrf_token %}
         <table class="row-override">
             <tr>
                 <td>
@@ -67,24 +64,63 @@
             $.ajax({
                 url : "{% url 'nuovo_contratto' %}", // the endpoint
                 type : "POST", // http method
-                data : fd, // inviamo un riferimento del form per farlo riconoscere al server
+                data : fd, // inviamo i dati del form al server
                 dataType: 'json',
                 success : function(json) {
                     if(json["msg"]=="Successo_1"){
                         $('#messaggi_ajax').show().text("Contratto inserito correttamente.").addClass('background-green').removeClass('background-error');
-                        $('#form1').hide();
-                        $('#form2').show();
+                        $('.form1').hide();
+                        $('.form2').show();
                         $('#form2').find('#id_Contratto').val(json["contratto"]);
                     } else {
-                        $('#messaggi_ajax').show().text("Errore2: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
+                        $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
                     }
                 },
 
                 error : function err() {
-                    $('#messaggi_ajax').show().text("Errore: riprovare più tardi.").addClass('background-error').removeClass('background-green');
+                    $('#messaggi_ajax').show().text("Errore: server non raggiungibile, riprovare più tardi.").addClass('background-error').removeClass('background-green');
                 }
             });
         });
+
+        //quando si invia il secondo form al server tramite la chiamata ajax si svuota il form per inserire un nuovo lavoro o si termina l'inserimento
+        $('#form2_button').click(function(event){
+            event.preventDefault();
+            check_form2(true);
+        });
+
+        $('#form2_button_2').click(function(event){
+            event.preventDefault();
+            check_form2(false);
+        });
+
+        function check_form2(nuovo_lavoro){
+            var fd = $('#form2').serialize();
+
+            $.ajax({
+                url : "{% url 'nuovo_contratto' %}", // the endpoint
+                type : "POST", // http method
+                data : fd, // inviamo i dati del form al server
+                dataType: 'json',
+                success : function(json) {
+                    if(json["msg"]=="Successo_2"){
+                        if (nuovo_lavoro){
+                            $('#messaggi_ajax').show().text("Lavoro inserito correttamente.").addClass('background-green').removeClass('background-error');
+                            $('#form2')[0].reset();
+                            $('#form2').find('#id_Contratto').text(json["contratto"]);
+                        } else {
+                            window.location='{% url 'nuovo_contratto_redirect' %}'
+                        }
+                    } else {
+                        $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
+                    }
+                },
+
+                error : function err() {
+                    $('#messaggi_ajax').show().text("Errore: server non raggiungibile, riprovare più tardi.").addClass('background-error').removeClass('background-green');
+                }
+            });
+        };
 
     });
 

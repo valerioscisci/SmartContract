@@ -13,7 +13,7 @@ class LavoroForm(forms.ModelForm):
             'Codice_Tariffa': forms.TextInput(attrs={'class': 'required'}),
             'Nome': forms.TextInput(attrs={'class': 'required'}),
             'Importo': forms.NumberInput(attrs={'class': 'required'}),
-            'Costo_Unitario': forms.Select(attrs={'class': 'notrequired'}),
+            'Costo_Unitario': forms.NumberInput(attrs={'class': 'notrequired'}),
         }
 
 # Definisce il form che servirà per l'inserimento di un nuovo contratto da parte della stazione appaltante

@@ -67,6 +67,15 @@ def nuovocontratto(request):
                 response_data["contratto"] = nuovo_contratto.pk
             else:
                 response_data["msg"] = "Errore_1"
+        elif request.POST.get("Contratto") is not None:
+            form2 = LavoroForm(request.POST)
+
+            if form2.is_valid():
+                nuovo_lavoro = form2.save()
+                response_data["msg"] = "Successo_2"
+                response_data["contratto"] = nuovo_lavoro.Contratto.pk
+            else:
+                response_data["msg"] = "Errore_2"
 
         return HttpResponse(
             json.dumps(response_data),
@@ -76,6 +85,11 @@ def nuovocontratto(request):
         form = ContrattoForm(user=request.user)
         form2 = LavoroForm()
         return render(request, 'contract_area/nuovo_contratto.html', {'form': form, 'form2': form2})
+
+# Vista per il Giornale dei Lavori
+
+class nuovocontrattoredirect(TemplateView):
+    template_name = "contract_area/nuovo_contratto_redirect.html"
 
 # Vista predisposta alla creazione e all'inizializzazione di un nuovo insieme di smartcontract
 
