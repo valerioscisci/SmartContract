@@ -1,5 +1,5 @@
 from django import forms
-from .models import Contratto, User, Lavoro
+from .models import Contratto, User, Lavoro, Misura
 
 # Definisce il form che servirà per l'inserimento di un nuovo lavoro da parte della stazione appaltante
 
@@ -20,7 +20,7 @@ class LavoroForm(forms.ModelForm):
 
 class ContrattoForm(forms.ModelForm):
 
-    # Metodo  per inizializzare il valore del campo utente in automatico
+    # Metodo  per inizializzare il valore del campo utente e altri campi in automatico
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)  # if dict kwargs has no key 'user', user is assigned None
@@ -43,30 +43,32 @@ class ContrattoForm(forms.ModelForm):
 
 # Definisce il form che servirà per l'inserimento di nuove misure nel libretto delle misure
 
-class librettoForm(forms.Form):
-    N_Ordine = forms.IntegerField()
-    Data = forms.DateField()
-    Codice_Tariffa = forms.IntegerField()
-    Designazione_Lavori = forms.CharField(max_length=1000)
-    Parti_Uguali = forms.IntegerField()
-    Larghezza = forms.FloatField()
-    Lunghezza = forms.FloatField()
-    Altezza_Peso = forms.IntegerField()
-    Positivi = forms.CharField(max_length=10)
-    Negativi = forms.CharField(max_length=10)
-    Annotazioni = forms.CharField(max_length=1000)
-    Stato = forms.CharField(max_length=1000)
+class librettoForm(forms.ModelForm):
 
-    # Widget necessari ad assegnare la classe ai campi del form
-    N_Ordine.widget.attrs['class'] = 'required'
-    Data.widget.attrs['class'] = 'required'
-    Codice_Tariffa.widget.attrs['class'] = 'required'
-    Designazione_Lavori.widget.attrs['class'] = 'required'
-    Parti_Uguali.widget.attrs['class'] = 'required'
-    Larghezza.widget.attrs['class'] = 'required'
-    Lunghezza.widget.attrs['class'] = 'required'
-    Altezza_Peso.widget.attrs['class'] = 'required'
-    Positivi.widget.attrs['class'] = 'required'
-    Negativi.widget.attrs['class'] = 'required'
-    Annotazioni.widget.attrs['class'] = 'notrequired'
-    Stato.widget.attrs['class'] = 'required'
+    # Metodo  per inizializzare il valore di alcuni campi in modo automatico
+
+    def __init__(self, *args, **kwargs):
+        contratto = kwargs.pop('contratto', None)  # if dict kwargs has no key 'contratto', contratto is assigned None
+        super().__init__(*args, **kwargs)
+        if contratto:
+            self.fields['Lavoro'].widget = forms.Select(
+                choices=((x.Contratto, x.Contratto) for x in Lavoro.objects.filter(Contratto=contratto))) # Aggiungo la lista dei lavori esistenti relativi al contratto selezionato dal direttore
+
+    class Meta:
+        model = Misura
+        fields = '__all__'
+        widgets = {
+            'Lavoro': forms.Select(attrs={'class': 'required'}),
+            'Codice_Tariffa': forms.HiddenInput(),
+            'Data': forms.DateInput(attrs={'class': 'required'}),
+            'Designazione_Lavori': forms.Textarea(attrs={'class': 'notrequired'}),
+            'Parti_Uguali': forms.NumberInput(attrs={'class': 'notrequired'}),
+            'Larghezza': forms.NumberInput(attrs={'class': 'notrequired'}),
+            'Lunghezza': forms.NumberInput(attrs={'class': 'notrequired'}),
+            'Altezza_Peso': forms.NumberInput(attrs={'class': 'notrequired'}),
+            'Positivi': forms.NumberInput(attrs={'class': 'required'}),
+            'Negativi': forms.NumberInput(attrs={'class': 'notrequired'}),
+            'Riserva': forms.Select(attrs={'class': 'required'}),
+            'Annotazioni': forms.Textarea(attrs={'class': 'notrequired'}),
+            'Stato': forms.HiddenInput(),
+        }

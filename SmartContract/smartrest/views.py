@@ -3,8 +3,9 @@ from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse, HttpResponse
+from django.core import serializers
 # MODELS IMPORTS
-from .models import Contracts, Contratto
+from .models import Contracts, Contratto, Lavoro
 # FORMS IMPORTS
 from .forms import librettoForm, ContrattoForm, LavoroForm
 # OTHER IMPORTS
@@ -43,6 +44,32 @@ class registrocont(TemplateView):
 class giornalelavori(TemplateView):
     template_name = "contract_area/giornale_lavori.html"
 
+# Vista per inserire una nuova misura
+
+def nuovamisura(request):
+    Contratti = Contratto.objects.filter(Direttore=request.user.id) # Prendo la lista dei contratti associati al direttore dei lavori che vuole inserire una misura
+    if request.method == "POST":
+        response_data = {}  # invieremo con questa variabile la risposta alla chiamata ajax
+
+        contratto = request.POST.get("Contratto")
+
+        ################ FORM 1 ################
+        if contratto is not None:
+            lavori = Lavoro.objects.filter(Contratto=contratto)
+
+            response_data["msg"] = "Successo_1"  # Se il contratto inserito è valido si manda l'ok per mostrare il secondo form
+            response_data["lavori"] = serializers.serialize('json', lavori) # Si passa l'id del nuovo contratto per associarci i lavori che inserirà la stazione
+        else:
+            response_data["msg"] = "Errore"
+
+        return HttpResponse(
+            json.dumps(response_data),
+            content_type='application/json'
+        )
+    else:
+        form = librettoForm()
+    return render(request, 'contract_area/nuova_misura.html', {'form': form, 'contratti': Contratti})
+
 # Vista per il Libretto delle Misure
 
 def librettomisure(request):
@@ -52,27 +79,29 @@ def librettomisure(request):
         form = librettoForm()
     return render(request, 'contract_area/libretto_misure.html', {'form': form})
 
-# Vista per il Libretto delle Misure
+# Vista per un nuovo contratto
 
 def nuovocontratto(request):
     if request.method == "POST":
         response_data = {} # invieremo con questa variabile la risposta positiva o negativa dell'inserimento parziale/totale del contratto
 
+        ################ FORM 1 ################
         if request.POST.get("Utente") is not None:
             form = ContrattoForm(request.POST, user=request.user)
 
             if form.is_valid():
                 nuovo_contratto = form.save()
-                response_data["msg"] = "Successo_1"
-                response_data["contratto"] = nuovo_contratto.pk
+                response_data["msg"] = "Successo_1" # Se il contratto inserito è valido si manda l'ok per mostrare il secondo form
+                response_data["contratto"] = nuovo_contratto.pk # Si passa l'id del nuovo contratto per associarci i lavori che inserirà la stazione
             else:
                 response_data["msg"] = "Errore_1"
+        ################ FORM 2 ################
         elif request.POST.get("Contratto") is not None:
             form2 = LavoroForm(request.POST)
 
             if form2.is_valid():
                 nuovo_lavoro = form2.save()
-                response_data["msg"] = "Successo_2"
+                response_data["msg"] = "Successo_2" # Se il lavoro inserito è valido si manda l'ok per far inserire un nuovo lavoro o terminare
                 response_data["contratto"] = nuovo_lavoro.Contratto.pk
             else:
                 response_data["msg"] = "Errore_2"
@@ -82,11 +111,11 @@ def nuovocontratto(request):
             content_type='application/json'
         )
     else:
-        form = ContrattoForm(user=request.user)
-        form2 = LavoroForm()
+        form = ContrattoForm(user=request.user) # Crea la form per inserire il contratto
+        form2 = LavoroForm() # Crea la form per inserire i lavori
         return render(request, 'contract_area/nuovo_contratto.html', {'form': form, 'form2': form2})
 
-# Vista per il Giornale dei Lavori
+# Vista per il redirect a seguito dell'inserimento di un nuovo contratto
 
 class nuovocontrattoredirect(TemplateView):
     template_name = "contract_area/nuovo_contratto_redirect.html"
@@ -172,7 +201,6 @@ def setcontratti(request):
 
         return JsonResponse("success",
                             safe=False)
-        #    contract_instance[0].functions.setIndirizzoValore(contract_addresses[3], "{gas: 0x99999}").transact()
     else:
         response = JsonResponse(
         {'status': 'false', 'message': "Questo endpoint può essere chiamato solo tramite una request di tipo POST"},

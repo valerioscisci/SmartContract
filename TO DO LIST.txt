@@ -1,0 +1,14 @@
+-registrazione
+    *Creare form di registrazione dell'utente e aggiornare il model di conseguenza
+-home
+    *Modificare front end della home con qualcosa di relativo agli smart contract
+
+-view nuovocontratto
+    *Aggiungere il salvataggio dei lavori in blockchain
+    *Verificare che la somma degli importi dei lavori inseriti coincida con l'importo del contratto
+    *Inserire simbolo € negli importi
+
+-creare un metodo automatico per inserire i contratti in blockchain (usare le viste già presenti creacontratto e setcontratti)
+
+-misureform
+    *inserire in modo automatico il N_Ordine che adesso è nascosto e impostato come id autoincrement 

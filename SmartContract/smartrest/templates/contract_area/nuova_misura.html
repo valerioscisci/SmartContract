@@ -1,0 +1,163 @@
+{% extends "contract_area/contract_area.html" %}
+
+{% block title %}Smart Contract - Inserisci Misure{% endblock title %}
+
+{% block css %}
+
+{% endblock css %}
+
+{% block pannello_direttore %}
+
+<div class="margin-s-left-0 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-right-20 margin-s-right-0">
+    <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Inserisci Nuova Misura</h3>
+    <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform" action="">{% csrf_token %}
+        <label for="id_contratto_sel">Seleziona Contratto:</label>
+        <select id="id_contratto_sel" name="Contratto" class="required" required>
+            <option value="">---</option>
+            {% for contratto in contratti %}
+            <option value="{{ contratto.id }}">{{ contratto.Nome }}</option>
+            {% endfor %}
+        </select><br/>
+        <button id="sel_contratto" type="submit" class="button border-radius background-primary text-white margin-top-10 navbutton">Seleziona Contratto</button>
+    </form>
+    <form id="form2" method="POST" enctype="multipart/form-data" class="post-form customform hidden" action="">{% csrf_token %}
+        <p class="text-error">
+            * I campi segnati in rosso sulla sinistra sono obbligatori.
+        </p>
+        <table class="row-override">
+            <tr>
+                <td>
+                    {{ form.Lavoro.errors }}
+                    {{ form.Lavoro.label_tag }} {{ form.Lavoro }}
+                    {{ form.Codice_Tariffa.errors }}
+                    {{ form.Codice_Tariffa.label_tag }} {{ form.Codice_Tariffa }}
+                    {{ form.Data.errors }}
+                    {{ form.Data.label_tag }} {{ form.Data }}
+                    </td>
+                <td>
+                    {{ form.Designazione_Lavori.errors }}
+                    {{ form.Designazione_Lavori.label_tag }} {{ form.Designazione_Lavori }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                 <h4 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Dimensioni</h4>
+                    {{ form.Parti_Uguali.errors }}
+                    {{ form.Parti_Uguali.label_tag }} {{ form.Parti_Uguali }}
+                    {{ form.Larghezza.errors }}
+                    {{ form.Larghezza.label_tag }} {{ form.Larghezza }}
+                    {{ form.Lunghezza.errors }}
+                    {{ form.Lunghezza.label_tag }} {{ form.Lunghezza }}
+                    {{ form.Altezza_Peso.errors }}
+                    {{ form.Altezza_Peso.label_tag }} {{ form.Altezza_Peso }}
+                </td>
+                <td>
+                    <h4 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Quantità/Percentuale</h4>
+                    {{ form.Positivi.errors }}
+                    {{ form.Positivi.label_tag }} {{ form.Positivi }}
+                    {{ form.Negativi.errors }}
+                    {{ form.Negativi.label_tag }} {{ form.Negativi }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form.Riserva.errors }}
+                    {{ form.Riserva.label_tag }} {{ form.Riserva }}
+                </td>
+                <td>
+                    {{ form.Annotazioni.errors }}
+                    {{ form.Annotazioni.label_tag }} {{ form.Annotazioni }}
+                    {{ form.Stato.errors }}
+                    {{ form.Stato.label_tag }} {{ form.Stato }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button id="save" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+{% endblock pannello_direttore %}
+
+{% block js %}
+
+{{ block.super }}  <!--contract_area.html js import-->
+
+<script type="text/javascript">
+
+    $( document ).ready(function() {
+
+        //quando si invia il primo form al server tramite la chiamata ajax si mostra il form per inserire la misura del contratto selezionato
+        $('#form1').submit(function(e){
+            e.preventDefault();
+            var fd = $('#form1').serialize();
+
+            $.ajax({
+                url : "{% url 'nuova_misura' %}", // the endpoint
+                type : "POST", // http method
+                data : fd, // inviamo il contratto selezionato al server
+                dataType: 'json',
+                success : function(json) {
+                    if(json["msg"]=="Successo_1"){
+                        $('#messaggi_ajax').show().text("Contratto inserito correttamente.").addClass('background-green').removeClass('background-error');
+                        $('.form1').hide();
+                        $('.form2').show();
+                        $('#form2').find('#id_Contratto').val(json["contratto"]);
+                    } else {
+                        $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
+                    }
+                },
+
+                error : function err() {
+                    $('#messaggi_ajax').show().text("Errore: server non raggiungibile, riprovare più tardi.").addClass('background-error').removeClass('background-green');
+                }
+            });
+        });
+
+        //quando si invia il secondo form al server tramite la chiamata ajax si svuota il form per inserire un nuovo lavoro o si termina l'inserimento
+        $('#form2_button').click(function(event){
+            event.preventDefault();
+            check_form2(true);
+        });
+
+        $('#form2_button_2').click(function(event){
+            event.preventDefault();
+            check_form2(false);
+        });
+
+        function check_form2(nuovo_lavoro){
+            var fd = $('#form2').serialize();
+
+            $.ajax({
+                url : "{% url 'nuovo_contratto' %}", // the endpoint
+                type : "POST", // http method
+                data : fd, // inviamo i dati del form al server
+                dataType: 'json',
+                success : function(json) {
+                    if(json["msg"]=="Successo_2"){
+                        if (nuovo_lavoro){
+                            $('#messaggi_ajax').show().text("Lavoro inserito correttamente.").addClass('background-green').removeClass('background-error');
+                            $('#form2')[0].reset();
+                            $('#form2').find('#id_Contratto').text(json["contratto"]);
+                        } else {
+                            window.location='{% url 'nuovo_contratto_redirect' %}'
+                        }
+                    } else {
+                        $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
+                    }
+                },
+
+                error : function err() {
+                    $('#messaggi_ajax').show().text("Errore: server non raggiungibile, riprovare più tardi.").addClass('background-error').removeClass('background-green');
+                }
+            });
+        };
+
+    });
+
+</script>
+
+{% endblock js %}

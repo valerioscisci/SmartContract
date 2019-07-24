@@ -9,59 +9,6 @@
 {% block pannello_direttore %}
 
 <div class="margin-s-left-0 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-right-20 margin-s-right-0">
-    <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Inserisci Nuova Misura</h3>
-    <p class="text-error">
-        * I campi segnati in rosso sulla sinistra sono obbligatori.
-    </p>
-    <form method="POST" enctype="multipart/form-data" class="post-form customform" action="">{% csrf_token %}
-        <table class="row-override">
-            <tr>
-                <td>
-                    {{ form.N_Ordine.errors }}
-                    {{ form.N_Ordine.label_tag }} {{ form.N_Ordine }}
-                    {{ form.Data.errors }}
-                    {{ form.Data.label_tag }} {{ form.Data }}
-                    {{ form.Codice_Tariffa.errors }}
-                    {{ form.Codice_Tariffa.label_tag }} {{ form.Codice_Tariffa }}
-                </td>
-                <td>
-                    {{ form.Designazione_Lavori.errors }}
-                    {{ form.Designazione_Lavori.label_tag }} {{ form.Designazione_Lavori }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                 <h4 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Dimensioni</h4>
-                    {{ form.Parti_Uguali.errors }}
-                    {{ form.Parti_Uguali.label_tag }} {{ form.Parti_Uguali }}
-                    {{ form.Larghezza.errors }}
-                    {{ form.Larghezza.label_tag }} {{ form.Larghezza }}
-                    {{ form.Lunghezza.errors }}
-                    {{ form.Lunghezza.label_tag }} {{ form.Lunghezza }}
-                    {{ form.Altezza_Peso.errors }}
-                    {{ form.Altezza_Peso.label_tag }} {{ form.Altezza_Peso }}
-                </td>
-                <td>
-                    <h4 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Quantità/Percentuale</h4>
-                    {{ form.Positivi.errors }}
-                    {{ form.Positivi.label_tag }} {{ form.Positivi }}
-                    {{ form.Negativi.errors }}
-                    {{ form.Negativi.label_tag }} {{ form.Negativi }}
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    {{ form.Annotazioni.errors }}
-                    {{ form.Annotazioni.label_tag }} {{ form.Annotazioni }}
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <button id="save" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci</button>
-                </td>
-            </tr>
-        </table>
-    </form>
     <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-30 margin-top-30 text-center">Libretto delle Misure</h3>
     <table>
         <tr>

@@ -45,7 +45,7 @@ class Lavoro(models.Model):
 
 # Modello contenente le misure relative ai lavori inserite dal direttore dei lavori
 
-class Misure(models.Model):
+class Misura(models.Model):
     Lavoro = models.ForeignKey(Lavoro, on_delete=models.CASCADE) # Riferimento al relativo Lavoro
     Codice_Tariffa = models.CharField(max_length=50) # Codice di Tariffa del lavoro
     Data = models.DateField() # Data della misurazione
@@ -55,13 +55,17 @@ class Misure(models.Model):
     Lunghezza = models.FloatField() # Dimensioni
     Altezza_Peso = models.FloatField() # Dimensioni
     Positivi = models.IntegerField() # Numero/percentuale misurazioni positive
-    Negativi = models.CharField(max_length=10) # Numero/percentuale misurazioni negative (di solito a zero)
-    Riserva = models.BooleanField() # Campo di tipo booleano per indicare la riserva o meno da parte del direttore
-    Annotazioni = models.CharField(max_length=1000) # Commenti aggiuntivi del direttore dei lavori
+    Negativi = models.IntegerField() # Numero/percentuale misurazioni negative (di solito a zero)
+    Stati_Riserva = (
+        ('NO', 'No'),
+        ('Si', 'Si'),
+    )
+    Riserva =  models.CharField(max_length=10, choices=Stati_Riserva) # Campo di tipo booleano per indicare la riserva o meno da parte del direttore
+    Annotazioni = models.TextField(max_length=1000) # Commenti aggiuntivi del direttore dei lavori
     Stati_Possibili = (
         ('INSERITO_LIBRETTO', 'Inserita nel Libretto'),
         ('INSERITO_LIBRETTO_RISERVA', 'Inserita nel Libretto con Riserva'),
         ('CONFERMATO_LIBRETTO', 'Confermata nel Libretto'),
         ('CONFERMATO_REGISTRO', 'Confermata nel Registro di Contabilità'),
     )
-    Stato = models.TextField(max_length=100, choices=Stati_Possibili, default = 'INSERITO_LIBRETTO') # Indica lo stato attuale della misura
+    Stato = models.CharField(max_length=100, choices=Stati_Possibili, default = 'INSERITO_LIBRETTO') # Indica lo stato attuale della misura
