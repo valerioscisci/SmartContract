@@ -10,6 +10,9 @@
 
 <div class="margin-s-left-0 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-right-20 margin-s-right-0">
     <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Inserisci Nuova Misura</h3>
+    <p id="messaggi_ajax" class="hidden text-dark background-error border-radius margin-bottom-20">
+
+    </p>
     <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform" action="">{% csrf_token %}
         <label for="id_contratto_sel">Seleziona Contratto:</label>
         <select id="id_contratto_sel" name="Contratto" class="required" required>
@@ -29,8 +32,6 @@
                 <td>
                     {{ form.Lavoro.errors }}
                     {{ form.Lavoro.label_tag }} {{ form.Lavoro }}
-                    {{ form.Codice_Tariffa.errors }}
-                    {{ form.Codice_Tariffa.label_tag }} {{ form.Codice_Tariffa }}
                     {{ form.Data.errors }}
                     {{ form.Data.label_tag }} {{ form.Data }}
                     </td>
@@ -67,13 +68,18 @@
                 <td>
                     {{ form.Annotazioni.errors }}
                     {{ form.Annotazioni.label_tag }} {{ form.Annotazioni }}
-                    {{ form.Stato.errors }}
-                    {{ form.Stato.label_tag }} {{ form.Stato }}
+                </td>
+            </tr>
+            <tr class="hidden">
+                <td>
+                    {{ form.Codice_Tariffa }}
+                    {{ form.Stato }}
                 </td>
             </tr>
             <tr>
                 <td colspan="2">
-                    <button id="save" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci</button>
+                    <button id="form2_button" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci e Continua</button>
+                    <button id="form2_button_2" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci e Termina</button>
                 </td>
             </tr>
         </table>
@@ -101,11 +107,15 @@
                 data : fd, // inviamo il contratto selezionato al server
                 dataType: 'json',
                 success : function(json) {
-                    if(json["msg"]=="Successo_1"){
-                        $('#messaggi_ajax').show().text("Contratto inserito correttamente.").addClass('background-green').removeClass('background-error');
-                        $('.form1').hide();
-                        $('.form2').show();
-                        $('#form2').find('#id_Contratto').val(json["contratto"]);
+                    var lavori = json["lavori"];
+
+                    if(lavori != "Errore"){
+                        //$('#form1').hide();
+                        $('#form2').show();
+                        $("#id_Lavoro").find('option').remove().end();
+                        $.each(lavori, function(key, value){
+                            $("#id_Lavoro").append('<option value=' + value["id"] + '>' + value["Nome"] + '</option>');
+                        });
                     } else {
                         $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
                     }
@@ -117,7 +127,7 @@
             });
         });
 
-        //quando si invia il secondo form al server tramite la chiamata ajax si svuota il form per inserire un nuovo lavoro o si termina l'inserimento
+        //quando si invia il secondo form al server tramite la chiamata ajax si svuota il form per inserire una nuova misura o si termina l'inserimento
         $('#form2_button').click(function(event){
             event.preventDefault();
             check_form2(true);
@@ -128,22 +138,22 @@
             check_form2(false);
         });
 
-        function check_form2(nuovo_lavoro){
+        function check_form2(nuova_misura){
             var fd = $('#form2').serialize();
 
             $.ajax({
-                url : "{% url 'nuovo_contratto' %}", // the endpoint
+                url : "{% url 'nuova_misura' %}", // the endpoint
                 type : "POST", // http method
                 data : fd, // inviamo i dati del form al server
                 dataType: 'json',
                 success : function(json) {
-                    if(json["msg"]=="Successo_2"){
-                        if (nuovo_lavoro){
-                            $('#messaggi_ajax').show().text("Lavoro inserito correttamente.").addClass('background-green').removeClass('background-error');
+                    if(json["misura"]=="Successo_2"){
+                        if (nuova_misura){
+                            $('#messaggi_ajax').show().text("Misura inserita correttamente.").addClass('background-green').removeClass('background-error');
                             $('#form2')[0].reset();
-                            $('#form2').find('#id_Contratto').text(json["contratto"]);
+                            $("html, body").stop().animate({scrollTop:0}, 500, 'swing');
                         } else {
-                            window.location='{% url 'nuovo_contratto_redirect' %}'
+                            window.location='{% url 'nuova_misura_redirect' %}'
                         }
                     } else {
                         $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
@@ -155,6 +165,17 @@
                 }
             });
         };
+
+        //datepickers function
+        $( function() {
+            $( "#id_Data" ).datepicker({
+                changeYear: true,
+                changeMonth: true,
+                showAnim: "fadeIn",
+                yearRange: "2019:2050",
+                dateFormat: "yy-mm-dd"
+            });
+        });
 
     });
 

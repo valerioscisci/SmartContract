@@ -105,9 +105,10 @@
                 success : function(json) {
                     if(json["msg"]=="Successo_2"){
                         if (nuovo_lavoro){
-                            $('#messaggi_ajax').show().text("Lavoro inserito correttamente.").addClass('background-green').removeClass('background-error');
+                            $('#messaggi_ajax').show().text("Lavoro inserito correttamente. Inserisci il prossimo.").addClass('background-green').removeClass('background-error');
                             $('#form2')[0].reset();
                             $('#form2').find('#id_Contratto').text(json["contratto"]);
+                            $("html, body").stop().animate({scrollTop: 0 }, 500, 'swing');
                         } else {
                             window.location='{% url 'nuovo_contratto_redirect' %}'
                         }

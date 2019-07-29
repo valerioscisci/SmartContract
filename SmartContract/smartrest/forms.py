@@ -45,15 +45,6 @@ class ContrattoForm(forms.ModelForm):
 
 class librettoForm(forms.ModelForm):
 
-    # Metodo  per inizializzare il valore di alcuni campi in modo automatico
-
-    def __init__(self, *args, **kwargs):
-        contratto = kwargs.pop('contratto', None)  # if dict kwargs has no key 'contratto', contratto is assigned None
-        super().__init__(*args, **kwargs)
-        if contratto:
-            self.fields['Lavoro'].widget = forms.Select(
-                choices=((x.Contratto, x.Contratto) for x in Lavoro.objects.filter(Contratto=contratto))) # Aggiungo la lista dei lavori esistenti relativi al contratto selezionato dal direttore
-
     class Meta:
         model = Misura
         fields = '__all__'

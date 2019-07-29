@@ -12,3 +12,9 @@
 
 -misureform
     *inserire in modo automatico il N_Ordine che adesso è nascosto e impostato come id autoincrement 
+    *fare le opportune verifiche quando il direttore dei lavori inserisce una misura
+    *inserire la misura in blockchain
+
+-librettomisure
+    *aggiungere le aliquote
+    *quando cambio il contratto aggiornare in modo automatico la lista dei lavori per solo quel contratto con una richiesta ajax

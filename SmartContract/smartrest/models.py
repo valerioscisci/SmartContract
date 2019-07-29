@@ -47,21 +47,21 @@ class Lavoro(models.Model):
 
 class Misura(models.Model):
     Lavoro = models.ForeignKey(Lavoro, on_delete=models.CASCADE) # Riferimento al relativo Lavoro
-    Codice_Tariffa = models.CharField(max_length=50) # Codice di Tariffa del lavoro
+    Codice_Tariffa = models.CharField(max_length=50, blank=True) # Codice di Tariffa del lavoro
     Data = models.DateField() # Data della misurazione
-    Designazione_Lavori = models.TextField(max_length=1000) # Descrizione libera della misura
-    Parti_Uguali = models.IntegerField() # Numero parti misurazione se è possibile contarle
-    Larghezza = models.FloatField() # Dimensioni
-    Lunghezza = models.FloatField() # Dimensioni
-    Altezza_Peso = models.FloatField() # Dimensioni
+    Designazione_Lavori = models.TextField(max_length=1000, blank=True) # Descrizione libera della misura
+    Parti_Uguali = models.IntegerField(blank=True, null=True) # Numero parti misurazione se è possibile contarle
+    Larghezza = models.FloatField(blank=True, null=True) # Dimensioni
+    Lunghezza = models.FloatField(blank=True, null=True) # Dimensioni
+    Altezza_Peso = models.FloatField(blank=True, null=True) # Dimensioni
     Positivi = models.IntegerField() # Numero/percentuale misurazioni positive
-    Negativi = models.IntegerField() # Numero/percentuale misurazioni negative (di solito a zero)
+    Negativi = models.IntegerField(blank=True, null=True) # Numero/percentuale misurazioni negative (di solito a zero)
     Stati_Riserva = (
         ('NO', 'No'),
         ('Si', 'Si'),
     )
-    Riserva =  models.CharField(max_length=10, choices=Stati_Riserva) # Campo di tipo booleano per indicare la riserva o meno da parte del direttore
-    Annotazioni = models.TextField(max_length=1000) # Commenti aggiuntivi del direttore dei lavori
+    Riserva =  models.CharField(max_length=10, choices=Stati_Riserva, default="NO") # Campo di tipo booleano per indicare la riserva o meno da parte del direttore
+    Annotazioni = models.TextField(max_length=1000, blank=True) # Commenti aggiuntivi del direttore dei lavori
     Stati_Possibili = (
         ('INSERITO_LIBRETTO', 'Inserita nel Libretto'),
         ('INSERITO_LIBRETTO_RISERVA', 'Inserita nel Libretto con Riserva'),

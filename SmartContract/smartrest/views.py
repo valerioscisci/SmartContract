@@ -3,9 +3,8 @@ from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse, HttpResponse
-from django.core import serializers
 # MODELS IMPORTS
-from .models import Contracts, Contratto, Lavoro
+from .models import Contracts, Contratto, Lavoro, Misura
 # FORMS IMPORTS
 from .forms import librettoForm, ContrattoForm, LavoroForm
 # OTHER IMPORTS
@@ -52,15 +51,31 @@ def nuovamisura(request):
         response_data = {}  # invieremo con questa variabile la risposta alla chiamata ajax
 
         contratto = request.POST.get("Contratto")
+        misura = request.POST.get("Lavoro")
 
         ################ FORM 1 ################
         if contratto is not None:
-            lavori = Lavoro.objects.filter(Contratto=contratto)
+            lavori = Lavoro.objects.filter(Contratto=contratto).values("id", "Nome")
 
-            response_data["msg"] = "Successo_1"  # Se il contratto inserito è valido si manda l'ok per mostrare il secondo form
-            response_data["lavori"] = serializers.serialize('json', lavori) # Si passa l'id del nuovo contratto per associarci i lavori che inserirà la stazione
+            response_data["lavori"] = list(lavori) # Si passa la lista di lavori che serviranno ad inizializzare la lista del form di inserimento della misura
         else:
-            response_data["msg"] = "Errore"
+            response_data["lavori"] = "Errore"
+
+        ################ FORM 2 ################
+        if misura is not None:
+            form = librettoForm(request.POST)
+
+            if form.is_valid():
+                nuova_misura = form.save(commit=False)
+                nuova_misura.Codice_Tariffa = nuova_misura.Lavoro.Codice_Tariffa
+                if nuova_misura.Riserva == "Si":
+                    nuova_misura.Stato = "INSERITO_LIBRETTO_RISERVA"
+                nuova_misura.save()
+                response_data["misura"] = "Successo_2" # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
+            else:
+                response_data["misura"] = "Errore"
+        else:
+            response_data["misura"] = "Error2"
 
         return HttpResponse(
             json.dumps(response_data),
@@ -70,14 +85,37 @@ def nuovamisura(request):
         form = librettoForm()
     return render(request, 'contract_area/nuova_misura.html', {'form': form, 'contratti': Contratti})
 
+# Vista per il redirect a seguito dell'inserimento di una nuova misura
+
+class nuovamisuraredirect(TemplateView):
+    template_name = "contract_area/nuova_misura_redirect.html"
+
 # Vista per il Libretto delle Misure
 
 def librettomisure(request):
+    contratti = Contratto.objects.filter(Direttore=request.user.id)
+    lavori = Lavoro.objects.filter(Contratto__in=contratti)
+    misure = Misura.objects.filter(Lavoro__in=lavori)
+    context = {'contratto': "all", 'lavoro': "all", 'stato': "all"}
+
     if request.method == "POST":
-        template_name = "contract_area/libretto_misure.html"
-    else:
-        form = librettoForm()
-    return render(request, 'contract_area/libretto_misure.html', {'form': form})
+        lavori_filt = lavori
+        contratto = request.POST.get("Contratto")
+        if contratto != "all":
+            contratti_filt = contratti.filter(id=contratto)
+            lavori_filt = Lavoro.objects.filter(Contratto__in=contratti_filt)
+            context["contratto"] = contratto
+        lavoro = request.POST.get("Lavoro")
+        if lavoro != "all":
+            lavori_filt = lavori.filter(id=lavoro)
+            context["lavoro"] = lavoro
+        stato = request.POST.get("Stato")
+        misure = Misura.objects.filter(Lavoro__in=lavori_filt)
+        if stato != "all":
+            misure = misure.filter(Stato=stato)
+            context["stato"] = stato
+
+    return render(request, 'contract_area/libretto_misure.html', {'misure': misure, 'contratti': contratti, 'lavori': lavori, 'context':context})
 
 # Vista per un nuovo contratto
 
