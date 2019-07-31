@@ -6,7 +6,7 @@ from django.http import JsonResponse
 # MODELS IMPORTS
 from .models import Contracts
 # FORMS IMPORTS
-from .forms import librettoForm, ContrattoForm
+from .forms import librettoForm
 # OTHER IMPORTS
 import json
 from web3 import Web3
@@ -51,15 +51,6 @@ def librettomisure(request):
     else:
         form = librettoForm()
     return render(request, 'contract_area/libretto_misure.html', {'form': form})
-
-# Vista per il Libretto delle Misure
-
-def nuovocontratto(request):
-    if request.method == "POST":
-        template_name = "contract_area/nuovo_contratto.html"
-    else:
-        form = ContrattoForm()
-    return render(request, 'contract_area/nuovo_contratto.html', {'form': form})
 
 # Vista predisposta alla creazione e all'inizializzazione di un nuovo insieme di smartcontract
 
@@ -118,29 +109,13 @@ def setcontratti(request):
             istanze_contratti[i] = w3.eth.contract(address=contract.Contract_Address,abi=contract.Contract_Abi.Abi_Value)  # Cre un'istanza del contratto per porte eseguire i metodi
             i = i+1
 
-        w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0) # Serve per sbloccare l'account prima di poter eseguire le transazioni
 
-        # la seguente sezione setta gli indirizzi per i vari contratti prima di poterli utilizzare
+        # la seguente sezione setta i valori iniziali per i vari contratti prima di poterli salvare
 
-        ###### Appalto ######
         tx_Appalto_1 = istanze_contratti[0].functions.setIndirizzoConforme(indirizzi[1]).transact()
         w3.eth.waitForTransactionReceipt(tx_Appalto_1)
-        tx_Appalto_2 = istanze_contratti[0].functions.setIndirizzoValore(indirizzi[3]).transact()
-        w3.eth.waitForTransactionReceipt(tx_Appalto_2)
 
-        ###### Valore ######
-        tx_Valore_1 = istanze_contratti[3].functions.setIndirizzoAppalto(indirizzi[0]).transact()
-        w3.eth.waitForTransactionReceipt(tx_Valore_1)
-        tx_Valore_2 = istanze_contratti[3].functions.setIndirizzoConforme(indirizzi[1]).transact()
-        w3.eth.waitForTransactionReceipt(tx_Valore_2)
-
-        ###### Conforme ######
-        tx_Conforme_1 = istanze_contratti[1].functions.setIndirizzoAppalto(indirizzi[0]).transact()
-        w3.eth.waitForTransactionReceipt(tx_Conforme_1)
-        tx_Conforme_2 = istanze_contratti[1].functions.setIndirizzoValore(indirizzi[3]).transact()
-        w3.eth.waitForTransactionReceipt(tx_Conforme_2)
-
-        return JsonResponse("success",
+        return JsonResponse(tx_Appalto_1,
                             safe=False)
         #    contract_instance[0].functions.setIndirizzoValore(contract_addresses[3], "{gas: 0x99999}").transact()
     else:
