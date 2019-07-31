@@ -33,15 +33,25 @@ class ContractAreaView(TemplateView):
 class statoavanzamento(TemplateView):
     template_name = "contract_area/stato_avanzamento.html"
 
-# Vista per il Registro Contabilità
-
-class registrocont(TemplateView):
-    template_name = "contract_area/registro_cont.html"
-
 # Vista per il Giornale dei Lavori
 
 class giornalelavori(TemplateView):
     template_name = "contract_area/giornale_lavori.html"
+
+
+# Vista per il Registro Contabilità
+
+def registrocont(request):
+    if request.user.groups.filter(name="DirettoreLavori").exists():
+        contratti = Contratto.objects.filter(Direttore=request.user.id)
+    elif request.user.groups.filter(name="DittaAppaltatrice").exists():
+        contratti = Contratto.objects.filter(Ditta=request.user.id)
+    else:
+        contratti = Contratto.objects.filter(Utente=request.user)
+    lavori = Lavoro.objects.filter(Contratto__in=contratti)
+    misure = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO") # Mi ricavo la lista delle misure che sono state giù approvate nel libretto e che l'utente ha diritto a visualizzare
+
+    return render(request, "contract_area/registro_cont.html", {'misure': misure})
 
 # Vista per inserire una nuova misura
 
@@ -93,27 +103,41 @@ class nuovamisuraredirect(TemplateView):
 # Vista per il Libretto delle Misure
 
 def librettomisure(request):
-    contratti = Contratto.objects.filter(Direttore=request.user.id)
+    if request.user.groups.filter(name="DirettoreLavori").exists():
+        contratti = Contratto.objects.filter(Direttore=request.user.id)
+    elif request.user.groups.filter(name="DittaAppaltatrice").exists():
+        contratti = Contratto.objects.filter(Ditta=request.user.id)
+    else:
+        contratti = Contratto.objects.filter(Utente=request.user)
     lavori = Lavoro.objects.filter(Contratto__in=contratti)
-    misure = Misura.objects.filter(Lavoro__in=lavori)
-    context = {'contratto': "all", 'lavoro': "all", 'stato': "all"}
+    misure = Misura.objects.filter(Lavoro__in=lavori) # Ricavo la lista di tutte le misure visualizzabili dall'utente in base alla sua tipologia
+    context = {'contratto': "all", 'lavoro': "all", 'stato': "all"} # Creo un context così da inizializzare i menù a tendina per filtrare le misure
 
     if request.method == "POST":
-        lavori_filt = lavori
-        contratto = request.POST.get("Contratto")
-        if contratto != "all":
-            contratti_filt = contratti.filter(id=contratto)
-            lavori_filt = Lavoro.objects.filter(Contratto__in=contratti_filt)
-            context["contratto"] = contratto
-        lavoro = request.POST.get("Lavoro")
-        if lavoro != "all":
-            lavori_filt = lavori.filter(id=lavoro)
-            context["lavoro"] = lavoro
-        stato = request.POST.get("Stato")
-        misure = Misura.objects.filter(Lavoro__in=lavori_filt)
-        if stato != "all":
-            misure = misure.filter(Stato=stato)
-            context["stato"] = stato
+        approva = request.POST.get("Approva")
+        if approva == "Approva": # Se la stazione clicca sul pulsante di approvazione delle misure, scorro tutta la lista delle misure e aggiorno lo stato
+            for misura in misure:
+                stato = misura.Stato
+                if stato == "INSERITO_LIBRETTO":
+                    misura.Stato = "CONFERMATO_LIBRETTO"
+                    misura.save()
+        else:
+            # In base alla selezione nei menù a tendina, applico un filtro diverso alla lista delle misure
+            lavori_filt = lavori
+            contratto = request.POST.get("Contratto")
+            if contratto != "all":
+                contratti_filt = contratti.filter(id=contratto)
+                lavori_filt = Lavoro.objects.filter(Contratto__in=contratti_filt)
+                context["contratto"] = contratto
+            lavoro = request.POST.get("Lavoro")
+            if lavoro != "all":
+                lavori_filt = lavori.filter(id=lavoro)
+                context["lavoro"] = lavoro
+            stato = request.POST.get("Stato")
+            misure = Misura.objects.filter(Lavoro__in=lavori_filt)
+            if stato != "all":
+                misure = misure.filter(Stato=stato)
+                context["stato"] = stato
 
     return render(request, 'contract_area/libretto_misure.html', {'misure': misure, 'contratti': contratti, 'lavori': lavori, 'context':context})
 

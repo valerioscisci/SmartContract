@@ -1,34 +1,12 @@
-{% extends "contract_area/contract_area.html" %}
-
-{% block title %}Smart Contract - Libretto Misure{% endblock title %}
-
-{% block css %}
-
-{% endblock css %}
-
-{% block pannello_direttore %}
-
-{% include "contract_area/blocco_libretto.html" %}
-
-{% endblock pannello_direttore %}
-
-{% block pannello_ditta %}
-
-{% include "contract_area/blocco_libretto.html" %}
-
-{% endblock pannello_ditta %}
-
-{% block pannello_stazione %}
-
 <div class="margin-s-left-0 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-right-20 margin-s-right-0">
     <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-30 margin-top-30 text-center">Libretto delle Misure</h3>
     <p id="messaggi_ajax" class="hidden text-dark background-error border-radius margin-bottom-20">
 
     </p>
-    <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform width65 float-left" action="{% url 'libretto_misure' %}">{% csrf_token %}
-        <table class="row-override">
+    <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform" action="{% url 'libretto_misure' %}">{% csrf_token %}
+         <table class="row-override">
              <tr>
-                 <td valign="bottom">
+                 <td>
                      <label for="id_contratto_sel">Seleziona Contratto:</label>
                      <select id="id_contratto_sel" name="Contratto">
                          <option value="all">---</option>
@@ -37,7 +15,7 @@
                          {% endfor %}
                      </select>
                  </td>
-                 <td valign="bottom">
+                 <td>
                      <label for="id_lavoro_sel">Seleziona Lavoro:</label>
                      <select id="id_lavoro_sel" name="Lavoro">
                          <option value="all">---</option>
@@ -46,7 +24,7 @@
                          {% endfor %}
                      </select>
                  </td>
-                 <td valign="bottom">
+                 <td>
                      <label for="id_stato_sel">Seleziona Stato:</label>
                      <select id="id_stato_sel" name="Stato">
                          <option value="all">---</option>
@@ -63,21 +41,7 @@
                  </td>
              </tr>
         </table>
-    </form>
-    <table class="width35 float-right">
-        <tr>
-            <td>
-                <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 margin-top-20 text-center">Approva Misure</h3>
-                <p id="messaggi_ajax_2" class="hidden text-dark background-error border-radius margin-bottom-20">
-
-                </p>
-                <form id="form2" method="POST" enctype="multipart/form-data" class="post-form customform" action="{% url 'libretto_misure' %}">{% csrf_token %}
-                    <input type="hidden" name="Approva" value="Approva" id="id_Approva">
-                    <button id="approva" type="submit" class="button border-radius background-primary text-white margin-top-10 ">Approva le misure</button>
-                </form>
-            </td>
-        </tr>
-    </table>
+     </form>
      <table>
         <tr>
             <td class="text-strong">Codice di Tariffa</td>
@@ -135,19 +99,3 @@
         {% endfor %}
     </table>
 </div>
-
-{% endblock pannello_stazione %}
-
-{% block js %}
-
-{{ block.super }}  <!--contract_area.html js import-->
-
-<script type="text/javascript">
-    $( document ).ready(function() {
-        $("#id_contratto_sel option[value={{ context.contratto }}]").prop("selected", "selected");
-        $("#id_lavoro_sel option[value={{ context.lavoro }}]").prop("selected", "selected");
-        $("#id_stato_sel option[value={{ context.stato }}]").prop("selected", "selected");
-    });
-</script>
-
-{% endblock js %}
