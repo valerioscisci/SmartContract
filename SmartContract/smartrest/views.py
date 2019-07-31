@@ -215,29 +215,13 @@ def setcontratti(request):
             istanze_contratti[i] = w3.eth.contract(address=contract.Contract_Address,abi=contract.Contract_Abi.Abi_Value)  # Cre un'istanza del contratto per porte eseguire i metodi
             i = i+1
 
-        w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0) # Serve per sbloccare l'account prima di poter eseguire le transazioni
 
-        # la seguente sezione setta gli indirizzi per i vari contratti prima di poterli utilizzare
+        # la seguente sezione setta i valori iniziali per i vari contratti prima di poterli salvare
 
-        ###### Appalto ######
         tx_Appalto_1 = istanze_contratti[0].functions.setIndirizzoConforme(indirizzi[1]).transact()
         w3.eth.waitForTransactionReceipt(tx_Appalto_1)
-        tx_Appalto_2 = istanze_contratti[0].functions.setIndirizzoValore(indirizzi[3]).transact()
-        w3.eth.waitForTransactionReceipt(tx_Appalto_2)
 
-        ###### Valore ######
-        tx_Valore_1 = istanze_contratti[3].functions.setIndirizzoAppalto(indirizzi[0]).transact()
-        w3.eth.waitForTransactionReceipt(tx_Valore_1)
-        tx_Valore_2 = istanze_contratti[3].functions.setIndirizzoConforme(indirizzi[1]).transact()
-        w3.eth.waitForTransactionReceipt(tx_Valore_2)
-
-        ###### Conforme ######
-        tx_Conforme_1 = istanze_contratti[1].functions.setIndirizzoAppalto(indirizzi[0]).transact()
-        w3.eth.waitForTransactionReceipt(tx_Conforme_1)
-        tx_Conforme_2 = istanze_contratti[1].functions.setIndirizzoValore(indirizzi[3]).transact()
-        w3.eth.waitForTransactionReceipt(tx_Conforme_2)
-
-        return JsonResponse("success",
+        return JsonResponse(tx_Appalto_1,
                             safe=False)
     else:
         response = JsonResponse(
