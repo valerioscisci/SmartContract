@@ -9,6 +9,7 @@
     *Aggiungere il salvataggio dei lavori in blockchain
     *Verificare che la somma degli importi dei lavori inseriti coincida con l'importo del contratto
     *Inserire simbolo € negli importi
+    *Aggiungere controllo sulla possibiilità di inserire ogni codice tariffa una sola volta
 
 -creare un metodo automatico per inserire i contratti in blockchain (usare le viste già presenti creacontratto e setcontratti)
 

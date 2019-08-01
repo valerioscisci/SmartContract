@@ -1,4 +1,6 @@
 # DJANGO IMPORTS
+from django.db.models import Sum, Max, F
+from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.contrib.staticfiles.templatetags.staticfiles import static
@@ -49,9 +51,22 @@ def registrocont(request):
     else:
         contratti = Contratto.objects.filter(Utente=request.user)
     lavori = Lavoro.objects.filter(Contratto__in=contratti)
-    misure = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO") # Mi ricavo la lista delle misure che sono state giù approvate nel libretto e che l'utente ha diritto a visualizzare
+    misure_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO").values("Codice_Tariffa", "Lavoro").annotate(Somma_Positivi=Sum("Positivi"), Sommae_Negativi=Sum("Negativi"), latest_date=Max('Data')) # Mi ricavo la lista delle misure che sono state giù approvate nel libretto e che l'utente ha diritto a visualizzare e le aggrego per Codice Tariffa in modo da vere il valore totale
+    misure_non_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO")
 
-    return render(request, "contract_area/registro_cont.html", {'misure': misure})
+    ## Aggiungere descrizione
+    Descrizione_Lavori = ""
+    for misura in misure_aggregate: # Prendo la lista delle ultime misure per ciascun codice tariffa, così da poter inserire nel template la data e il costo unitario
+        misura["Lavoro_Nome"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Nome")[0]['Nome']
+        misura["Prezzo_Unitario"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Costo_Unitario")[0]['Costo_Unitario']
+        for misura_non_aggregata in misure_non_aggregate:
+            if misura_non_aggregata.Codice_Tariffa == misura["Codice_Tariffa"] and misura_non_aggregata.Lavoro.id == misura["Lavoro"]:
+                Descrizione_Lavori += misura_non_aggregata.Designazione_Lavori + "</br>"
+        misura["Lavoro_Descrizione"] = mark_safe(Descrizione_Lavori)
+        Descrizione_Lavori = ""
+    debito = "quanto deve la stazione"
+    pagamento = "quanto la stazione pagherà alla conferma delle misure"
+    return render(request, "contract_area/registro_cont.html", {'misure_aggregate': misure_aggregate, 'debito': debito, 'pagamento': pagamento})
 
 # Vista per inserire una nuova misura
 

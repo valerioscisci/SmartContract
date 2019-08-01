@@ -10,11 +10,17 @@
             <td class="text-strong">Prezzo Unitario</td>
             <td class="text-strong">Debito</td>
             <td class="text-strong">Pagamento</td>
-            <td class="text-strong">Stato</td>
         </tr>
-        {% for misura in misure %}
+        {% for misura in misure_aggregate %}
         <tr>
             <td>{{ misura.Codice_Tariffa }}</td>
+            <td>{{ misura.latest_date }}</td>
+            <td>{{ misura.Lavoro_Nome }} </br></br>{{ misura.Lavoro_Descrizione }}</td>
+            <td>{{ misura.Somma_Positivi }}</td>
+            <td>{{ misura.Somma_Negativi }}</td>
+            <td>{{ misura.Prezzo_Unitario }}</td>
+            <td>{{ debito }}</td>
+            <td>{{ pagamento }}</td>
         </tr>
         {% endfor %}
     </table>
