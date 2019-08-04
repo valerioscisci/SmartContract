@@ -1,12 +1,14 @@
 -registrazione
     *Creare form di registrazione dell'utente e aggiornare il model di conseguenza
+
 -home
     *Modificare front end della home con qualcosa di relativo agli smart contract
+    
 -areacontratti
     *aggiungere menu che scompare scorrendo in basso
 
 -view nuovocontratto
-    *Aggiungere il salvataggio dei lavori in blockchain
+    *Aggiungere il salvataggio dei lavori in blockchain a aggiungere le soglie nel form di inserimento
     *Verificare che la somma degli importi dei lavori inseriti coincida con l'importo del contratto
     *Inserire simbolo € negli importi
     *Aggiungere controllo sulla possibiilità di inserire ogni codice tariffa una sola volta
@@ -22,3 +24,18 @@
     *aggiungere le aliquote
     *quando cambio il contratto aggiornare in modo automatico la lista dei lavori per solo quel contratto con una richiesta ajax
     *aggiungere la possibilità di approvare le misure singolarmente o solo quelle selezionate
+
+-registro contabilità
+    *aggiungere controllo che inserisce nella lista delle voci da aaprovare solo quelle che non hanno elementi negativi
+    *aggiungere % lavoro (0 default) e verificare la soglia
+        questo va fatto prima lato db e poi va aggiunto in blockchain
+    *nel redirect inserire se il pagamento è andato a buonfine e creare la notifica di pagamento per la ditta
+
+-stato avanzamento lavori
+    *verificare in blockchain la % di completamento di ciascun lavoro e visualizzarla con una barra di completamento
+    *calcolare la % di completamento dell'intero contratto e visualizzarla
+
+-giornale lavori 
+    *creare model giornale lavori in base al pdf
+    *inserire la possibilità al direttore lavori di inserire voci nel giornale lavori
+    *creare giornale dei lavori consultabile da tutti

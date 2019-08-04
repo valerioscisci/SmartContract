@@ -1,8 +1,8 @@
 # DJANGO IMPORTS
-from django.db.models import Sum, Max, F
+from django.db.models import Sum, Max
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse, HttpResponse
 # MODELS IMPORTS
@@ -30,15 +30,15 @@ class AuthenticationView(TemplateView):
 class ContractAreaView(TemplateView):
     template_name = "contract_area/contract_area.html"
 
-# Vista per lo Stato Avanzamento Lavori
-
-class statoavanzamento(TemplateView):
-    template_name = "contract_area/stato_avanzamento.html"
-
 # Vista per il Giornale dei Lavori
 
-class giornalelavori(TemplateView):
-    template_name = "contract_area/giornale_lavori.html"
+def giornalelavori(request):
+    return render(request, "contract_area/giornale_lavori.html")
+
+# Vista per lo Stato Avanzamento Lavori
+
+def statoavanzamento(request):
+    return render(request, "contract_area/stato_avanzamento.html")
 
 
 # Vista per il Registro Contabilità
@@ -54,19 +54,37 @@ def registrocont(request):
     misure_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO").values("Codice_Tariffa", "Lavoro").annotate(Somma_Positivi=Sum("Positivi"), Sommae_Negativi=Sum("Negativi"), latest_date=Max('Data')) # Mi ricavo la lista delle misure che sono state giù approvate nel libretto e che l'utente ha diritto a visualizzare e le aggrego per Codice Tariffa in modo da vere il valore totale
     misure_non_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO")
 
-    ## Aggiungere descrizione
     Descrizione_Lavori = ""
-    for misura in misure_aggregate: # Prendo la lista delle ultime misure per ciascun codice tariffa, così da poter inserire nel template la data e il costo unitario
+    for misura in misure_aggregate: # Prendo la lista delle ultime misure per ciascun codice tariffa, così da poter inserire nel template il costo unitario, il nome del lavoro e la descrizione di ciò che è stato fatto
         misura["Lavoro_Nome"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Nome")[0]['Nome']
         misura["Prezzo_Unitario"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Costo_Unitario")[0]['Costo_Unitario']
+        misura["Debito"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Debito")[0]['Debito']
+
         for misura_non_aggregata in misure_non_aggregate:
             if misura_non_aggregata.Codice_Tariffa == misura["Codice_Tariffa"] and misura_non_aggregata.Lavoro.id == misura["Lavoro"]:
-                Descrizione_Lavori += misura_non_aggregata.Designazione_Lavori + "</br>"
-        misura["Lavoro_Descrizione"] = mark_safe(Descrizione_Lavori)
+                Descrizione_Lavori += misura_non_aggregata.Designazione_Lavori + "</br>" # Costruisco la descrizione del lavoro fatto concatenando le descrizioni delle singole misure
+        misura["Lavoro_Descrizione"] = mark_safe(Descrizione_Lavori) # Trasforma la stringa costruita in html per poterla inserire nel template
         Descrizione_Lavori = ""
-    debito = "quanto deve la stazione"
-    pagamento = "quanto la stazione pagherà alla conferma delle misure"
-    return render(request, "contract_area/registro_cont.html", {'misure_aggregate': misure_aggregate, 'debito': debito, 'pagamento': pagamento})
+    pagamento = "quanto la stazione pagherà alla conferma delle misure" # Bisogna calcolarlo andando a verificare che con le misure aggiunte ci sia il superamento della soglia e verificare di quanto sarà il pagamento
+
+    # Sezione dedicata all'approvazione delle misure contenute nel registro da parte della stazione
+    if request.method == "POST":
+        approva = request.POST.get("Approva")
+        if approva == "Approva": # Se la stazione clicca sul pulsante di approvazione delle misure, scorro tutta la lista delle misure e aggiorno lo stato
+            for misura in misure_non_aggregate:
+                stato = misura.Stato
+                if stato == "CONFERMATO_LIBRETTO":
+                    misura.Stato = "CONFERMATO_REGISTRO"
+                    misura.save()
+        # Se tutto è andato a buon fine far partire il pagamento e inviare la notifica alla ditta
+        return redirect("registro_contabilita_redirect")
+
+    return render(request, "contract_area/registro_cont.html", {'misure_aggregate': misure_aggregate, 'pagamento': pagamento})
+
+# Vista per il redirect a seguito dell'approvazione delle misure nel registro contabilità
+
+class registrocontredirect(TemplateView):
+    template_name = "contract_area/registro_cont_redirect.html"
 
 # Vista per inserire una nuova misura
 
@@ -135,6 +153,9 @@ def librettomisure(request):
                 stato = misura.Stato
                 if stato == "INSERITO_LIBRETTO":
                     misura.Stato = "CONFERMATO_LIBRETTO"
+
+                    # Aggiungere calcolo del debito aggiornato che prende in considerazione le ultime misure
+
                     misura.save()
         else:
             # In base alla selezione nei menù a tendina, applico un filtro diverso alla lista delle misure

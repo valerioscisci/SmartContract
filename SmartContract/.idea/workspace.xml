@@ -2,10 +2,21 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="76552703-d1cf-4781-bbbb-207a8846d17e" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_giornale_lavori.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_stato_avanzamento.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/registro_cont_redirect.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_registro.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_registro.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/giornale_lavori.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/giornale_lavori.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/libretto_misure.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/libretto_misure.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/registro_cont.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/registro_cont.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/stato_avanzamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/stato_avanzamento.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smartrest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TO DO LIST.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../TO DO LIST.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
