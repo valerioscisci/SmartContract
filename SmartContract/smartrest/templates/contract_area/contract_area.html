@@ -37,8 +37,8 @@
                             <ul>
                                 <li id="nuova_misura"><a href="{% url 'nuova_misura' %}">Inserisci Misura</a></li>
                                 <li id="libretto"><a href="{% url 'libretto_misure' %}">Libretto delle Misure</a></li>
-                                <li id="avanzamento"><a href="{% url 'stato_avanzamento' %}">Stato Avanzamento Lavori</a></li>
                                 <li id="registro"><a href="{% url 'registro_cont' %}">Registro Contabilità</a></li>
+                                <li id="avanzamento"><a href="{% url 'stato_avanzamento' %}">Stato Avanzamento Lavori</a></li>
                                 <li id="giornale"><a href="{% url 'giornale_lavori' %}">Giornale dei Lavori</a></li>
                             </ul>
                         </ul>
@@ -71,9 +71,10 @@
                             <li class="minimize hidden"><span class="minimizespan">Nascondi</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
                             <li>Lista Attività</li>
                             <ul>
-                                <li id="libretto_ditta"><a href="">Libretto delle Misure</a></li>
-                                <li id="registro_ditta"><a href="">Registro Contabilità</a></li>
-                                <li id="giornale_ditta"><a href="">Giornale dei Lavori</a></li>
+                                <li id="libretto_ditta"><a href="{% url 'libretto_misure' %}">Libretto delle Misure</a></li>
+                                <li id="registro_ditta"><a href="{% url 'registro_cont' %}">Registro Contabilità</a></li>
+                                <li id="avanzamento_ditta"><a href="{% url 'stato_avanzamento' %}">Stato Avanzamento Lavori</a></li>
+                                <li id="giornale_ditta"><a href="{% url 'giornale_lavori' %}">Giornale dei Lavori</a></li>
                             </ul>
                         </ul>
                     </div>
@@ -105,11 +106,19 @@
                             <li class="minimize hidden"><span class="minimizespan">Nascondi</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
                             <li>Lista Attività</li>
                             <ul>
+<<<<<<< HEAD
                                 <li id="new_project"><a href="">Nuovo Contratto</a></li>
                                 <li id="libretto_stazione"><a href="">Libretto delle Misure</a></li>
                                 <li id="avanzamento_stazione"><a href="">Stato Avanzamento Lavori</a></li>
                                 <li id="registro_stazione"><a href="">Registro Contabilità</a></li>
                                 <li id="giornale_stazione"><a href="">Giornale dei Lavori</a></li>
+=======
+                                <li id="new_project"><a href="{% url 'nuovo_contratto' %}">Nuovo Contratto</a></li>
+                                <li id="libretto_stazione"><a href="{% url 'libretto_misure' %}">Libretto delle Misure</a></li>
+                                <li id="registro_stazione"><a href="{% url 'registro_cont' %}">Registro Contabilità</a></li>
+                                <li id="avanzamento_stazione"><a href="{% url 'stato_avanzamento' %}">Stato Avanzamento Lavori</a></li>
+                                <li id="giornale_stazione"><a href="{% url 'giornale_lavori' %}">Giornale dei Lavori</a></li>
+>>>>>>> master
                             </ul>
                         </ul>
                     </div>

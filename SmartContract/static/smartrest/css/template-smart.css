@@ -614,6 +614,11 @@ visibility:hidden;
   bottom: 0;
   position: absolute;
 }
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
 
 /* Margins */
 .margin-top {

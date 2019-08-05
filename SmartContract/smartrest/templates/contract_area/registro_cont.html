@@ -1,6 +1,6 @@
 {% extends "contract_area/contract_area.html" %}
 
-{% block title %}Smart Contract - Libretto Misure{% endblock title %}
+{% block title %}Smart Contract - Registro Contabilità{% endblock title %}
 
 {% block css %}
 
@@ -8,30 +8,33 @@
 
 {% block pannello_direttore %}
 
-<div class="margin-s-left-0 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-right-20 margin-s-right-0">
-    <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Registro di Contabilità</h3>
-    <table>
-        <tr>
-            <td class="text-strong">N. Ordine</td>
-            <td class="text-strong">Codice di Tariffa</td>
-            <td class="text-strong">Data</td>
-            <td class="text-strong">Indicazione dei Lavori e delle Somministrazioni</td>
-            <td class="text-strong">Positivi</td>
-            <td class="text-strong">Negativi</td>
-            <td class="text-strong">Prezzo Unitario</td>
-            <td class="text-strong">Debito</td>
-            <td class="text-strong">Pagamento</td>
-            <td class="text-strong">Stato</td>
-        </tr>
-    </table>
-    <p class="text-dark padding-2x margin-left-right margin-top-40 text-center background-grey border-radius-2x">
-        Totale Importi : <br/>
-        + Aliquote: <br/>
-        = Totale Importi Lavori
-    </p>
-</div>
+{% include "contract_area/blocco_registro.html" %}
 
 {% endblock pannello_direttore %}
+
+{% block pannello_ditta %}
+
+{% include "contract_area/blocco_registro.html" %}
+
+{% endblock pannello_ditta %}
+
+{% block pannello_stazione %}
+
+{% include "contract_area/blocco_registro.html" %}
+
+<table>
+    <tr>
+        <td>
+            <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 margin-top-20 text-center">Approva Misure nel Registro</h3>
+            <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform" action="{% url 'registro_cont' %}">{% csrf_token %}
+                <input type="hidden" name="Approva" value="Approva" id="id_Approva">
+                <button id="approva" type="submit" class="button border-radius background-primary text-white margin-top-10 navbutton center">Approva le misure</button>
+            </form>
+        </td>
+    </tr>
+</table>
+
+{% endblock pannello_stazione %}
 
 {% block js %}
 
@@ -39,6 +42,18 @@
 
 <script type="text/javascript">
 
+    $( document ).ready(function() {
+        $(function() {
+          $('table').each(function() {
+            var rowspan = $(this).find('td.pagamento').length;
+            if( rowspan > 1 ) {
+              $(this).find('td.pagamento:first').attr('rowspan', rowspan);
+              $(this).find('td.pagamento:not(:first)').remove();
+            }
+          });
+        });
+        $('td.pagamento').text("{{ pagamento }}");
+    });
 </script>
 
 {% endblock js %}

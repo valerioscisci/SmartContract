@@ -1,6 +1,8 @@
 # DJANGO IMPORTS
+from django.db.models import Sum, Max
+from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse, HttpResponse
 # MODELS IMPORTS
@@ -28,20 +30,61 @@ class AuthenticationView(TemplateView):
 class ContractAreaView(TemplateView):
     template_name = "contract_area/contract_area.html"
 
+# Vista per il Giornale dei Lavori
+
+def giornalelavori(request):
+    return render(request, "contract_area/giornale_lavori.html")
+
 # Vista per lo Stato Avanzamento Lavori
 
-class statoavanzamento(TemplateView):
-    template_name = "contract_area/stato_avanzamento.html"
+def statoavanzamento(request):
+    return render(request, "contract_area/stato_avanzamento.html")
+
 
 # Vista per il Registro Contabilità
 
-class registrocont(TemplateView):
-    template_name = "contract_area/registro_cont.html"
+def registrocont(request):
+    if request.user.groups.filter(name="DirettoreLavori").exists():
+        contratti = Contratto.objects.filter(Direttore=request.user.id)
+    elif request.user.groups.filter(name="DittaAppaltatrice").exists():
+        contratti = Contratto.objects.filter(Ditta=request.user.id)
+    else:
+        contratti = Contratto.objects.filter(Utente=request.user)
+    lavori = Lavoro.objects.filter(Contratto__in=contratti)
+    misure_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO").values("Codice_Tariffa", "Lavoro").annotate(Somma_Positivi=Sum("Positivi"), Sommae_Negativi=Sum("Negativi"), latest_date=Max('Data')) # Mi ricavo la lista delle misure che sono state giù approvate nel libretto e che l'utente ha diritto a visualizzare e le aggrego per Codice Tariffa in modo da vere il valore totale
+    misure_non_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO")
 
-# Vista per il Giornale dei Lavori
+    Descrizione_Lavori = ""
+    for misura in misure_aggregate: # Prendo la lista delle ultime misure per ciascun codice tariffa, così da poter inserire nel template il costo unitario, il nome del lavoro e la descrizione di ciò che è stato fatto
+        misura["Lavoro_Nome"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Nome")[0]['Nome']
+        misura["Prezzo_Unitario"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Costo_Unitario")[0]['Costo_Unitario']
+        misura["Debito"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Debito")[0]['Debito']
 
-class giornalelavori(TemplateView):
-    template_name = "contract_area/giornale_lavori.html"
+        for misura_non_aggregata in misure_non_aggregate:
+            if misura_non_aggregata.Codice_Tariffa == misura["Codice_Tariffa"] and misura_non_aggregata.Lavoro.id == misura["Lavoro"]:
+                Descrizione_Lavori += misura_non_aggregata.Designazione_Lavori + "</br>" # Costruisco la descrizione del lavoro fatto concatenando le descrizioni delle singole misure
+        misura["Lavoro_Descrizione"] = mark_safe(Descrizione_Lavori) # Trasforma la stringa costruita in html per poterla inserire nel template
+        Descrizione_Lavori = ""
+    pagamento = "quanto la stazione pagherà alla conferma delle misure" # Bisogna calcolarlo andando a verificare che con le misure aggiunte ci sia il superamento della soglia e verificare di quanto sarà il pagamento
+
+    # Sezione dedicata all'approvazione delle misure contenute nel registro da parte della stazione
+    if request.method == "POST":
+        approva = request.POST.get("Approva")
+        if approva == "Approva": # Se la stazione clicca sul pulsante di approvazione delle misure, scorro tutta la lista delle misure e aggiorno lo stato
+            for misura in misure_non_aggregate:
+                stato = misura.Stato
+                if stato == "CONFERMATO_LIBRETTO":
+                    misura.Stato = "CONFERMATO_REGISTRO"
+                    misura.save()
+        # Se tutto è andato a buon fine far partire il pagamento e inviare la notifica alla ditta
+        return redirect("registro_contabilita_redirect")
+
+    return render(request, "contract_area/registro_cont.html", {'misure_aggregate': misure_aggregate, 'pagamento': pagamento})
+
+# Vista per il redirect a seguito dell'approvazione delle misure nel registro contabilità
+
+class registrocontredirect(TemplateView):
+    template_name = "contract_area/registro_cont_redirect.html"
 
 # Vista per inserire una nuova misura
 
@@ -93,27 +136,44 @@ class nuovamisuraredirect(TemplateView):
 # Vista per il Libretto delle Misure
 
 def librettomisure(request):
-    contratti = Contratto.objects.filter(Direttore=request.user.id)
+    if request.user.groups.filter(name="DirettoreLavori").exists():
+        contratti = Contratto.objects.filter(Direttore=request.user.id)
+    elif request.user.groups.filter(name="DittaAppaltatrice").exists():
+        contratti = Contratto.objects.filter(Ditta=request.user.id)
+    else:
+        contratti = Contratto.objects.filter(Utente=request.user)
     lavori = Lavoro.objects.filter(Contratto__in=contratti)
-    misure = Misura.objects.filter(Lavoro__in=lavori)
-    context = {'contratto': "all", 'lavoro': "all", 'stato': "all"}
+    misure = Misura.objects.filter(Lavoro__in=lavori) # Ricavo la lista di tutte le misure visualizzabili dall'utente in base alla sua tipologia
+    context = {'contratto': "all", 'lavoro': "all", 'stato': "all"} # Creo un context così da inizializzare i menù a tendina per filtrare le misure
 
     if request.method == "POST":
-        lavori_filt = lavori
-        contratto = request.POST.get("Contratto")
-        if contratto != "all":
-            contratti_filt = contratti.filter(id=contratto)
-            lavori_filt = Lavoro.objects.filter(Contratto__in=contratti_filt)
-            context["contratto"] = contratto
-        lavoro = request.POST.get("Lavoro")
-        if lavoro != "all":
-            lavori_filt = lavori.filter(id=lavoro)
-            context["lavoro"] = lavoro
-        stato = request.POST.get("Stato")
-        misure = Misura.objects.filter(Lavoro__in=lavori_filt)
-        if stato != "all":
-            misure = misure.filter(Stato=stato)
-            context["stato"] = stato
+        approva = request.POST.get("Approva")
+        if approva == "Approva": # Se la stazione clicca sul pulsante di approvazione delle misure, scorro tutta la lista delle misure e aggiorno lo stato
+            for misura in misure:
+                stato = misura.Stato
+                if stato == "INSERITO_LIBRETTO":
+                    misura.Stato = "CONFERMATO_LIBRETTO"
+
+                    # Aggiungere calcolo del debito aggiornato che prende in considerazione le ultime misure
+
+                    misura.save()
+        else:
+            # In base alla selezione nei menù a tendina, applico un filtro diverso alla lista delle misure
+            lavori_filt = lavori
+            contratto = request.POST.get("Contratto")
+            if contratto != "all":
+                contratti_filt = contratti.filter(id=contratto)
+                lavori_filt = Lavoro.objects.filter(Contratto__in=contratti_filt)
+                context["contratto"] = contratto
+            lavoro = request.POST.get("Lavoro")
+            if lavoro != "all":
+                lavori_filt = lavori.filter(id=lavoro)
+                context["lavoro"] = lavoro
+            stato = request.POST.get("Stato")
+            misure = Misura.objects.filter(Lavoro__in=lavori_filt)
+            if stato != "all":
+                misure = misure.filter(Stato=stato)
+                context["stato"] = stato
 
     return render(request, 'contract_area/libretto_misure.html', {'misure': misure, 'contratti': contratti, 'lavori': lavori, 'context':context})
 

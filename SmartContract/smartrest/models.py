@@ -41,6 +41,7 @@ class Lavoro(models.Model):
     Nome = models.CharField(max_length=100)  # Nome del lavoro
     Importo = models.FloatField()  # Valore totale del lavoro in euro
     Costo_Unitario = models.FloatField(default=0.0) # Costo unitario di ogni componente del lavoro, che sarà 0 per lavori non divisibili
+    Debito = models.FloatField(default=0.0) # Quantità di denaro che la ditta deve ricevere in un dato istante. Viene scalato se la quantità di denaro è erogata dalla stazione
 
 # Modello contenente le misure relative ai lavori inserite dal direttore dei lavori
 
