@@ -3,9 +3,11 @@
 
 -home
     *Modificare front end della home con qualcosa di relativo agli smart contract
-    
+
 -areacontratti
     *aggiungere menu che scompare scorrendo in basso
+
+-creare un metodo automatico per inserire i contratti in blockchain (usare le viste già presenti creacontratto e setcontratti)
 
 -view nuovocontratto
     *Aggiungere il salvataggio dei lavori in blockchain a aggiungere le soglie nel form di inserimento
@@ -13,15 +15,13 @@
     *Inserire simbolo € negli importi
     *Aggiungere controllo sulla possibiilità di inserire ogni codice tariffa una sola volta
 
--creare un metodo automatico per inserire i contratti in blockchain (usare le viste già presenti creacontratto e setcontratti)
-
 -misureform
     *inserire in modo automatico il N_Ordine che adesso è nascosto e impostato come id autoincrement 
     *fare le opportune verifiche quando il direttore dei lavori inserisce una misura
     *inserire la misura in blockchain
 
 -librettomisure
-    *aggiungere le aliquote
+    *scrivere codice che aggiorna il debito per ciascun lavoro per il quale sono state approvvate delle misure
     *quando cambio il contratto aggiornare in modo automatico la lista dei lavori per solo quel contratto con una richiesta ajax
     *aggiungere la possibilità di approvare le misure singolarmente o solo quelle selezionate
 
@@ -30,6 +30,7 @@
     *aggiungere % lavoro (0 default) e verificare la soglia
         questo va fatto prima lato db e poi va aggiunto in blockchain
     *nel redirect inserire se il pagamento è andato a buonfine e creare la notifica di pagamento per la ditta
+    *aggiungere le aliquote
 
 -stato avanzamento lavori
     *verificare in blockchain la % di completamento di ciascun lavoro e visualizzarla con una barra di completamento
