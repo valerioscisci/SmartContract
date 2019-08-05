@@ -1,5 +1,18 @@
 from django import forms
-from .models import Contratto, User, Lavoro, Misura
+from .models import Contratto, User, Lavoro, Misura, Soglia
+
+# Definisce il form che servirà per l'inserimento di una nuova soglia da parte della stazione appaltante
+
+class SogliaForm(forms.ModelForm):
+
+    class Meta:
+        model = Soglia
+        fields = '__all__'
+        widgets = {
+            'Contratto': forms.HiddenInput(),
+            'Importo_Pagamento': forms.NumberInput(attrs={'class': 'required'}),
+            'Percentuale_Da_Raggiungere': forms.NumberInput(attrs={'class': 'required'}),
+        }
 
 # Definisce il form che servirà per l'inserimento di un nuovo lavoro da parte della stazione appaltante
 
@@ -14,6 +27,7 @@ class LavoroForm(forms.ModelForm):
             'Nome': forms.TextInput(attrs={'class': 'required'}),
             'Importo': forms.NumberInput(attrs={'class': 'required'}),
             'Costo_Unitario': forms.NumberInput(attrs={'class': 'notrequired'}),
+            'Debito': forms.HiddenInput(),
         }
 
 # Definisce il form che servirà per l'inserimento di un nuovo contratto da parte della stazione appaltante

@@ -1,22 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="76552703-d1cf-4781-bbbb-207a8846d17e" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_giornale_lavori.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_stato_avanzamento.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/registro_cont_redirect.html" afterDir="false" />
+    <list default="true" id="76552703-d1cf-4781-bbbb-207a8846d17e" name="Default Changelist" comment="Aggiunti i file dei contratti e un file JSON di lavoro. Iniziata la parte di codice che creerà i contratti.">
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smartrest/templates/registration/register.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smartrest/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_registro.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_registro.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/giornale_lavori.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/giornale_lavori.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/libretto_misure.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/libretto_misure.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/registro_cont.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/registro_cont.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/stato_avanzamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/stato_avanzamento.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/nuovo_contratto.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/nuovo_contratto.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smartrest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../TO DO LIST.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../TO DO LIST.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -89,17 +82,15 @@
       <option name="project" value="LOCAL" />
       <updated>1553722587212</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Revert &quot;inutile&quot;&#10;&#10;This reverts commit 4eda9a78">
+      <created>1565016610245</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1565016610245</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
-  </component>
-  <component name="TodoView">
-    <todo-panel id="selected-file">
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-    <todo-panel id="all">
-      <are-packages-shown value="true" />
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -131,6 +122,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Aggiornato il readme e aggiunta l'app django" />
     <MESSAGE value="Aggiunti i file dei contratti e un file JSON di lavoro. Iniziata la parte di codice che creerà i contratti." />
-    <option name="LAST_COMMIT_MESSAGE" value="Aggiunti i file dei contratti e un file JSON di lavoro. Iniziata la parte di codice che creerà i contratti." />
+    <MESSAGE value="Revert &quot;inutile&quot;&#10;&#10;This reverts commit 4eda9a78" />
+    <option name="LAST_COMMIT_MESSAGE" value="Revert &quot;inutile&quot;&#10;&#10;This reverts commit 4eda9a78" />
   </component>
 </project>

@@ -44,6 +44,20 @@
             </tr>
         </table>
     </form>
+    <form id="form3" method="POST" enctype="multipart/form-data" class="post-form customform form3 hidden" action="">{% csrf_token %}
+        <table class="row-override">
+            <tr>
+                <td>
+                    {{form3.as_p}}
+                </td>
+            <tr>
+                <td colspan="2">
+                    <button id="form3_button" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci e Continua</button>
+                    <button id="form3_button_2" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci e Termina</button>
+                </td>
+            </tr>
+        </table>
+    </form>
 </div>
 
 {% endblock pannello_stazione %}
@@ -110,8 +124,54 @@
                             $('#form2').find('#id_Contratto').text(json["contratto"]);
                             $("html, body").stop().animate({scrollTop: 0 }, 500, 'swing');
                         } else {
+                            $('.form2').hide();
+                            $('.form3').show();
+                            $('#form3').find('#id_Contratto').val(json["contratto"]);
+                        }
+                    } else if (json["msg"]=="Errore_Block") {
+                        $('#messaggi_ajax').show().text("Errore: non è stato possibile inserire il lavoro in blockchain.").addClass('background-error').removeClass('background-green');
+                    } else {
+                        $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
+                    }
+                },
+
+                error : function err() {
+                    $('#messaggi_ajax').show().text("Errore: server non raggiungibile, riprovare più tardi.").addClass('background-error').removeClass('background-green');
+                }
+            });
+        };
+
+        //quando si invia il terzo form al server tramite la chiamata ajax si svuota il form per inserire una nuova soglia o si termina l'inserimento
+        $('#form3_button').click(function(event){
+            event.preventDefault();
+            check_form3(true);
+        });
+
+        $('#form3_button_2').click(function(event){
+            event.preventDefault();
+            check_form3(false);
+        });
+
+        function check_form3(nuova_soglia){
+            var fd = $('#form3').serialize();
+
+            $.ajax({
+                url : "{% url 'nuovo_contratto' %}", // the endpoint
+                type : "POST", // http method
+                data : fd, // inviamo i dati del form al server
+                dataType: 'json',
+                success : function(json) {
+                    if(json["msg"]=="Successo_3"){
+                        if (nuova_soglia){
+                            $('#messaggi_ajax').show().text("Lavoro inserito correttamente. Inserisci il prossimo.").addClass('background-green').removeClass('background-error');
+                            $('#form3')[0].reset();
+                            $('#form3').find('#id_Contratto').text(json["contratto"]);
+                            $("html, body").stop().animate({scrollTop: 0 }, 500, 'swing');
+                        } else {
                             window.location='{% url 'nuovo_contratto_redirect' %}'
                         }
+                    } else if (json["msg"]=="Errore_Block") {
+                        $('#messaggi_ajax').show().text("Errore: non è stato possibile inserire la soglia in blockchain.").addClass('background-error').removeClass('background-green');
                     } else {
                         $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
                     }

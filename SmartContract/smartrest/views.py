@@ -6,9 +6,9 @@ from django.shortcuts import render, redirect
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse, HttpResponse
 # MODELS IMPORTS
-from .models import Contracts, Contratto, Lavoro, Misura
+from .models import Contracts, Contratto, Lavoro, Misura, Soglia
 # FORMS IMPORTS
-from .forms import librettoForm, ContrattoForm, LavoroForm
+from .forms import librettoForm, ContrattoForm, LavoroForm, SogliaForm
 # OTHER IMPORTS
 import json
 from web3 import Web3
@@ -199,10 +199,48 @@ def nuovocontratto(request):
 
             if form2.is_valid():
                 nuovo_lavoro = form2.save()
-                response_data["msg"] = "Successo_2" # Se il lavoro inserito è valido si manda l'ok per far inserire un nuovo lavoro o terminare
-                response_data["contratto"] = nuovo_lavoro.Contratto.pk
+
+                ## sezione dedicata all'inserimento di ciascun lavoro in blockchain
+                contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto') # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
+                w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+                istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
+                w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0) # Serve per sbloccare l'account prima di poter eseguire le transazioni
+                tx_nuovo_lavoro = istanza_contratto.functions.addLavoro(nuovo_lavoro.Nome).transact({'gas': 100000})
+                try:
+                    w3.eth.waitForTransactionReceipt(tx_nuovo_lavoro, timeout=20)
+                    response_data["msg"] = "Successo_2"  # Se il lavoro inserito è valido si manda l'ok per far inserire un nuovo lavoro o terminare
+                    response_data["contratto"] = nuovo_lavoro.Contratto.pk  # Si ripassa l'id del nuovo contratto per associarci gli altri lavori che inserirà la stazione
+                except:
+                    response_data["msg"] = "Errore_Block" # Se non si riesce a mandare la transazione in blockchain allora si ha un errore
+                ## fine lavoro in blockchain
+
             else:
                 response_data["msg"] = "Errore_2"
+        ################ FORM 3 ################
+        elif request.POST.get("Importo_Pagamento") is not None:
+            form3 = SogliaForm(request.POST)
+
+            if form3.is_valid():
+                nuova_soglia = form3.save()
+
+                ## sezione dedicata all'inserimento di ciascuna soglia in blockchain
+                contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
+                w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+                istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
+                w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
+                tx_nuova_soglia = istanza_contratto.functions.addSoglia(nuova_soglia.Importo_Pagamento,nuova_soglia.Percentuale_Da_Raggiungere).transact({'gas': 100000})
+                try:
+                    w3.eth.waitForTransactionReceipt(tx_nuova_soglia, timeout=20)
+                    response_data["msg"] = "Successo_3"  # Se la soglia inserita è valido si manda l'ok per far inserire una nuova soglia o terminare
+                    response_data["contratto"] = nuova_soglia.Contratto.pk  # Si ripassa l'id del nuovo contratto per associarci le altre soglie che inserirà la stazione
+                except:
+                    response_data["msg"] = "Errore_Block"  # Se non si riesce a mandare la transazione in blockchain allora si ha un errore
+                ## fine soglia in blockchain
+
+            else:
+                response_data["msg"] = "Errore_3"
 
         return HttpResponse(
             json.dumps(response_data),
@@ -211,7 +249,8 @@ def nuovocontratto(request):
     else:
         form = ContrattoForm(user=request.user) # Crea la form per inserire il contratto
         form2 = LavoroForm() # Crea la form per inserire i lavori
-        return render(request, 'contract_area/nuovo_contratto.html', {'form': form, 'form2': form2})
+        form3 = SogliaForm() # Crea la form per inserire le soglie
+        return render(request, 'contract_area/nuovo_contratto.html', {'form': form, 'form2': form2, 'form3': form3})
 
 # Vista per il redirect a seguito dell'inserimento di un nuovo contratto
 
@@ -265,14 +304,14 @@ def creacontratto(request):
 def setcontratti(request):
     if request.method != "POST":
         w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
-        w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'acount della stazione è quello che farà le transazioni
+        w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
         contracts = Contracts.objects.filter(Username='stazione')
         i = 0
         indirizzi = [0] * 4
         istanze_contratti = [0] * 4
         for contract in contracts:
             indirizzi[i] = contract.Contract_Address
-            istanze_contratti[i] = w3.eth.contract(address=contract.Contract_Address,abi=contract.Contract_Abi.Abi_Value)  # Cre un'istanza del contratto per porte eseguire i metodi
+            istanze_contratti[i] = w3.eth.contract(address=contract.Contract_Address,abi=contract.Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
             i = i+1
 
         w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0) # Serve per sbloccare l'account prima di poter eseguire le transazioni

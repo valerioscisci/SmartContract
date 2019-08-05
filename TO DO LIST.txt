@@ -10,6 +10,8 @@
 -view nuovocontratto
     *Aggiungere il salvataggio dei lavori in blockchain a aggiungere le soglie nel form di inserimento
     *Verificare che la somma degli importi dei lavori inseriti coincida con l'importo del contratto
+    *Verificare che la somma dei pagamenti indicati nelle soglie sia uguale all'importo del contratto 
+    *Verificare che la percentuale totale delle soglie sia 100%
     *Inserire simbolo € negli importi
     *Aggiungere controllo sulla possibiilità di inserire ogni codice tariffa una sola volta
 
