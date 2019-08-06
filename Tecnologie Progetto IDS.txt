@@ -1,0 +1,16 @@
+Tecnologie Usate:
+    -Blockchain
+        *Geth/Go-Ethereum (versione 1.8.27), software che permette l'implementazione di una Blockchain ethereum locale che è scritto in un linguaggio chiamato Go
+        *Truffle (versione 5.0.9), software che permette la migrazione degli smart contract all'interno della blockchain
+        *Solidity (versione 0.5.0), linguaggio per scrivere e modificare gli smart contract
+        *Web3.py (versione 5.0.0), libreria python che ci permette di interagire con la Blockchain Ethereum dal back-end e di usare quindi gli smart contract
+        *py-solc-x (versione 0.5.0), libreria python che permette di compilare smart contract scritti in solidity direttamente dal back-end
+    -Back-End
+        *Linguaggio Python (versione 3.6.6)
+        *Framework Django (versione 2.2), Framework versatile che permette di realizzare applicazioni web sicure scritte in python
+        *Database SQLite (versione 3), database a supporto dell'applicazione web
+    -Front-End
+        *HTML5
+        *CSS3
+        *JS
+        *Jquery (versione 2.2.4), libreria javascript per interagire con gli elementi della pagina e per mandare richeiste ajax al server inviando e ricevendo dati

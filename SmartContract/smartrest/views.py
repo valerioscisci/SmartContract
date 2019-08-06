@@ -194,7 +194,7 @@ def nuovocontratto(request):
             else:
                 response_data["msg"] = "Errore_1"
         ################ FORM 2 ################
-        elif request.POST.get("Contratto") is not None:
+        elif request.POST.get("Codice_Tariffa") is not None:
             form2 = LavoroForm(request.POST)
 
             if form2.is_valid():
@@ -220,7 +220,7 @@ def nuovocontratto(request):
         ################ FORM 3 ################
         elif request.POST.get("Importo_Pagamento") is not None:
             form3 = SogliaForm(request.POST)
-
+            response_data["test"]=request.POST.get("Importo_Pagamento")
             if form3.is_valid():
                 nuova_soglia = form3.save()
 
@@ -230,7 +230,7 @@ def nuovocontratto(request):
                 w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
                 istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
                 w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
-                tx_nuova_soglia = istanza_contratto.functions.addSoglia(nuova_soglia.Importo_Pagamento,nuova_soglia.Percentuale_Da_Raggiungere).transact({'gas': 100000})
+                tx_nuova_soglia = istanza_contratto.functions.addSoglia(int(nuova_soglia.Importo_Pagamento), int(nuova_soglia.Percentuale_Da_Raggiungere)).transact({'gas': 100000})
                 try:
                     w3.eth.waitForTransactionReceipt(tx_nuova_soglia, timeout=20)
                     response_data["msg"] = "Successo_3"  # Se la soglia inserita è valido si manda l'ok per far inserire una nuova soglia o terminare
