@@ -154,7 +154,20 @@ def librettomisure(request):
                 if stato == "INSERITO_LIBRETTO":
                     misura.Stato = "CONFERMATO_LIBRETTO"
 
-                    # Aggiungere calcolo del debito aggiornato che prende in considerazione le ultime misure
+                    # Sezione che calcola il debito aggiornato che prende in considerazione le ultime misure
+                    lavoro = Lavoro.objects.get(id=misura.Lavoro.id) # Prendo il lavoro relativo a questa misura
+                    positivi = misura.Positivi # Prendo la quantità misurata
+                    costo_unitario = lavoro.Costo_Unitario # Prendo il costo unitario, se esiste per il lavoro in questione
+                    importo = lavoro.Importo
+
+                    if costo_unitario == 0.0: # Se il lavoro si misura in percentuale, si calcola in euro quanto vale la misura che la stazione sta approvando
+                        aggiunta = (importo * positivi)/100
+                    else: # Altrimento si calcola il valore della misura moltiplicando il costo unitario per quanti elementi sono stati misurati
+                        aggiunta = costo_unitario * positivi
+
+                    lavoro.Debito += aggiunta
+                    lavoro.save()
+                    # Fine aggiornamento debito
 
                     misura.save()
         else:
