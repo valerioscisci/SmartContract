@@ -1,5 +1,6 @@
--registrazione
+﻿-registrazione
     *Creare form di registrazione dell'utente e aggiornare il model di conseguenza
+		--Fare validazione e login una volta validata	//valerio
 
 -home
     *Modificare front end della home con qualcosa di relativo agli smart contract
@@ -8,10 +9,8 @@
     *aggiungere menu che scompare scorrendo in basso
 
 -view nuovocontratto
-    *Verificare come bloccare il form mentre si attende la risposta dalla blockchain visto che richiede tempo (https://stackoverflow.com/questions/46978302/how-to-handle-duplicate-form-submission-with-django)
+    *Aggiungere il salvataggio dei lavori in blockchain a aggiungere le soglie nel form di inserimento
     *Verificare che la somma degli importi dei lavori inseriti coincida con l'importo del contratto
-    *Verificare che la somma dei pagamenti indicati nelle soglie sia uguale all'importo del contratto 
-    *Verificare che la percentuale totale delle soglie sia 100%
     *Inserire simbolo € negli importi
     *Aggiungere controllo sulla possibiilità di inserire ogni codice tariffa una sola volta
 

@@ -41,6 +41,11 @@ def statoavanzamento(request):
     return render(request, "contract_area/stato_avanzamento.html")
 
 
+def registerform(request):
+    return render(request, "registration/register.html")
+
+
+
 # Vista per il Registro Contabilità
 
 def registrocont(request):
