@@ -43,6 +43,7 @@ class Lavoro(models.Model):
     Importo = models.FloatField()  # Valore totale del lavoro in euro
     Costo_Unitario = models.FloatField(default=0.0) # Costo unitario di ogni componente del lavoro, che sarà 0 per lavori non divisibili
     Debito = models.FloatField(default=0.0) # Quantità di denaro che la ditta deve ricevere in un dato istante. Viene scalato se la quantità di denaro è erogata dalla stazione
+    Percentuale = models.IntegerField(default=0.0) # Percentuale di completamente di un lavoro in un certo istante
 
 # Modello contenente le soglie dei contratti creati dalla stazione appaltante
 
@@ -50,6 +51,7 @@ class Soglia(models.Model):
     Contratto = models.ForeignKey(Contratto, on_delete=models.CASCADE) # Riferimento al relativo Contratto
     Importo_Pagamento = models.FloatField()  # Valore in euro che verrà erogato al momento del raggiungimento della soglia
     Percentuale_Da_Raggiungere = models.FloatField() # Percentuale da raggiungere per scatenare il pagamento
+    Attuale = models.BooleanField(default=True) # Campo booleano che ci dice qual'è la soglia attuale da raggiungere per il pagamento
 
 # Modello contenente le misure relative ai lavori inserite dal direttore dei lavori
 

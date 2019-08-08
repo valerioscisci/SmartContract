@@ -29,7 +29,7 @@
 
 -registro contabilità
     *aggiungere controllo che inserisce nella lista delle voci da aaprovare solo quelle che non hanno elementi negativi
-    *aggiungere % lavoro (0 default) e verificare la soglia
+    *aggiungere % lavoro (0 default) e verificare la soglia: nel verificare la soglia, verificare qual'è quella più grande che si è superata
         questo va fatto prima lato db e poi va aggiunto in blockchain
     *nel redirect inserire se il pagamento è andato a buonfine e creare la notifica di pagamento per la ditta
 

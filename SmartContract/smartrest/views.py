@@ -1,5 +1,5 @@
 # DJANGO IMPORTS
-from django.db.models import Sum, Max
+from django.db.models import Sum, Max, Min
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
@@ -40,7 +40,6 @@ def giornalelavori(request):
 def statoavanzamento(request):
     return render(request, "contract_area/stato_avanzamento.html")
 
-
 # Vista per il Registro Contabilità
 
 def registrocont(request):
@@ -59,13 +58,35 @@ def registrocont(request):
         misura["Lavoro_Nome"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Nome")[0]['Nome']
         misura["Prezzo_Unitario"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Costo_Unitario")[0]['Costo_Unitario']
         misura["Debito"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Debito")[0]['Debito']
+        misura["Contratto"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Contratto")[0]['Contratto']
 
         for misura_non_aggregata in misure_non_aggregate:
             if misura_non_aggregata.Codice_Tariffa == misura["Codice_Tariffa"] and misura_non_aggregata.Lavoro.id == misura["Lavoro"]:
                 Descrizione_Lavori += misura_non_aggregata.Designazione_Lavori + "</br>" # Costruisco la descrizione del lavoro fatto concatenando le descrizioni delle singole misure
+
         misura["Lavoro_Descrizione"] = mark_safe(Descrizione_Lavori) # Trasforma la stringa costruita in html per poterla inserire nel template
         Descrizione_Lavori = ""
-    pagamento = "quanto la stazione pagherà alla conferma delle misure" # Bisogna calcolarlo andando a verificare che con le misure aggiunte ci sia il superamento della soglia e verificare di quanto sarà il pagamento
+
+    # Calcola il pagamento che dovrà essere effettuato se, approvando le misure elencate, ci sarà uno scatto della soglia corrente
+    for contratto in contratti: # Per ogni contratto vediamo la percentuale attuale dei lavori
+        lavori_contratto = Lavoro.objects.filter(Contratto=contratto.id) # Prendiamo i lavori del contratto in questione
+        num_lavori = lavori_contratto.count() # Li contiamo
+        percentuale_parziale = 0
+
+        for lavoro in lavori_contratto: # Per ogni lavoro calcoliamo la percentuale di avanzamento
+            positivi_lavoro = misure_aggregate.filter(Lavoro=lavoro.id).values("Positivi")[0]['Positivi'] # Prendiamo le misure positive per quel lavoro
+            if lavoro.Costo_Unitario == 0.0:  # Se il lavoro si misura in percentuale, si aggiunge la percentuale che è stata misurata
+                percentuale_parziale += lavoro.Percentuale + positivi_lavoro
+            else:  # Altrimento si calcola il l'avanzamento in percentuale in base agli elementi inseriti
+                percentuale_parziale += lavoro.Percentuale + (positivi_lavoro * lavoro.Percentuale / 100)
+
+        percentuale_totale = percentuale_parziale / num_lavori # Calcoliamo la percentuale del contratto proporzionalmente al numero di lavori
+        soglia_da_raggiungere = Soglia.objects.filter(Contratto=contratto.id, Attuale=True).values("Importo_Pagamento", "Percentuale_Da_Raggiungere").order_by("Percentuale_Da_Raggiungere") # Prendiamo le soglie e le ordiniamo in modo da sapere quale è la prossima da raggiungere
+        if soglia_da_raggiungere.values("Percentuale_Da_Raggiungere")[0]['Percentuale_Da_Raggiungere'] < percentuale_totale:
+            contratto.Pagamento = soglia_da_raggiungere[0]["Importo_Pagamento"]
+        else:
+            contratto.Pagamento = 0
+    #### Visualizzare per contratto il pagamento futuro a schermo
 
     # Sezione dedicata all'approvazione delle misure contenute nel registro da parte della stazione
     if request.method == "POST":
@@ -79,7 +100,7 @@ def registrocont(request):
         # Se tutto è andato a buon fine far partire il pagamento e inviare la notifica alla ditta
         return redirect("registro_contabilita_redirect")
 
-    return render(request, "contract_area/registro_cont.html", {'misure_aggregate': misure_aggregate, 'pagamento': pagamento})
+    return render(request, "contract_area/registro_cont.html", {'misure_aggregate': misure_aggregate, 'contratti': contratti})
 
 # Vista per il redirect a seguito dell'approvazione delle misure nel registro contabilità
 
@@ -233,7 +254,6 @@ def nuovocontratto(request):
         ################ FORM 3 ################
         elif request.POST.get("Importo_Pagamento") is not None:
             form3 = SogliaForm(request.POST)
-            response_data["test"]=request.POST.get("Importo_Pagamento")
             if form3.is_valid():
                 nuova_soglia = form3.save()
 

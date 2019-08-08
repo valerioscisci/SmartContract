@@ -43,16 +43,18 @@
 <script type="text/javascript">
 
     $( document ).ready(function() {
+        {% for contratto in contratti %}
         $(function() {
           $('table').each(function() {
-            var rowspan = $(this).find('td.pagamento').length;
+            var rowspan = $(this).find('td.{{ contratto.id }}').length;
             if( rowspan > 1 ) {
-              $(this).find('td.pagamento:first').attr('rowspan', rowspan);
-              $(this).find('td.pagamento:not(:first)').remove();
+              $(this).find('td.{{ contratto.id }}:first').attr('rowspan', rowspan);
+              $(this).find('td.{{ contratto.id }}:not(:first)').remove();
             }
           });
         });
-        $('td.pagamento').text("{{ pagamento }}");
+        $('td.{{ contratto.id }}').text("{{ contratto.Pagamento }}");
+        {% endfor %}
     });
 </script>
 
