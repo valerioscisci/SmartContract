@@ -1,5 +1,8 @@
 # DJANGO IMPORTS
+from operator import attrgetter
+
 from django.db.models import Sum, Max, Min
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
@@ -53,12 +56,14 @@ def registrocont(request):
     misure_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO").values("Codice_Tariffa", "Lavoro").annotate(Somma_Positivi=Sum("Positivi"), Sommae_Negativi=Sum("Negativi"), latest_date=Max('Data')) # Mi ricavo la lista delle misure che sono state giù approvate nel libretto e che l'utente ha diritto a visualizzare e le aggrego per Codice Tariffa in modo da vere il valore totale
     misure_non_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO")
 
+    # Sezione dedicata ad aggiungere dei campi alla queryset che contiene le misure aggregate
     Descrizione_Lavori = ""
     for misura in misure_aggregate: # Prendo la lista delle ultime misure per ciascun codice tariffa, così da poter inserire nel template il costo unitario, il nome del lavoro e la descrizione di ciò che è stato fatto
         misura["Lavoro_Nome"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Nome")[0]['Nome']
         misura["Prezzo_Unitario"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Costo_Unitario")[0]['Costo_Unitario']
         misura["Debito"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Debito")[0]['Debito']
         misura["Contratto"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Contratto")[0]['Contratto']
+        misura["Contratto_Nome"] = Contratto.objects.filter(id=misura["Contratto"]).values("Nome")[0]['Nome']
 
         for misura_non_aggregata in misure_non_aggregate:
             if misura_non_aggregata.Codice_Tariffa == misura["Codice_Tariffa"] and misura_non_aggregata.Lavoro.id == misura["Lavoro"]:
@@ -82,11 +87,14 @@ def registrocont(request):
 
         percentuale_totale = percentuale_parziale / num_lavori # Calcoliamo la percentuale del contratto proporzionalmente al numero di lavori
         soglia_da_raggiungere = Soglia.objects.filter(Contratto=contratto.id, Attuale=True).values("Importo_Pagamento", "Percentuale_Da_Raggiungere").order_by("Percentuale_Da_Raggiungere") # Prendiamo le soglie e le ordiniamo in modo da sapere quale è la prossima da raggiungere
-        if soglia_da_raggiungere.values("Percentuale_Da_Raggiungere")[0]['Percentuale_Da_Raggiungere'] < percentuale_totale:
+        if soglia_da_raggiungere.values("Percentuale_Da_Raggiungere")[0]['Percentuale_Da_Raggiungere'] <= percentuale_totale:
             contratto.Pagamento = soglia_da_raggiungere[0]["Importo_Pagamento"]
+            if soglia_da_raggiungere.values("Percentuale_Da_Raggiungere")[0]['Percentuale_Da_Raggiungere'] == 100:
+                contratto.Soglia = 100
+            else:
+                contratto.Soglia = 0
         else:
             contratto.Pagamento = 0
-    #### Visualizzare per contratto il pagamento futuro a schermo
 
     # Sezione dedicata all'approvazione delle misure contenute nel registro da parte della stazione
     if request.method == "POST":
@@ -97,8 +105,48 @@ def registrocont(request):
                 if stato == "CONFERMATO_LIBRETTO":
                     misura.Stato = "CONFERMATO_REGISTRO"
                     misura.save()
-        # Se tutto è andato a buon fine far partire il pagamento e inviare la notifica alla ditta
-        return redirect("registro_contabilita_redirect")
+
+            # Se tutto è andato a buon fine, scorro la lista dei contratti per vedere se ci sono dei pagamenti che devono essere effettuati a seguito dell'approvazione delle misure
+            pagamenti = ""
+            for contratto in contratti:
+                if contratto.Pagamento != 0:
+                    ## sezione dedicata al lancio della funzione di pagamento in blockchain
+                    contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                    w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
+                    w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+                    istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
+                    w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
+                    tx_nuovo_pagamento = istanza_contratto.functions.sendPagamento().transact({'gas': 100000})
+                    try:
+                        w3.eth.waitForTransactionReceipt(tx_nuovo_pagamento, timeout=20)
+                        pagamenti += "Per il contratto " + contratto.Nome + " è stato erogato un pagamento di " + contratto.Pagamento + "€</br></br>"
+                    except:
+                        pagamenti += "Per il contratto " + contratto.Nome + " il pagamento non è andato a buon fine. </br></br>" # Se non si riesce a mandare la transazione in blockchain allora il pagamento non parte
+                    ## fine pagamento in blockchain
+
+                    # Se la soglia raggiunta è 100, vuol dire che il contratto è completo e viene quindi terminato in blockchain.
+                    if contratto.Soglia == 100:
+                        ## sezione dedicata al lancio della funzione che termina un contratto in blockchain
+                        contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                        w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
+                        w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+                        istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
+                        w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract', 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
+                        tx_termina_contratto = istanza_contratto.functions.killContratto().transact({'gas': 100000})
+                        try:
+                            w3.eth.waitForTransactionReceipt(tx_termina_contratto, timeout=20)
+                            contratto.Terminato = True
+                            contratto.save()
+                            pagamenti += "<p class=\"text-success text-strong background-green\">Il contratto è stato concluso con successo.</p></br></br>" + pagamenti
+                        except:
+                            pagamenti += "<p class=\"text-error text-strong\">Non è stato possibile chiudere il contratto</p></br></br>" + pagamenti  # Se non si riesce a mandare la transazione in blockchain allora il contratto non viene ufficialmente chiuso
+                        ## fine chiusura in blockchain
+
+                    ## Capire come inserire notifica di pagamento alla ditta
+            if pagamenti != "":
+                pagamenti = "<h3>Pagamenti Effettuati</h3></br></br>" + pagamenti
+            pagamenti = mark_safe(pagamenti)
+            return render(request, "contract_area/registro_cont_redirect.html", {'pagamenti': pagamenti})
 
     return render(request, "contract_area/registro_cont.html", {'misure_aggregate': misure_aggregate, 'contratti': contratti})
 

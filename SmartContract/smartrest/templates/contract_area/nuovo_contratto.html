@@ -163,7 +163,7 @@
                 success : function(json) {
                     if(json["msg"]=="Successo_3"){
                         if (nuova_soglia){
-                            $('#messaggi_ajax').show().text("Lavoro inserito correttamente. Inserisci il prossimo.").addClass('background-green').removeClass('background-error');
+                            $('#messaggi_ajax').show().text("Nuova soglia inserita correttamente. Inserisci la prossima.").addClass('background-green').removeClass('background-error');
                             $('#form3')[0].reset();
                             $('#form3').find('#id_Contratto').text(json["contratto"]);
                             $("html, body").stop().animate({scrollTop: 0 }, 500, 'swing');

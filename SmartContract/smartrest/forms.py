@@ -12,6 +12,7 @@ class SogliaForm(forms.ModelForm):
             'Contratto': forms.HiddenInput(),
             'Importo_Pagamento': forms.NumberInput(attrs={'class': 'required'}),
             'Percentuale_Da_Raggiungere': forms.NumberInput(attrs={'class': 'required'}),
+            'Attuale': forms.HiddenInput(),
         }
 
 # Definisce il form che servirà per l'inserimento di un nuovo lavoro da parte della stazione appaltante
@@ -28,6 +29,7 @@ class LavoroForm(forms.ModelForm):
             'Importo': forms.NumberInput(attrs={'class': 'required'}),
             'Costo_Unitario': forms.NumberInput(attrs={'class': 'notrequired'}),
             'Debito': forms.HiddenInput(),
+            'Percentuale': forms.HiddenInput(),
         }
 
 # Definisce il form che servirà per l'inserimento di un nuovo contratto da parte della stazione appaltante
@@ -53,6 +55,7 @@ class ContrattoForm(forms.ModelForm):
             'Importo': forms.NumberInput(attrs={'class': 'required'}),
             'Ditta': forms.Select(attrs={'class': 'required'}),
             'Direttore': forms.Select(attrs={'class': 'required'}),
+            'Terminato': forms.HiddenInput(),
         }
 
 # Definisce il form che servirà per l'inserimento di nuove misure nel libretto delle misure

@@ -33,6 +33,7 @@ class Contratto(models.Model):
     Importo = models.FloatField()  # Valore del cotratto in euro
     Ditta = models.CharField(max_length=100) # Ditta appaltatrice
     Direttore = models.CharField(max_length=100) # Direttore dei lavori
+    Terminato = models.BooleanField(default=False) # Campo booleano che ci dice se un contratto è completo al 100%
 
 # Modello contenente i lavori dei contratti creati dalla stazione appaltante
 
