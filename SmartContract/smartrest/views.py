@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse, HttpResponse
 # MODELS IMPORTS
+from SmartContract.smartrest.models import Soglia
 from .models import Contracts, Contratto, Lavoro, Misura, Soglia
 # FORMS IMPORTS
 from .forms import librettoForm, ContrattoForm, LavoroForm, SogliaForm
@@ -261,6 +262,9 @@ def librettomisure(request):
 
 # Vista per un nuovo contratto
 
+
+
+
 def nuovocontratto(request):
     if request.method == "POST":
         response_data = {} # invieremo con questa variabile la risposta positiva o negativa dell'inserimento parziale/totale del contratto
@@ -280,9 +284,26 @@ def nuovocontratto(request):
             form2 = LavoroForm(request.POST)
 
             if form2.is_valid():
-                nuovo_lavoro = form2.save()
+                nuovo_lavoro = form2.save(commit =  False)
+                ImportoTot =  Contratto.objects.get(id = nuovo_lavoro.Contratto).values("Importo")
+                ImportoLavori =  0
+                lavori =  Lavoro.objects.filter(Contratto = nuovo_lavoro.Contratto)
+                codiceripetuto = False
+
+                # TODO da testare
+                for lavoro in lavori:
+                    ImportoLavori += nuovo_lavoro.Importo
+                    if lavori.Codice_Tariffa == nuovo_lavoro.Codice_Tariffa :
+                        codiceripetuto = True
+
+                if ImportoLavori > ImportoTot or codiceripetuto :
+                    response_data["msg"] = "Errore_2"
+                else:
+                    form2.save()
+
 
                 ## sezione dedicata all'inserimento di ciascun lavoro in blockchain
+                """
                 contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto') # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
                 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
                 w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
@@ -299,11 +320,27 @@ def nuovocontratto(request):
 
             else:
                 response_data["msg"] = "Errore_2"
+                """
         ################ FORM 3 ################
         elif request.POST.get("Importo_Pagamento") is not None:
             form3 = SogliaForm(request.POST)
             if form3.is_valid():
-                nuova_soglia = form3.save()
+
+                #TODO da testare
+                nuova_soglia = form3.save(commit = False)
+                Soglie = Soglia.objects.filter(Contratto = nuova_soglia.Contratto)
+                ImportoContratto = Contratto.objects.get(id = nuova_soglia.Contratto).values("Importo")
+                SommaSoglie =  0
+                Perc_completamento = 0
+
+                for abcd in Soglie :       #ho messo abcd perchè mi dà un problema con Soglia
+                    SommaSoglie += abcd.Importo_Pagamento
+                    Perc_completamento += abcd.Percentuale_Da_Raggiungere
+
+                if SommaSoglie > ImportoContratto or Perc_completamento < 100 :
+                    response_data["msg"] = "Errore_2"
+
+
 
                 ## sezione dedicata all'inserimento di ciascuna soglia in blockchain
                 contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
