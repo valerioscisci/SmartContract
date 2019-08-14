@@ -12,6 +12,11 @@
             <td class="text-strong">Debito</td>
             <td class="text-strong">Pagamento</td>
         </tr>
+        {% if not misure_aggregate %}
+        <tr class="text-center">
+            <td colspan="9">Nessuna misura presente nel registro</td>
+        </tr>
+        {% endif %}
         {% for misura in misure_aggregate|dictsort:'Contratto' %}
         <tr>
             <td>{{ misura.Contratto_Nome }}</td>
@@ -21,8 +26,8 @@
             <td>{{ misura.Somma_Positivi }}</td>
             <td>{{ misura.Somma_Negativi }}</td>
             <td>{{ misura.Prezzo_Unitario }}</td>
-            <td>{{ misura.Debito }}</td>
-            <td class="{{ misura.Contratto }}"></td>
+            <td class="background-error">{{ misura.Debito }}</td>
+            <td class="{{ misura.Contratto }} background-green"></td>
         </tr>
         {% endfor %}
     </table>

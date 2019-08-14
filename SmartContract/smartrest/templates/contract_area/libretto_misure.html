@@ -90,6 +90,11 @@
             <td class="text-strong">Annotazioni</td>
             <td class="text-strong">Stato</td>
         </tr>
+         {% if not misure %}
+        <tr class="text-center">
+            <td colspan="12">Nessuna misura presente nel libretto</td>
+        </tr>
+        {% endif %}
         {% for misura in misure %}
         <tr>
             <td>

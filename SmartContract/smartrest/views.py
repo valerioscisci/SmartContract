@@ -1,21 +1,22 @@
 # DJANGO IMPORTS
-from operator import attrgetter
+import traceback
 
-from django.db.models import Sum, Max, Min
-from django.urls import reverse
+from django.db.models import Sum, Max
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse, HttpResponse
 # MODELS IMPORTS
-from .models import Contracts, Contratto, Lavoro, Misura, Soglia
+from .models import User, Contracts, Contratto, Lavoro, Misura, Soglia
 # FORMS IMPORTS
 from .forms import librettoForm, ContrattoForm, LavoroForm, SogliaForm
 # OTHER IMPORTS
 import json
 from web3 import Web3
 from solcx import compile_files
+from notify.signals import notify
+from itertools import chain
 
 # Vista per la Homepage
 
@@ -43,6 +44,27 @@ def giornalelavori(request):
 def statoavanzamento(request):
     return render(request, "contract_area/stato_avanzamento.html")
 
+# Funzione utilizzata per calcolare la nuova percentuale di un lavoro a seguito di approvazione di misure nel registro
+
+def avanza_lavori(lavori_contratto, misure_aggregate, azzera):
+    percentuale_parziale = 0
+    for lavoro in lavori_contratto:  # Per ogni lavoro calcoliamo la percentuale di avanzamento
+        try:
+            positivi_lavoro = misure_aggregate.filter(Lavoro=lavoro.id).values("Positivi")[0]['Positivi']  # Prendiamo le misure positive per quel lavoro
+        except:
+            positivi_lavoro = 0
+        if lavoro.Costo_Unitario == 0.0:  # Se il lavoro si misura in percentuale, si aggiunge la percentuale che è stata misurata
+            percentuale_parziale += lavoro.Percentuale + positivi_lavoro
+        else:  # Altrimento si calcola il l'avanzamento in percentuale in base agli elementi inseriti
+            elementi_misurabili = lavoro.Importo / lavoro.Costo_Unitario
+            percentuale_parziale += lavoro.Percentuale + (positivi_lavoro * 100 / elementi_misurabili)
+        if azzera:
+            lavoro.Percentuale = percentuale_parziale
+            lavoro.save()
+            percentuale_parziale = 0
+
+    return percentuale_parziale
+
 # Vista per il Registro Contabilità
 
 def registrocont(request):
@@ -53,60 +75,53 @@ def registrocont(request):
     else:
         contratti = Contratto.objects.filter(Utente=request.user)
     lavori = Lavoro.objects.filter(Contratto__in=contratti)
-    misure_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO").values("Codice_Tariffa", "Lavoro").annotate(Somma_Positivi=Sum("Positivi"), Sommae_Negativi=Sum("Negativi"), latest_date=Max('Data')) # Mi ricavo la lista delle misure che sono state giù approvate nel libretto e che l'utente ha diritto a visualizzare e le aggrego per Codice Tariffa in modo da vere il valore totale
-    misure_non_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO")
+    try:
+        misure_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO").values("Codice_Tariffa", "Lavoro").annotate(Somma_Positivi=Sum("Positivi"), Sommae_Negativi=Sum("Negativi"), latest_date=Max('Data')) # Mi ricavo la lista delle misure che sono state giù approvate nel libretto e che l'utente ha diritto a visualizzare e le aggrego per Codice Tariffa in modo da vere il valore totale
+        misure_non_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO")
 
-    # Sezione dedicata ad aggiungere dei campi alla queryset che contiene le misure aggregate
-    Descrizione_Lavori = ""
-    for misura in misure_aggregate: # Prendo la lista delle ultime misure per ciascun codice tariffa, così da poter inserire nel template il costo unitario, il nome del lavoro e la descrizione di ciò che è stato fatto
-        misura["Lavoro_Nome"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Nome")[0]['Nome']
-        misura["Prezzo_Unitario"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Costo_Unitario")[0]['Costo_Unitario']
-        misura["Debito"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Debito")[0]['Debito']
-        misura["Contratto"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Contratto")[0]['Contratto']
-        misura["Contratto_Nome"] = Contratto.objects.filter(id=misura["Contratto"]).values("Nome")[0]['Nome']
-
-        for misura_non_aggregata in misure_non_aggregate:
-            if misura_non_aggregata.Codice_Tariffa == misura["Codice_Tariffa"] and misura_non_aggregata.Lavoro.id == misura["Lavoro"]:
-                Descrizione_Lavori += misura_non_aggregata.Designazione_Lavori + "</br>" # Costruisco la descrizione del lavoro fatto concatenando le descrizioni delle singole misure
-
-        misura["Lavoro_Descrizione"] = mark_safe(Descrizione_Lavori) # Trasforma la stringa costruita in html per poterla inserire nel template
+        # Sezione dedicata ad aggiungere dei campi alla queryset che contiene le misure aggregate
         Descrizione_Lavori = ""
+        for misura in misure_aggregate: # Prendo la lista delle ultime misure per ciascun codice tariffa, così da poter inserire nel template il costo unitario, il nome del lavoro e la descrizione di ciò che è stato fatto
+            misura["Lavoro_Nome"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Nome")[0]['Nome']
+            misura["Prezzo_Unitario"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Costo_Unitario")[0]['Costo_Unitario']
+            misura["Debito"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Debito")[0]['Debito']
+            misura["Contratto"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Contratto")[0]['Contratto']
+            misura["Contratto_Nome"] = Contratto.objects.filter(id=misura["Contratto"]).values("Nome")[0]['Nome']
 
-    # Calcola il pagamento che dovrà essere effettuato se, approvando le misure elencate, ci sarà uno scatto della soglia corrente
-    for contratto in contratti: # Per ogni contratto vediamo la percentuale attuale dei lavori
-        lavori_contratto = Lavoro.objects.filter(Contratto=contratto.id) # Prendiamo i lavori del contratto in questione
-        num_lavori = lavori_contratto.count() # Li contiamo
-        percentuale_parziale = 0
+            for misura_non_aggregata in misure_non_aggregate:
+                if misura_non_aggregata.Codice_Tariffa == misura["Codice_Tariffa"] and misura_non_aggregata.Lavoro.id == misura["Lavoro"]:
+                    Descrizione_Lavori += misura_non_aggregata.Designazione_Lavori + "</br>" # Costruisco la descrizione del lavoro fatto concatenando le descrizioni delle singole misure
 
-        for lavoro in lavori_contratto: # Per ogni lavoro calcoliamo la percentuale di avanzamento
-            positivi_lavoro = misure_aggregate.filter(Lavoro=lavoro.id).values("Positivi")[0]['Positivi'] # Prendiamo le misure positive per quel lavoro
-            if lavoro.Costo_Unitario == 0.0:  # Se il lavoro si misura in percentuale, si aggiunge la percentuale che è stata misurata
-                percentuale_parziale += lavoro.Percentuale + positivi_lavoro
-            else:  # Altrimento si calcola il l'avanzamento in percentuale in base agli elementi inseriti
-                percentuale_parziale += lavoro.Percentuale + (positivi_lavoro * lavoro.Percentuale / 100)
+            misura["Lavoro_Descrizione"] = mark_safe(Descrizione_Lavori) # Trasforma la stringa costruita in html per poterla inserire nel template
+            Descrizione_Lavori = ""
 
-        percentuale_totale = percentuale_parziale / num_lavori # Calcoliamo la percentuale del contratto proporzionalmente al numero di lavori
-        soglia_da_raggiungere = Soglia.objects.filter(Contratto=contratto.id, Attuale=True).values("Importo_Pagamento", "Percentuale_Da_Raggiungere").order_by("Percentuale_Da_Raggiungere") # Prendiamo le soglie e le ordiniamo in modo da sapere quale è la prossima da raggiungere
-        if soglia_da_raggiungere.values("Percentuale_Da_Raggiungere")[0]['Percentuale_Da_Raggiungere'] <= percentuale_totale:
-            contratto.Pagamento = soglia_da_raggiungere[0]["Importo_Pagamento"]
-            if soglia_da_raggiungere.values("Percentuale_Da_Raggiungere")[0]['Percentuale_Da_Raggiungere'] == 100:
-                contratto.Soglia = 100
+        # Calcola il pagamento che dovrà essere effettuato se, approvando le misure elencate, ci sarà uno scatto della soglia corrente
+        for contratto in contratti: # Per ogni contratto vediamo la percentuale attuale dei lavori
+            lavori_contratto = Lavoro.objects.filter(Contratto=contratto.id) # Prendiamo i lavori del contratto in questione
+            num_lavori = lavori_contratto.count() # Li contiamo
+
+            percentuale_parziale = avanza_lavori(lavori_contratto, misure_aggregate, False) # Calcola la percentuale senza far avanzare i lavori
+
+            percentuale_totale = percentuale_parziale / num_lavori # Calcoliamo la percentuale del contratto proporzionalmente al numero di lavori
+            soglia_da_raggiungere = Soglia.objects.filter(Contratto=contratto.id, Attuale=True).values("Importo_Pagamento", "Percentuale_Da_Raggiungere").order_by("Percentuale_Da_Raggiungere") # Prendiamo le soglie e le ordiniamo in modo da sapere quale è la prossima da raggiungere
+            if soglia_da_raggiungere.values("Percentuale_Da_Raggiungere")[0]['Percentuale_Da_Raggiungere'] <= percentuale_totale:
+                contratto.Pagamento = soglia_da_raggiungere[0]["Importo_Pagamento"]
+                if soglia_da_raggiungere.values("Percentuale_Da_Raggiungere")[0]['Percentuale_Da_Raggiungere'] == 100.0:
+                    contratto.Soglia = 100.0
+                else:
+                    contratto.Soglia = 0
             else:
-                contratto.Soglia = 0
-        else:
-            contratto.Pagamento = 0
+                contratto.Pagamento = 0
+    except:
+        misure_aggregate = {}
 
     # Sezione dedicata all'approvazione delle misure contenute nel registro da parte della stazione
-    if request.method == "POST":
+    if request.method == "POST" and misure_aggregate != {}:
         approva = request.POST.get("Approva")
-        if approva == "Approva": # Se la stazione clicca sul pulsante di approvazione delle misure, scorro tutta la lista delle misure e aggiorno lo stato
-            for misura in misure_non_aggregate:
-                stato = misura.Stato
-                if stato == "CONFERMATO_LIBRETTO":
-                    misura.Stato = "CONFERMATO_REGISTRO"
-                    misura.save()
+        if approva == "Approva": # Se la stazione clicca sul pulsante di approvazione delle misure, aggiornoo le soglie, le percentuali dei lavori e lo stato delle misure.
 
             # Se tutto è andato a buon fine, scorro la lista dei contratti per vedere se ci sono dei pagamenti che devono essere effettuati a seguito dell'approvazione delle misure
+            # Inoltre aggiorna la soglia che deve essere raggiunta
             pagamenti = ""
             for contratto in contratti:
                 if contratto.Pagamento != 0:
@@ -119,13 +134,38 @@ def registrocont(request):
                     tx_nuovo_pagamento = istanza_contratto.functions.sendPagamento().transact({'gas': 100000})
                     try:
                         w3.eth.waitForTransactionReceipt(tx_nuovo_pagamento, timeout=20)
-                        pagamenti += "Per il contratto " + contratto.Nome + " è stato erogato un pagamento di " + contratto.Pagamento + "€</br></br>"
+                        pagamenti += "Per il contratto " + contratto.Nome + " è stato erogato un pagamento di " + str(contratto.Pagamento) + "€</br></br>"
+
+                        soglia_raggiunta = Soglia.objects.filter(Contratto=contratto.id, Attuale=True).order_by("Percentuale_Da_Raggiungere")[0]  # Prendiamo la soglia raggiunta in modo da aggiornarne lo stato
+                        soglia_raggiunta.Attuale = False
+                        soglia_raggiunta.save()
+
+                        # Aggiorniamo il debito dei lavori
+                        pagamento = contratto.Pagamento
+                        lavori_contratto = Lavoro.objects.filter(Contratto=contratto.id) # Prendiamo i lavori del contratto in questione
+                        for lavoro in lavori_contratto:
+                            debito = lavoro.Debito
+                            if debito > 0.0 and pagamento > 0.0: # Vediamo se il debito è maggiore di 0 e se c'è ancora da scalare qualcosa dal pagamento
+                                offset = debito - pagamento
+                                if offset >= 0.0: # Se il pagamento copre solo una parte del debito lo scalo e poi salvo
+                                    lavoro.Debito = offset
+                                    pagamento = 0.0
+                                else: # Altrimenti scalo al debito parte del pagamento e il resto lo scalerò dal debito di altri lavori
+                                    lavoro.Debito = 0.0
+                                    pagamento -= debito
+                                lavoro.save()
+
+                        avanza_lavori(lavori_contratto, misure_aggregate, True)  # Calcola la nuova percentuale di ogni lavoro e la salva
+
+                        # Viene creata una notifica da mandare alla ditta
+                        utente_ditta = User.objects.get(id=contratto.Ditta)
+                        notify.send(request.user, recipient=utente_ditta, actor=request.user, verb='ha effettuato un pagamento di ' + str(contratto.Pagamento) + '€ relativamente al contratto ' + contratto.Nome + ".", nf_type='nuova_notifica')
                     except:
                         pagamenti += "Per il contratto " + contratto.Nome + " il pagamento non è andato a buon fine. </br></br>" # Se non si riesce a mandare la transazione in blockchain allora il pagamento non parte
                     ## fine pagamento in blockchain
 
                     # Se la soglia raggiunta è 100, vuol dire che il contratto è completo e viene quindi terminato in blockchain.
-                    if contratto.Soglia == 100:
+                    if contratto.Soglia == 100.0:
                         ## sezione dedicata al lancio della funzione che termina un contratto in blockchain
                         contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
                         w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
@@ -137,14 +177,27 @@ def registrocont(request):
                             w3.eth.waitForTransactionReceipt(tx_termina_contratto, timeout=20)
                             contratto.Terminato = True
                             contratto.save()
-                            pagamenti += "<p class=\"text-success text-strong background-green\">Il contratto è stato concluso con successo.</p></br></br>" + pagamenti
+                            pagamenti = "<p class=\"text-dark text-strong\">Il contratto " + contratto.Nome + " è stato concluso con successo.</p></br></br>" + pagamenti
+
+                            # Viene creata una notifica che indica la fine del contratto per la ditta e il direttore
+                            utente_ditta = User.objects.filter(id=contratto.Ditta)
+                            utente_direttore = User.objects.filter(id=contratto.Direttore)
+                            lista_utenti = utente_ditta | utente_direttore
+                            for utente in lista_utenti:
+                                notify.send(request.user, recipient=utente, actor=request.user, verb='ha terminato il contratto ' + contratto.Nome + ".", nf_type='nuova_notifica')
                         except:
                             pagamenti += "<p class=\"text-error text-strong\">Non è stato possibile chiudere il contratto</p></br></br>" + pagamenti  # Se non si riesce a mandare la transazione in blockchain allora il contratto non viene ufficialmente chiuso
                         ## fine chiusura in blockchain
 
-                    ## Capire come inserire notifica di pagamento alla ditta
+
+            for misura in misure_non_aggregate: # Scorro tutta la lista delle misure e aggiorno lo stato
+                stato = misura.Stato
+                if stato == "CONFERMATO_LIBRETTO":
+                    misura.Stato = "CONFERMATO_REGISTRO"
+                    misura.save()
+
             if pagamenti != "":
-                pagamenti = "<h3>Pagamenti Effettuati</h3></br></br>" + pagamenti
+                pagamenti = "<div class=\"background-green\"><h3 class=\"text-strong\">Pagamenti Effettuati</h3></br>" + pagamenti + "</div>"
             pagamenti = mark_safe(pagamenti)
             return render(request, "contract_area/registro_cont_redirect.html", {'pagamenti': pagamenti})
 

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'notify',
 ]
 
 MIDDLEWARE = [
@@ -130,3 +131,6 @@ LOGIN_REDIRECT_URL = 'contract_area'
 
 # Used to Extend User Model
 AUTH_USER_MODEL = 'smartrest.User'
+
+# Intervallo in millisecondi che indica ogni quanto tempo viene lanciata una richiesta ajax per vedere se ci sono nuove notifiche
+NOTIFY_UPDATE_TIME_INTERVAL = 300000 # una volta ogni 5 minuti

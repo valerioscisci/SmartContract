@@ -26,13 +26,15 @@
     *aggiungere le aliquote
     *quando cambio il contratto aggiornare in modo automatico la lista dei lavori per solo quel contratto con una richiesta ajax
     *aggiungere la possibilità di approvare le misure singolarmente o solo quelle selezionate
+    *aggiungere nome contratto per ogni misura
 
 -registro contabilità
     *aggiungere controllo che inserisce nella lista delle voci da aaprovare solo quelle che non hanno elementi negativi
     *nel verificare la soglia, verificare qual'è quella più grande che si è superata
-    *nel redirect inserire se il pagamento è andato a buonfine e creare la notifica di pagamento per la ditta
     *aggiungere la possibilità di approvare le misure singolarmente o solo quelle selezionate
-
+    *inserire i filtri come in libretto misure
+    *aggiungere il salvataggio delle percentuali dei lavori in blockchain
+    *aggiustare il funzionamento del salvataggio delle soglie
 
 -stato avanzamento lavori
     *verificare in blockchain la % di completamento di ciascun lavoro e visualizzarla con una barra di completamento

@@ -9,6 +9,7 @@ Tecnologie Usate:
         *Linguaggio Python (versione 3.6.6)
         *Framework Django (versione 2.2), Framework versatile che permette di realizzare applicazioni web sicure scritte in python
         *Database SQLite (versione 3), database a supporto dell'applicazione web
+        *django-notify-x(1.11.0), libreria che permette di creare un sistema di notifiche in django
     -Front-End
         *HTML5
         *CSS3
