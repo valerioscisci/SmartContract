@@ -9,11 +9,12 @@
 
 -view nuovocontratto
     *Verificare come bloccare il form mentre si attende la risposta dalla blockchain visto che richiede tempo (https://stackoverflow.com/questions/46978302/how-to-handle-duplicate-form-submission-with-django)
-    *Verificare che la somma degli importi dei lavori inseriti coincida con l'importo del contratto
-    *Verificare che la somma dei pagamenti indicati nelle soglie sia uguale all'importo del contratto 
-    *Verificare che la percentuale totale delle soglie sia 100%
+    *Verificare che la somma degli importi dei lavori inseriti coincida con l'importo del contratto ---da testare
+
+    *Verificare che la somma dei pagamenti indicati nelle soglie sia uguale all'importo del contratto --Da testare
+    *Verificare che la percentuale totale delle soglie sia 100% --Da testare
     *Inserire simbolo € negli importi
-    *Aggiungere controllo sulla possibiilità di inserire ogni codice tariffa una sola volta
+    *Aggiungere controllo sulla possibiilità di inserire ogni codice tariffa una sola volta ----da testare
 
 -creare un metodo automatico per inserire i contratti in blockchain (usare le viste già presenti creacontratto e setcontratti)
 
@@ -44,3 +45,6 @@
     *creare model giornale lavori in base al pdf
     *inserire la possibilità al direttore lavori di inserire voci nel giornale lavori
     *creare giornale dei lavori consultabile da tutti
+
+
+    --Commentare parti dove ci sta la blockchain sennò non riesco a testarlo

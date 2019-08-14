@@ -2,6 +2,7 @@ from django.urls import path
 from smartrest import views
 from django.contrib.auth import views as auth_views
 
+
 # Link Generali
 urlpatterns = [
     path('contract_area/set_contratti/', views.setcontratti, name='set_contratti'), # Url per il settaggio iniziale dei contratti
