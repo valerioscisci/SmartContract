@@ -89,6 +89,7 @@
                     } else {
                         $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
                     }
+                    $("html, body").stop().animate({scrollTop: $("#notification-box").offset().top }, 500, 'swing');
                 },
 
                 error : function err() {
@@ -118,21 +119,26 @@
                 dataType: 'json',
                 success : function(json) {
                     if(json["msg"]=="Successo_2"){
-                        if (nuovo_lavoro){
+                        if (nuovo_lavoro && json["totale"] != "completo"){
                             $('#messaggi_ajax').show().text("Lavoro inserito correttamente. Inserisci il prossimo.").addClass('background-green').removeClass('background-error');
                             $('#form2')[0].reset();
                             $('#form2').find('#id_Contratto').text(json["contratto"]);
-                            $("html, body").stop().animate({scrollTop: 0 }, 500, 'swing');
                         } else {
+                            $('#messaggi_ajax').show().text("Lavoro inserito correttamente. Inserisci le soglie.").addClass('background-green').removeClass('background-error');
                             $('.form2').hide();
                             $('.form3').show();
                             $('#form3').find('#id_Contratto').val(json["contratto"]);
                         }
                     } else if (json["msg"]=="Errore_Block") {
                         $('#messaggi_ajax').show().text("Errore: non è stato possibile inserire il lavoro in blockchain.").addClass('background-error').removeClass('background-green');
+                    } else if (json["importo"]=="Errore_Importo") {
+                        $('#messaggi_ajax').show().text("Errore: verificare l'importo inserito. La somma degli importi dei lavori, che ad ora ammonta a " + json["importo_attuale"] + "€, deve coincidere con l'importo totale del contratto.").addClass('background-error').removeClass('background-green');
+                    } else if (json["codice"]=="Errore_Codice") {
+                        $('#messaggi_ajax').show().text("Errore: verificare il codice tariffa immesso in quanto risulta presente un altro lavoro con lo stesso codice.").addClass('background-error').removeClass('background-green');
                     } else {
                         $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
                     }
+                    $("html, body").stop().animate({scrollTop: $("#notification-box").offset().top }, 500, 'swing');
                 },
 
                 error : function err() {
@@ -162,19 +168,23 @@
                 dataType: 'json',
                 success : function(json) {
                     if(json["msg"]=="Successo_3"){
-                        if (nuova_soglia){
+                        if (nuova_soglia && json["totale"] != "completo"){
                             $('#messaggi_ajax').show().text("Nuova soglia inserita correttamente. Inserisci la prossima.").addClass('background-green').removeClass('background-error');
                             $('#form3')[0].reset();
                             $('#form3').find('#id_Contratto').text(json["contratto"]);
-                            $("html, body").stop().animate({scrollTop: 0 }, 500, 'swing');
                         } else {
                             window.location='{% url 'nuovo_contratto_redirect' %}'
                         }
                     } else if (json["msg"]=="Errore_Block") {
                         $('#messaggi_ajax').show().text("Errore: non è stato possibile inserire la soglia in blockchain.").addClass('background-error').removeClass('background-green');
+                    } else if (json["importo"]=="Errore_Importo") {
+                        $('#messaggi_ajax').show().text("Errore: verificare l'importo inserito. La somma degli importi delle soglie, che ad ora ammonta a " + json["importo_attuale"] + "€, deve coincidere con l'importo totale del contratto.").addClass('background-error').removeClass('background-green');
+                    } else if (json["percentuale"]=="Errore_Percentuale") {
+                        $('#messaggi_ajax').show().text("Errore: verificare che la percentuale inserita sia minore o uguale a 100.").addClass('background-error').removeClass('background-green');
                     } else {
                         $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
                     }
+                    $("html, body").stop().animate({scrollTop: $("#notification-box").offset().top }, 500, 'swing');
                 },
 
                 error : function err() {

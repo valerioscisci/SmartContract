@@ -333,78 +333,86 @@ def nuovocontratto(request):
             form2 = LavoroForm(request.POST)
 
             if form2.is_valid():
-                nuovo_lavoro = form2.save(commit =  False)
-                ImportoTot =  Contratto.objects.get(id = nuovo_lavoro.Contratto).values("Importo")
-                ImportoLavori =  0
-                lavori =  Lavoro.objects.filter(Contratto = nuovo_lavoro.Contratto)
-                codiceripetuto = False
+                nuovo_lavoro = form2.save(commit=False) # Blocco il salvataggio per fare gli opportuni controlli
+                importo_tot = Contratto.objects.filter(id=nuovo_lavoro.Contratto.id).values("Importo")[0]['Importo'] # Prendo l'importo totale del contratto. Mi servirà per verificare che la somma degli importi dei lavori è uguale ad esso
+                importo_lavori = 0  # Mi creo una variabile di appoggio
+                lavori = Lavoro.objects.filter(Contratto=nuovo_lavoro.Contratto.id) # Prendo la lista dei lavori di questo contratto
+                codiceripetuto = False # Mi creo una variabile per verificare se per qulche lavoro l'utente ripete erroneamente il codice tariffa
 
-                # TODO da testare
-                for lavoro in lavori:
-                    ImportoLavori += nuovo_lavoro.Importo
-                    if lavori.Codice_Tariffa == nuovo_lavoro.Codice_Tariffa :
+                for lavoro in lavori: # Scorro la lista dei lavori
+                    importo_lavori += lavoro.Importo # Sommo gli importi dei singoli lavori
+                    if lavoro.Codice_Tariffa == nuovo_lavoro.Codice_Tariffa: # Se il codice tariffa è già stato inserito lo segno con la variabile booleana
                         codiceripetuto = True
 
-                if ImportoLavori > ImportoTot or codiceripetuto :
-                    response_data["msg"] = "Errore_2"
-                else:
-                    form2.save()
+                importo_lavori += nuovo_lavoro.Importo # Agli alla somma degli importi dei lavori aggiungo anche l'ultimo lavoro inserito
 
+                if importo_lavori == importo_tot:  # Se la somma degli importi coincide con l'importo totale, termino l'inserimento degli stessi e salvo l'ultimo lavoro
+                    response_data["totale"] = "completo"
 
-                ## sezione dedicata all'inserimento di ciascun lavoro in blockchain
-                """
-                contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto') # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
-                w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
-                w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
-                istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
-                w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0) # Serve per sbloccare l'account prima di poter eseguire le transazioni
-                tx_nuovo_lavoro = istanza_contratto.functions.addLavoro(nuovo_lavoro.Nome).transact({'gas': 100000})
-                try:
-                    w3.eth.waitForTransactionReceipt(tx_nuovo_lavoro, timeout=20)
-                    response_data["msg"] = "Successo_2"  # Se il lavoro inserito è valido si manda l'ok per far inserire un nuovo lavoro o terminare
-                    response_data["contratto"] = nuovo_lavoro.Contratto.pk  # Si ripassa l'id del nuovo contratto per associarci gli altri lavori che inserirà la stazione
-                except:
-                    response_data["msg"] = "Errore_Block" # Se non si riesce a mandare la transazione in blockchain allora si ha un errore
-                ## fine lavoro in blockchain
+                if importo_lavori > importo_tot: # Se ho inserito un importo troppo altro, mando un messaggio di errore
+                    response_data["importo"] = "Errore_Importo"
+                    response_data["importo_attuale"] = str(importo_lavori - nuovo_lavoro.Importo)
+                elif codiceripetuto: # Se ho già inserito quel codice tariffa, mando un errore
+                    response_data["codice"] = "Errore_Codice"
+                else: # Se non ci sono stati errori e se bisogna inserire altri lavori, salvo l'ultimo lavoro
+                    nuovo_lavoro.save()
+
+                    ## sezione dedicata all'inserimento di ciascun lavoro in blockchain
+                    contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto') # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                    w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
+                    w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+                    istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
+                    w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0) # Serve per sbloccare l'account prima di poter eseguire le transazioni
+                    tx_nuovo_lavoro = istanza_contratto.functions.addLavoro(nuovo_lavoro.Nome).transact({'gas': 100000})
+                    try:
+                        w3.eth.waitForTransactionReceipt(tx_nuovo_lavoro, timeout=20)
+                        response_data["msg"] = "Successo_2"  # Se il lavoro inserito è valido si manda l'ok per far inserire un nuovo lavoro o terminare
+                        response_data["contratto"] = nuovo_lavoro.Contratto.pk  # Si ripassa l'id del nuovo contratto per associarci gli altri lavori che inserirà la stazione
+                    except:
+                        response_data["msg"] = "Errore_Block" # Se non si riesce a mandare la transazione in blockchain allora si ha un errore
+                    ## fine lavoro in blockchain
 
             else:
                 response_data["msg"] = "Errore_2"
-                """
         ################ FORM 3 ################
         elif request.POST.get("Importo_Pagamento") is not None:
             form3 = SogliaForm(request.POST)
             if form3.is_valid():
+                nuova_soglia = form3.save(commit=False) # Blocco il salvataggio della soglia così che posso fare i dovuti controlli
+                soglie = Soglia.objects.filter(Contratto=nuova_soglia.Contratto.id) # Mi prendo la lista delle soglie
+                importo_contratto = Contratto.objects.filter(id=nuova_soglia.Contratto.id).values("Importo")[0]['Importo'] # Prendo l'importo totale del contratto. Mi servirà per verificare che la somma degli importi delle soglie è uguale ad esso
+                importo_soglie = 0 # Mi creo una variabile di appoggio
 
-                #TODO da testare
-                nuova_soglia = form3.save(commit = False)
-                Soglie = Soglia.objects.filter(Contratto = nuova_soglia.Contratto)
-                ImportoContratto = Contratto.objects.get(id = nuova_soglia.Contratto).values("Importo")
-                SommaSoglie =  0
-                Perc_completamento = 0
+                for soglia in soglie: # Scorro la lista delle soglie
+                    importo_soglie += soglia.Importo_Pagamento # Mi calcolo la somma degli importi delle soglie
 
-                for abcd in Soglie :       #ho messo abcd perchè mi dà un problema con Soglia
-                    SommaSoglie += abcd.Importo_Pagamento
-                    Perc_completamento += abcd.Percentuale_Da_Raggiungere
+                importo_soglie += nuova_soglia.Importo_Pagamento # Aggiungo anche l'importo dell'ultima soglia inserita
 
-                if SommaSoglie > ImportoContratto or Perc_completamento < 100 :
-                    response_data["msg"] = "Errore_2"
+                if importo_soglie == importo_contratto:  # Se la somma degli importi delle soglie coincide con il totale, termino l'inserimento delle stesse e salvo l'ultima soglia
+                    response_data["totale"] = "completo"
 
+                if importo_soglie > importo_contratto: # Se l'importo delle soglie supera il totale, mando un errore
+                    response_data["importo"] = "Errore_Importo"
+                    response_data["importo_attuale"] = str(importo_soglie - nuova_soglia.Importo_Pagamento)
+                elif nuova_soglia.Percentuale_Da_Raggiungere > 100: # Se la percentuale da raggiungere dell'ultima soglia è maggiore di 100, mando un errore
+                    response_data["percentuale"] = "Errore_Percentuale"
+                else:
+                    nuova_soglia.save()
 
-
-                ## sezione dedicata all'inserimento di ciascuna soglia in blockchain
-                contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
-                w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
-                w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
-                istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
-                w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
-                tx_nuova_soglia = istanza_contratto.functions.addSoglia(int(nuova_soglia.Importo_Pagamento), int(nuova_soglia.Percentuale_Da_Raggiungere)).transact({'gas': 100000})
-                try:
-                    w3.eth.waitForTransactionReceipt(tx_nuova_soglia, timeout=20)
-                    response_data["msg"] = "Successo_3"  # Se la soglia inserita è valido si manda l'ok per far inserire una nuova soglia o terminare
-                    response_data["contratto"] = nuova_soglia.Contratto.pk  # Si ripassa l'id del nuovo contratto per associarci le altre soglie che inserirà la stazione
-                except:
-                    response_data["msg"] = "Errore_Block"  # Se non si riesce a mandare la transazione in blockchain allora si ha un errore
-                ## fine soglia in blockchain
+                    ## sezione dedicata all'inserimento di ciascuna soglia in blockchain
+                    contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                    w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
+                    w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+                    istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
+                    w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
+                    tx_nuova_soglia = istanza_contratto.functions.addSoglia(int(nuova_soglia.Importo_Pagamento), int(nuova_soglia.Percentuale_Da_Raggiungere)).transact({'gas': 100000})
+                    try:
+                        w3.eth.waitForTransactionReceipt(tx_nuova_soglia, timeout=20)
+                        response_data["msg"] = "Successo_3"  # Se la soglia inserita è valido si manda l'ok per far inserire una nuova soglia o terminare
+                        response_data["contratto"] = nuova_soglia.Contratto.pk  # Si ripassa l'id del nuovo contratto per associarci le altre soglie che inserirà la stazione
+                    except:
+                        response_data["msg"] = "Errore_Block"  # Se non si riesce a mandare la transazione in blockchain allora si ha un errore
+                    ## fine soglia in blockchain
 
             else:
                 response_data["msg"] = "Errore_3"

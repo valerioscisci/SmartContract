@@ -22,7 +22,7 @@
             <h2 class="text-dark text-size-50 text-m-size-40">Area Contratti</h2>
         </div>
     </section>
-    <div class="notification-box-list padding-2x text-strong text-right">
+    <div id="notification-box" class="notification-box-list padding-2x text-strong text-right">
         {% render_notifications using request.user.notifications.active %}
     </div>
     {% if request.user|has_group:"DirettoreLavori" %}
