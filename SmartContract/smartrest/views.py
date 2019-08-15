@@ -39,7 +39,44 @@ def giornalelavori(request):
 # Vista per lo Stato Avanzamento Lavori
 
 def statoavanzamento(request):
-    return render(request, "contract_area/stato_avanzamento.html")
+    if request.user.groups.filter(name="DirettoreLavori").exists():
+        contratti = Contratto.objects.filter(Direttore=request.user.id)
+    elif request.user.groups.filter(name="DittaAppaltatrice").exists():
+        contratti = Contratto.objects.filter(Ditta=request.user.id)
+    else:
+        contratti = Contratto.objects.filter(Utente=request.user)
+
+    # Mi calcolo la percentuale totale attuale di ciascun contratto per visualizzarla a schermo
+    for contratto in contratti:  # Per ogni contratto vediamo la percentuale attuale dei lavori
+        lavori_contratto = Lavoro.objects.filter(Contratto=contratto.id)  # Prendiamo i lavori del contratto in questione
+        num_lavori = lavori_contratto.count()  # Li contiamo
+
+        percentuale_parziale = 0
+        for lavoro in lavori_contratto:
+            percentuale_parziale += lavoro.Percentuale  # Somma le percentuali dei lavori
+
+        percentuale_totale = percentuale_parziale / num_lavori  # Calcoliamo la percentuale del contratto proporzionalmente al numero di lavori
+
+        contratto.Percentuale = percentuale_totale # Assegno la percentuale totale al contratto in questione
+
+    if request.method == "POST":
+        response_data = {}  # invieremo con questa variabile la risposta alla chiamata ajax
+
+        contratto = request.POST.get("Contratto")
+
+        ################ FORM 1 ################
+        if contratto is not None:
+            lavori = Lavoro.objects.filter(Contratto=contratto).values("id", "Nome", "Percentuale", "Importo", "Codice_Tariffa")
+
+            response_data["lavori"] = list(lavori)  # Si passa la lista di lavori che serviranno ad inizializzare la lista del form di inserimento della misura
+        else:
+            response_data["lavori"] = "Errore"
+
+        return HttpResponse(
+            json.dumps(response_data),
+            content_type='application/json'
+        )
+    return render(request, "contract_area/stato_avanzamento.html", {'contratti':contratti})
 
 # Funzione utilizzata per calcolare la nuova percentuale di un lavoro a seguito di approvazione di misure nel registro
 

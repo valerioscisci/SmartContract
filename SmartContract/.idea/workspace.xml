@@ -2,12 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="76552703-d1cf-4781-bbbb-207a8846d17e" name="Default Changelist" comment="Aggiunti i file dei contratti e un file JSON di lavoro. Iniziata la parte di codice che creerà i contratti.">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/nuovo_contratto.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/nuovo_contratto.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_stato_avanzamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_stato_avanzamento.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/nuova_misura.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/nuova_misura.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/stato_avanzamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/stato_avanzamento.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smartrest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/smartrest/css/template-smart.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/smartrest/css/template-smart.css" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -37,7 +39,7 @@
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/smartrest/templates/contract_area" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -119,6 +121,9 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/src/notify" />
+    </ignored-roots>
     <MESSAGE value="Aggiornato il readme e aggiunta l'app django" />
     <MESSAGE value="Aggiunti i file dei contratti e un file JSON di lavoro. Iniziata la parte di codice che creerà i contratti." />
     <MESSAGE value="Revert &quot;inutile&quot;&#10;&#10;This reverts commit 4eda9a78" />

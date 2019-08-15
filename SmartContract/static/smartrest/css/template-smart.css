@@ -2066,3 +2066,10 @@ a.tab-label.active-btn {
 .head-colour {
     background-color: #8ACEED;
 }
+
+canvas {
+    border-radius: 50px 50px 50px 50px;
+    -moz-border-radius: 50px 50px 50px 50px;
+    -webkit-border-radius: 50px 50px 50px 50px;
+    border: 2px double #28A5DF;
+}

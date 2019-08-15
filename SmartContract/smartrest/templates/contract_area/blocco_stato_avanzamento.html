@@ -1,4 +1,19 @@
 <div class="margin-s-left-0 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-right-20 margin-s-right-0">
     <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Stato Avanzamento Lavori</h3>
+    <p id="messaggi_ajax" class="hidden text-dark background-error border-radius margin-bottom-20">
 
+    </p>
+    <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform" action="">{% csrf_token %}
+        <label for="id_contratto_sel">Seleziona Contratto:</label>
+        <select id="id_contratto_sel" name="Contratto" class="required" required>
+            <option value="">---</option>
+            {% for contratto in contratti %}
+            <option data-id="{{ contratto.Percentuale }}" data-target="{{ contratto.Importo }}" value="{{ contratto.id }}">{{ contratto.Nome }}</option>
+            {% endfor %}
+        </select><br/>
+        <button id="sel_contratto" type="submit" class="button border-radius background-primary text-white margin-top-10 navbutton">Seleziona Contratto</button>
+    </form>
+    <div id="progress_bars">
+
+    </div>
 </div>

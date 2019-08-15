@@ -110,7 +110,6 @@
                     var lavori = json["lavori"];
 
                     if(lavori != "Errore"){
-                        //$('#form1').hide();
                         $('#form2').show();
                         $("#id_Lavoro").find('option').remove().end();
                         $.each(lavori, function(key, value){

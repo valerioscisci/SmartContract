@@ -1,4 +1,5 @@
 {% extends "contract_area/contract_area.html" %}
+{% load static %}
 
 {% block title %}Smart Contract - Stato Avanzamento Lavori{% endblock title %}
 
@@ -30,6 +31,65 @@
 
 <script type="text/javascript">
 
+    $( document ).ready(function() {
+
+        //quando si seleziona il contratto, il server tramite la chiamata ajax ci restituisce la lista di lavori così da poter visualizzarli a schermo
+        $('#form1').submit(function(e){
+            e.preventDefault();
+            var fd = $('#form1').serialize();
+
+            $.ajax({
+                url : "{% url 'stato_avanzamento' %}", // the endpoint
+                type : "POST", // http method
+                data : fd, // inviamo il contratto selezionato al server
+                dataType: 'json',
+                success : function(json) {
+                    var lavori = json["lavori"];
+
+                    if(lavori != "Errore"){
+                        $('#progress_bars').empty();
+                        var today = $.datepicker.formatDate('yy/mm/dd', new Date());
+                        $('#progress_bars').append("<div class=\"text-error margin-top-bottom-20\">*I dati seguenti sono aggiornati al " + today + "</div>")
+                        nome_contratto = $("#id_contratto_sel option:selected").text();
+                        id_contratto = $("#id_contratto_sel option:selected").val();
+                        percentuale_contratto = $("#id_contratto_sel option:selected").attr("data-id");
+                        importo_contratto = $("#id_contratto_sel option:selected").attr("data-target");
+                        $('#progress_bars').append('<div><span class="text-dark text-strong">Nome Contratto: <span class="text-error">' + nome_contratto + '</span></span></br><span class="text-dark text-strong">Importo Totale Contratto: <span class="text-error">' + importo_contratto + '€</span></span></br></br><div id="' + id_contratto  + '"></div></div><hr class=\"break\">');
+                        $("#" + id_contratto).gradientProgressBar({
+                            value: parseFloat(percentuale_contratto)/100,
+                            size: 500,
+                            fill: {gradient: ["red", "yellow", "green"]},
+                            lineCap: 'round',
+                            thickness: 25,
+                            emptyFill: 'rgba(255, 255, 255, 1)'
+                        });
+                        $("<span class=\"text-strong\">Percentuale contratto: " + percentuale_contratto + "%" + " - Importo contratto raggiunto: " + parseFloat(importo_contratto)*parseFloat(percentuale_contratto)/100 + "€</span>").insertAfter("#" + id_contratto);
+                        for(var lavoro in lavori) {
+                            var campi_lavoro = lavori[lavoro]
+                            $('#progress_bars').append('<div><span class="text-dark text-strong">Nome Lavoro: <span class="text-error">' + campi_lavoro.Nome + '</span></span></br><span class="text-dark text-strong">Codice Tariffa: <span class="text-error">' + campi_lavoro.Codice_Tariffa + '</span></span></br><span class="text-dark text-strong">Importo Totale Lavoro: <span class="text-error">' + campi_lavoro.Importo + '€</span></span></br></br><div id="' + campi_lavoro.id + '"></div></div>');
+                            $("#" + campi_lavoro.id).gradientProgressBar({
+                                value: campi_lavoro.Percentuale/100,
+                                size: 500,
+                                fill: {gradient: ["red", "yellow", "green"]},
+                                lineCap: 'round',
+                                thickness: 25,
+                                emptyFill: 'rgba(255, 255, 255, 1)'
+                            });
+                            $("<span class=\"text-strong\">Percentuale lavoro: " + campi_lavoro.Percentuale + "%" + " - Importo lavoro raggiunto: " + campi_lavoro.Importo*campi_lavoro.Percentuale/100 + "€</span><hr class=\"animated-carousel-element break background-primary break-small\">").insertAfter("#" + campi_lavoro.id);
+                        }
+                    } else {
+                        $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
+                    }
+                },
+
+                error : function err() {
+                    $('#messaggi_ajax').show().text("Errore: server non raggiungibile, riprovare più tardi.").addClass('background-error').removeClass('background-green');
+                }
+            });
+        });
+    });
+
 </script>
+<script src="{% static 'smartrest/js/gradient-progress-bar.js' %}"></script>
 
 {% endblock js %}
