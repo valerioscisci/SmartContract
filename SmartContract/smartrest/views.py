@@ -227,9 +227,39 @@ def nuovamisura(request):
         if misura is not None:
             form = librettoForm(request.POST)
 
+            #prendere il lavoro associato alla misura
+            #vedere se il costo unitario è 0
+            #se si, devo considerare solo la percentuale
+            #se no devo considerare da quanti elementi è composto il lavoro
+
             if form.is_valid():
+
                 nuova_misura = form.save(commit=False)
                 nuova_misura.Codice_Tariffa = nuova_misura.Lavoro.Codice_Tariffa
+                lavoro_associato = Lavoro.objects.filter(id=nuova_misura.Lavoro)
+                totale_misure = Misura.objects.filter(id = nuova_misura.Lavoro)
+                perc_completamento  = 0
+
+                #caso in cui inserisco la percentuale
+                if lavoro_associato.values("Costo_Unitario") == 0 :
+
+                    for misurazione in totale_misure :
+                        perc_completamento += misurazione.Positivi
+
+                    if perc_completamento > 100 :
+                        response_data["msg"] = "Errore: la percentuale ha superato il 100%"
+                    else:
+                        nuova_misura.save()
+                #caso in cui inserisco valori
+                else:
+                    numero_elementi =  lavoro_associato.values("Importo") / lavoro_associato.values("Costo_Unitario")
+
+                    if nuova_misura.Positivo > numero_elementi :
+                        response_data["msg"] = "Errore: Hai inserito troppi elementi per questo lavoro"
+
+                    else:
+                        nuova_misura.save()
+
                 if nuova_misura.Riserva == "Si":
                     nuova_misura.Stato = "INSERITO_LIBRETTO_RISERVA"
                 nuova_misura.save()
