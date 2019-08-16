@@ -154,9 +154,14 @@
                         } else {
                             window.location='{% url 'nuova_misura_redirect' %}'
                         }
+                    } else if (json["percentuale"]=="Errore_Percentuale") {
+                        $('#messaggi_ajax').show().text("Errore: la percentauale inserita supera la percentuale di lavoro rimanente da misurare che ammonta a " + json["percentuale_rimanente"] + "%.").addClass('background-error').removeClass('background-green');
+                    } else if (json["elementi"]=="Errore_Elementi") {
+                        $('#messaggi_ajax').show().text("Errore: il numero di elementi misurati supera quelli rimanenti da misurare che ammontano a " + json["elementi_rimanenti"] + ".").addClass('background-error').removeClass('background-green');
                     } else {
                         $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
                     }
+                    $("html, body").stop().animate({scrollTop: $("#notification-box").offset().top }, 500, 'swing');
                 },
 
                 error : function err() {

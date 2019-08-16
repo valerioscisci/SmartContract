@@ -264,43 +264,37 @@ def nuovamisura(request):
         if misura is not None:
             form = librettoForm(request.POST)
 
-            #prendere il lavoro associato alla misura
-            #vedere se il costo unitario è 0
-            #se si, devo considerare solo la percentuale
-            #se no devo considerare da quanti elementi è composto il lavoro
-
             if form.is_valid():
+                nuova_misura = form.save(commit=False) # Blocco il salvataggio per poter fare le dovute verifiche
 
-                nuova_misura = form.save(commit=False)
-                nuova_misura.Codice_Tariffa = nuova_misura.Lavoro.Codice_Tariffa
-                lavoro_associato = Lavoro.objects.filter(id=nuova_misura.Lavoro)
-                totale_misure = Misura.objects.filter(id = nuova_misura.Lavoro)
-                perc_completamento  = 0
-
-                #caso in cui inserisco la percentuale
-                if lavoro_associato.values("Costo_Unitario") == 0 :
-
-                    for misurazione in totale_misure :
-                        perc_completamento += misurazione.Positivi
-
-                    if perc_completamento > 100 :
-                        response_data["msg"] = "Errore: la percentuale ha superato il 100%"
-                    else:
-                        nuova_misura.save()
-                #caso in cui inserisco valori
-                else:
-                    numero_elementi =  lavoro_associato.values("Importo") / lavoro_associato.values("Costo_Unitario")
-
-                    if nuova_misura.Positivo > numero_elementi :
-                        response_data["msg"] = "Errore: Hai inserito troppi elementi per questo lavoro"
-
-                    else:
-                        nuova_misura.save()
-
-                if nuova_misura.Riserva == "Si":
+                if nuova_misura.Riserva == "Si": # Se la misura è inserita con la riserva si modifica lo stato
                     nuova_misura.Stato = "INSERITO_LIBRETTO_RISERVA"
-                nuova_misura.save()
-                response_data["misura"] = "Successo_2" # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
+
+                lavoro_associato = Lavoro.objects.filter(id=nuova_misura.Lavoro.id)[0] # Prendo il lavoro associato alla nuova misura
+                misure = Misura.objects.filter(Lavoro=nuova_misura.Lavoro.id, Stato__in={"INSERITO_LIBRETTO", "CONFERMATO_LIBRETTO", "CONFERMATO_REGISTRO"}) # Prendo la lista delle misure per il lavoro che stiamo verififcando
+                misure_totali = 0 # Mi creo una variabile di appoggio
+
+                for misura in misure:  # Scorro la lista delle misure
+                    misure_totali += misura.Positivi  # Mi calcolo il totale delle misure fino ad ora
+
+                misure_totali += nuova_misura.Positivi  # Aggiungo la misura appena inserita dal direttore
+
+                if lavoro_associato.Costo_Unitario == 0.0: # Caso in cui il lavoro si misura in percentuale
+                    if misure_totali > 100: # Se con la misura inserita si supera il totale del lavoro, si manda un errore
+                        response_data["percentuale"] = "Errore_Percentuale"
+                        response_data["percentuale_rimanente"] = 100 - (misure_totali - nuova_misura.Positivi)
+                    else:
+                        nuova_misura.save()
+                        response_data["misura"] = "Successo_2"  # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
+                else: # Caso in cui il lavoro si misura in elementi
+                    elementi_totali = lavoro_associato.Importo / lavoro_associato.Costo_Unitario # Calcolo il numero totale di elementi misurabili per il lavoro in questione
+
+                    if misure_totali > elementi_totali: # Se con la misura inserita si supera il numero massimo di elementi misurabili, si manda un errore
+                        response_data["elementi"] = "Errore_Elementi"
+                        response_data["elementi_rimanenti"] = elementi_totali - misure_totali + nuova_misura.Positivi
+                    else:
+                        nuova_misura.save()
+                        response_data["misura"] = "Successo_2"  # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
             else:
                 response_data["misura"] = "Errore"
         else:
@@ -377,9 +371,6 @@ def librettomisure(request):
     return render(request, 'contract_area/libretto_misure.html', {'misure': misure, 'contratti': contratti, 'lavori': lavori, 'context':context})
 
 # Vista per un nuovo contratto
-
-
-
 
 def nuovocontratto(request):
     if request.method == "POST":

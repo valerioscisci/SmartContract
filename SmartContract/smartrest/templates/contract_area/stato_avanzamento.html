@@ -46,15 +46,16 @@
                 success : function(json) {
                     var lavori = json["lavori"];
 
+                    // Se la richiesta ajax ha avuto buon fine visualizzo stato lavori e contratto
                     if(lavori != "Errore"){
-                        $('#progress_bars').empty();
-                        var today = $.datepicker.formatDate('yy/mm/dd', new Date());
-                        $('#progress_bars').append("<div class=\"text-error margin-top-bottom-20\">*I dati seguenti sono aggiornati al " + today + "</div>")
-                        nome_contratto = $("#id_contratto_sel option:selected").text();
-                        id_contratto = $("#id_contratto_sel option:selected").val();
-                        percentuale_contratto = $("#id_contratto_sel option:selected").attr("data-id");
-                        importo_contratto = $("#id_contratto_sel option:selected").attr("data-target");
-                        $('#progress_bars').append('<div><span class="text-dark text-strong">Nome Contratto: <span class="text-error">' + nome_contratto + '</span></span></br><span class="text-dark text-strong">Importo Totale Contratto: <span class="text-error">' + importo_contratto + '€</span></span></br></br><div id="' + id_contratto  + '"></div></div><hr class=\"break\">');
+                        $('#progress_bars').empty(); // Svuoto la div dove andrò ad aggiungere gli elementi
+                        var today = $.datepicker.formatDate('yy/mm/dd', new Date()); // Prendo la data di oggi per visualizzarla
+                        $('#progress_bars').append("<div class=\"text-error margin-top-bottom-20\">*I dati seguenti sono aggiornati al " + today + "</div>") // Visualizzo la data
+                        nome_contratto = $("#id_contratto_sel option:selected").text(); // Prendo il nome del contratto
+                        id_contratto = $("#id_contratto_sel option:selected").val(); // Prendo l'id del contratto
+                        percentuale_contratto = $("#id_contratto_sel option:selected").attr("data-id"); // Prendo la percentuale del contratto
+                        importo_contratto = $("#id_contratto_sel option:selected").attr("data-target"); // Prendo l'importo totale del contratto
+                        $('#progress_bars').append('<div><span class="text-dark text-strong">Nome Contratto: <span class="text-error">' + nome_contratto + '</span></span></br><span class="text-dark text-strong">Importo Totale Contratto: <span class="text-error">' + importo_contratto + '€</span></span></br></br><div id="' + id_contratto  + '"></div></div><hr class=\"break\">'); // Visualizzo nome e importo del contratto
                         $("#" + id_contratto).gradientProgressBar({
                             value: parseFloat(percentuale_contratto)/100,
                             size: 500,
@@ -62,9 +63,9 @@
                             lineCap: 'round',
                             thickness: 25,
                             emptyFill: 'rgba(255, 255, 255, 1)'
-                        });
-                        $("<span class=\"text-strong\">Percentuale contratto: " + percentuale_contratto + "%" + " - Importo contratto raggiunto: " + parseFloat(importo_contratto)*parseFloat(percentuale_contratto)/100 + "€</span>").insertAfter("#" + id_contratto);
-                        for(var lavoro in lavori) {
+                        }); // Visualizzo la progress bas del contratto
+                        $("<span class=\"text-strong\">Percentuale contratto: " + percentuale_contratto + "%" + " - Importo contratto raggiunto: " + parseFloat(importo_contratto)*parseFloat(percentuale_contratto)/100 + "€</span>").insertAfter("#" + id_contratto); // Visualizzo la percentuale del contratto e l'importo raggiunto
+                        for(var lavoro in lavori) { // Per tutti i lavori andrò a visualizzare i loro dati come per il contratto
                             var campi_lavoro = lavori[lavoro]
                             $('#progress_bars').append('<div><span class="text-dark text-strong">Nome Lavoro: <span class="text-error">' + campi_lavoro.Nome + '</span></span></br><span class="text-dark text-strong">Codice Tariffa: <span class="text-error">' + campi_lavoro.Codice_Tariffa + '</span></span></br><span class="text-dark text-strong">Importo Totale Lavoro: <span class="text-error">' + campi_lavoro.Importo + '€</span></span></br></br><div id="' + campi_lavoro.id + '"></div></div>');
                             $("#" + campi_lavoro.id).gradientProgressBar({

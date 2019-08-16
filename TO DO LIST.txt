@@ -15,7 +15,6 @@
 
 -misureform
     *inserire in modo automatico il N_Ordine che adesso è nascosto e impostato come id autoincrement 
-    *fare le opportune verifiche quando il direttore dei lavori inserisce una misura
     *inserire la misura in blockchain
 
 -librettomisure
@@ -23,6 +22,7 @@
     *quando cambio il contratto aggiornare in modo automatico la lista dei lavori per solo quel contratto con una richiesta ajax
     *aggiungere la possibilità di approvare le misure singolarmente o solo quelle selezionate
     *aggiungere nome contratto per ogni misura
+    *aggiungere messaggio di conferma quando la stazione approva le misure
 
 -registro contabilità
     *aggiungere controllo che inserisce nella lista delle voci da aaprovare solo quelle che non hanno elementi negativi
@@ -33,11 +33,10 @@
     *aggiustare il funzionamento del salvataggio delle soglie
     *aggiungere le aliquote
 
--stato avanzamento lavori
-    *verificare in blockchain la % di completamento di ciascun lavoro e visualizzarla con una barra di completamento
-    *calcolare la % di completamento dell'intero contratto e visualizzarla
-
 -giornale lavori 
     *creare model giornale lavori in base al pdf
     *inserire la possibilità al direttore lavori di inserire voci nel giornale lavori
     *creare giornale dei lavori consultabile da tutti
+
+-extra
+    *aggiungere eventualmente dei riferimenti alle transazioni che sono state effettuate in blockchain
