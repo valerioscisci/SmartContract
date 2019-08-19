@@ -1,20 +1,58 @@
 <div class="margin-s-left-0 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-right-20 margin-s-right-0">
     <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-30 margin-top-30 text-center">Giornale dei Lavori</h3>
+    <p id="messaggi_ajax" class="hidden text-dark background-error border-radius margin-bottom-20">
 
-     <table>
-        <tr>
-            <td class="text-strong">Codice di Tariffa</td>
-            <td class="text-strong">Data</td>
-            <td class="text-strong">Designazione dei Lavori</td>
-            <td class="text-strong">Parti Uguali</td>
-            <td class="text-strong">Larghezza</td>
-            <td class="text-strong">Lunghezza</td>
-            <td class="text-strong">Altezza/Peso</td>
-            <td class="text-strong">Positivi</td>
-            <td class="text-strong">Negativi</td>
-            <td class="text-strong">Riserva</td>
-            <td class="text-strong">Annotazioni</td>
-            <td class="text-strong">Stato</td>
-        </tr>
+    </p>
+    <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform" action="{% url 'giornale_lavori' %}">{% csrf_token %}
+     <table class="row-override">
+         <tr>
+             <td>
+                 <label for="id_contratto_sel">Seleziona Contratto:</label>
+                 <select id="id_contratto_sel" name="Contratto">
+                     <option value="all">---</option>
+                     {% for contratto in contratti %}
+                     <option value="{{ contratto.id }}">{{ contratto.Nome }}</option>
+                     {% endfor %}
+                 </select>
+             </td>
+         </tr>
+         <tr>
+             <td>
+                  <button id="sel_contratto" type="submit" class="button border-radius background-primary text-white margin-top-10 navbutton">Filtra Voci</button>
+             </td>
+         </tr>
     </table>
+    </form>
+    <div id="table-scroll">
+        <table>
+            <tr>
+                <td class="text-strong">Contratto</td>
+                <td class="text-strong">Data</td>
+                <td class="text-strong">Meteo</td>
+                <td class="text-strong">Annotazioni Generali</td>
+                <td class="text-strong">Immagini</td>
+            </tr>
+            {% for voce in voci_giornale %}
+            <tr valign="top">
+                <td>
+                    {{ voce.Contratto.Nome }}
+                </td>
+                <td>
+                    {{ voce.Data }}
+                </td>
+                <td>
+                    {{ voce.Meteo }}
+                </td>
+                <td>
+                    {{ voce.Annotazioni_Generali }}
+                </td>
+                <td>
+                    {% for immagine in voce.Immagini %}
+                    <a href="{{ immagine.Image.url }}" target="_blank"><img class="img-giornale margin-bottom-10" src="{{ immagine.Image.url }}"></a>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 </div>

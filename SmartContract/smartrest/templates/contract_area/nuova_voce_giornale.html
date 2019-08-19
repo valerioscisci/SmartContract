@@ -1,0 +1,139 @@
+{% extends "contract_area/contract_area.html" %}
+
+{% block title %}Smart Contract - Inserisci Voce Giornale{% endblock title %}
+
+{% block css %}
+
+{% endblock css %}
+
+{% block pannello_direttore %}
+
+<div class="margin-s-left-0 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-right-20 margin-s-right-0">
+    <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Inserisci Nuova Voce nel Giornale</h3>
+    <p id="messaggi_ajax" class="hidden text-dark background-error border-radius margin-bottom-20">
+
+    </p>
+    <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform" action="">{% csrf_token %}
+        <label for="id_contratto_sel">Seleziona Contratto:</label>
+        <select id="id_contratto_sel" name="Contratto" class="required" required>
+            <option value="">---</option>
+            {% for contratto in contratti %}
+            <option value="{{ contratto.id }}">{{ contratto.Nome }}</option>
+            {% endfor %}
+        </select><br/>
+        <button id="sel_contratto" type="submit" class="button border-radius background-primary text-white margin-top-10 navbutton">Seleziona Contratto</button>
+    </form>
+    <form id="form2" method="POST" enctype="multipart/form-data" class="post-form customform hidden" action="">{% csrf_token %}
+        <p class="text-error">
+            * I campi segnati in rosso sulla sinistra sono obbligatori.
+        </p><hr class="break">
+        {% for field in voceform %}
+            {{ field.errors }}{{ field.label_tag }} {{ field }} <br />
+        {% endfor %}
+
+        {{ formset.management_form }}
+        {% for form in formset %}
+            {{ form }}
+        {% endfor %}
+        <button id="form2_button" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci e Continua</button>
+        <button id="form2_button_2" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci e Termina</button>
+    </form>
+</div>
+
+{% endblock pannello_direttore %}
+
+{% block js %}
+
+{{ block.super }}  <!--contract_area.html js import-->
+
+<script type="text/javascript">
+
+    $( document ).ready(function() {
+
+        //si mostra il form per inserire la nuova voce nel giornale
+        $('#form1').submit(function(e){
+            e.preventDefault();
+            $('#form2').show();
+            contratto = $("#id_contratto_sel").val();
+            $("#id_Contratto").val(contratto).text(contratto);
+            $("label[for='id_Contratto'").remove()
+        });
+
+        //quando si invia il form al server tramite la chiamata ajax si svuota il form per inserire una nuova voce o si termina l'inserimento
+        $('#form2_button').click(function(event){
+            event.preventDefault();
+            checkSubmit();
+            check_form2(true);
+        });
+
+        $('#form2_button_2').click(function(event){
+            event.preventDefault();
+            checkSubmit();
+            check_form2(false);
+        });
+
+        var checkSubmit = function(){
+            // Verifica se le immagini inserite sono troppo grandi
+            if (window.File && window.FileReader && window.FileList && window.Blob) {
+                submit = true;
+                $(':file').each(function(){
+                    var file = $(this)[0].files[0];
+
+                    if (file && file.size > 10 * 1024 * 1024) {
+                      alert("File " + file.name + " of type " + file.type + " is bigger than 5 MB");
+                      $(this).focus();
+                      submit = false;
+                    }
+                });
+                return submit;
+            }
+        }
+
+        function check_form2(nuova_voce){
+            var fd = $('#form2').serialize();
+
+            $.ajax({
+                url : "{% url 'nuova_voce_giornale' %}", // the endpoint
+                type : "POST", // http method
+                data : new FormData($('#form2')[0]), // inviamo i dati del form al server
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: 'json',
+                success : function(json) {
+                    if(json["voce"]=="Successo"){
+                        if (nuova_voce){
+                            $('#messaggi_ajax').show().text("Voce inserita correttamente.").addClass('background-green').removeClass('background-error');
+                            $('#form2')[0].reset();
+                            $("html, body").stop().animate({scrollTop: $("#notification-box").offset().top }, 500, 'swing');
+                        } else {
+                            window.location='{% url 'nuova_voce_giornale_redirect' %}'
+                        }
+                    } else {
+                        $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
+                    }
+                    $("html, body").stop().animate({scrollTop: $("#notification-box").offset().top }, 500, 'swing');
+                },
+
+                error : function err() {
+                    $('#messaggi_ajax').show().text("Errore: server non raggiungibile, riprovare più tardi.").addClass('background-error').removeClass('background-green');
+                }
+            });
+        };
+
+        //datepickers function
+        $( function() {
+            $( "#id_Data" ).datepicker({
+                changeYear: true,
+                changeMonth: true,
+                showAnim: "fadeIn",
+                yearRange: "2019:2050",
+                dateFormat: "yy-mm-dd"
+            });
+        });
+
+    });
+
+</script>
+
+{% endblock js %}

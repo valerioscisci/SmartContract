@@ -29,5 +29,7 @@ urlpatterns += [
     path('contract_area/registro_contabilita/', views.registrocont, name='registro_cont'), # Contract Area - Registro Contabilità
     path('contract_area/registro_contabilita/', views.registrocontredirect.as_view(), name='registro_cont_redirect'), # Contract Area - Registro Contabilità Redirect
     path('contract_area/stato_avanzamento/', views.statoavanzamento, name='stato_avanzamento'),  #Contract Area - Stato Avanzamento Lavori
+    path('contract_area/nuova_voce_giornale/', views.nuovavocegiornale, name='nuova_voce_giornale'),  # Contract Area - Nuova Voce Giornale
+    path('contract_area/nuova_voce_giornale_redirect/', views.nuovavocegiornaleredirect.as_view(), name='nuova_voce_giornale_redirect'), # Contract Area - Nuova Voce Giornale Redirect
     path('contract_area/giornale_lavori/', views.giornalelavori, name='giornale_lavori'),  #Contract Area - Giornale dei Lavori
 ]

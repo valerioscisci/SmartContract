@@ -1,5 +1,28 @@
 from django import forms
-from .models import Contratto, User, Lavoro, Misura, Soglia
+from .models import Contratto, User, Lavoro, Misura, Soglia, Giornale, Images
+
+# Definisce il form che servirà per l'inserimento di una nuova voce nel Giornale dei Lavori
+
+class GiornaleForm(forms.ModelForm):
+    class Meta:
+        model = Giornale
+        fields = '__all__'
+        widgets = {
+            'Contratto': forms.HiddenInput(),
+            'Data': forms.DateInput(attrs={'class': 'required'}),
+            'Meteo': forms.TextInput(attrs={'class': 'notrequired'}),
+            'Annotazioni_Generali': forms.Textarea(attrs={'class': 'required'}),
+        }
+
+# Definisce il form dove l'utente potrà inserire le immagini
+
+class ImageForm(forms.ModelForm):
+    class Meta:
+        model = Images
+        fields = ('Image',)
+        widgets = {
+            'Image': forms.FileInput(attrs={'class': 'notrequired', 'accept': 'image/gif, image/jpeg, image/jpg, image/png'}),
+        }
 
 # Definisce il form che servirà per l'inserimento di una nuova soglia da parte della stazione appaltante
 

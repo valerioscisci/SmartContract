@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.utils.text import slugify
+from django.core.exceptions import ValidationError
 
 # Modello per contenere gli abi dei contratti
 
@@ -80,3 +82,38 @@ class Misura(models.Model):
         ('CONFERMATO_REGISTRO', 'Confermata nel Registro di Contabilità'),
     )
     Stato = models.CharField(max_length=100, choices=Stati_Possibili, default = 'INSERITO_LIBRETTO') # Indica lo stato attuale della misura
+
+# Modello contenente le voci inserite nel giornale dei lavori
+
+class Giornale(models.Model):
+    Contratto = models.ForeignKey(Contratto, on_delete=models.CASCADE) # Riferimento al relativo Contratto
+    Data = models.DateField() # Data di inserimento della voce
+    Meteo = models.CharField(max_length=150, blank=True) # Meteo osservato nel giorno indicato
+    Annotazioni_Generali = models.TextField(max_length=2000) # Annotazioni e avvenimenti particolari osservati dal direttore
+
+# Modello Usato per contenere le immagini inserite nelle voci del giornale dei lavori
+
+class Images(models.Model):
+
+    # Metodo usato per definire il path dell'immagine caricata -- MEDIA_ROOT/contratto/filename.xxx
+    def contract_directory_path(self, filename):
+
+        return 'giornale_{0}/{1}/{2}'.format(self.Giornale.Contratto.id, self.Giornale.id, filename)
+
+    # Metodo usato per validare l'estensione dell'immagine caricate
+    def validate_file_extension(fieldfile_obj):
+        import os
+        ext = os.path.splitext(fieldfile_obj.name)[1]
+        valid_extensions = ['.jpg', '.jpeg', '.png', '.gif']
+        if ext not in valid_extensions:
+            raise ValidationError(u'Invalid File Extension!')
+
+    # Metodo usato per verificare se l'immagine inserita ha dimensione minore di 10 MB
+    def validate_file_size(fieldfile_obj):
+        filesize = fieldfile_obj.file.size
+        megabyte_limit = 10
+        if filesize > megabyte_limit * 1024 * 1024:
+            raise ValidationError("Max file size is %sMB" % str(megabyte_limit))
+
+    Giornale = models.ForeignKey(Giornale, on_delete=models.CASCADE) # Riferimento al giornale dei lavori a cui appartiene l'immagine
+    Image = models.ImageField(validators=[validate_file_extension, validate_file_size], upload_to=contract_directory_path, verbose_name='Image') # File immagine

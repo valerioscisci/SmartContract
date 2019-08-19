@@ -150,7 +150,7 @@
                         if (nuova_misura){
                             $('#messaggi_ajax').show().text("Misura inserita correttamente.").addClass('background-green').removeClass('background-error');
                             $('#form2')[0].reset();
-                            $("html, body").stop().animate({scrollTop:0}, 500, 'swing');
+                            $("html, body").stop().animate({scrollTop: $("#notification-box").offset().top }, 500, 'swing');
                         } else {
                             window.location='{% url 'nuova_misura_redirect' %}'
                         }

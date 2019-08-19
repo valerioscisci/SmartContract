@@ -134,3 +134,15 @@ AUTH_USER_MODEL = 'smartrest.User'
 
 # Intervallo in millisecondi che indica ogni quanto tempo viene lanciata una richiesta ajax per vedere se ci sono nuove notifiche
 NOTIFY_UPDATE_TIME_INTERVAL = 300000 # una volta ogni 5 minuti
+
+# Informazioni necessarie per uploadare le immagini nel giornale dei lavori
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Tipologie di file accettati durante il caricamento
+CONTENT_TYPES = ['image/gif',
+                 'image/jpeg',
+                 'image/png']
+# Massima dimensione che devono avere le immagini caricate
+MAX_UPLOAD_SIZE = "10485760‬" # 10 MB

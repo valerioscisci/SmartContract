@@ -1,14 +1,16 @@
 # DJANGO IMPORTS
+from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Max
+from django.forms import modelformset_factory
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse, HttpResponse
 # MODELS IMPORTS
-from .models import User, Contracts, Contratto, Lavoro, Misura, Soglia
+from .models import User, Contracts, Contratto, Lavoro, Misura, Soglia, Giornale, Images
 # FORMS IMPORTS
-from .forms import librettoForm, ContrattoForm, LavoroForm, SogliaForm
+from .forms import librettoForm, ContrattoForm, LavoroForm, SogliaForm, GiornaleForm, ImageForm
 # OTHER IMPORTS
 import json
 from web3 import Web3
@@ -31,13 +33,78 @@ class AuthenticationView(TemplateView):
 class ContractAreaView(TemplateView):
     template_name = "contract_area/contract_area.html"
 
+# Vista per inserire una nuova voce nel giornale
+
+@login_required
+def nuovavocegiornale(request):
+    Contratti = Contratto.objects.filter(Direttore=request.user.id) # Prendo la lista dei contratti associati al direttore dei lavori che vuole inserire una voce nel giornale
+
+    ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=3) # Crea un form multiplo che permette l'inserimento delle immagini
+
+    if request.method == "POST":
+        response_data = {}  # invieremo con questa variabile la risposta alla chiamata ajax
+        voceform = GiornaleForm(request.POST) # Form della voce del giornale
+        formset = ImageFormSet(request.POST, request.FILES, queryset=Images.objects.none()) # Form delle immagini
+
+        if voceform.is_valid() and formset.is_valid(): # Controllo che entrambi siano validi
+            voce = voceform.save(commit=False) # Salva la nuova voce dle giornale
+            voce.save()
+
+            for form in formset.cleaned_data: # Scorre tutte le immagini inserite e le salva
+                if form:
+                    immagine = form['Image'] # Prende un'immgine
+                    photo = Images(Giornale=voce, Image=immagine) # Crea una nuova istanza nel db dell'immagine
+                    photo.save() # Salva l'immagine
+
+            response_data["voce"] = "Successo"
+        else:
+            response_data["voce"] = "Errore"
+
+        return HttpResponse(
+            json.dumps(response_data),
+            content_type='application/json'
+        )
+    else:
+        voceform = GiornaleForm()
+        formset = ImageFormSet(queryset=Images.objects.none())
+    return render(request, 'contract_area/nuova_voce_giornale.html', {'voceform': voceform, 'formset': formset, 'contratti': Contratti})
+
+# Vista per il redirect a seguito dell'inserimento di una nuova voce nel giornale
+
+class nuovavocegiornaleredirect(TemplateView):
+    template_name = "contract_area/nuova_voce_giornale_redirect.html"
+
 # Vista per il Giornale dei Lavori
 
+@login_required
 def giornalelavori(request):
-    return render(request, "contract_area/giornale_lavori.html")
+    if request.user.groups.filter(name="DirettoreLavori").exists():
+        contratti = Contratto.objects.filter(Direttore=request.user.id)
+    elif request.user.groups.filter(name="DittaAppaltatrice").exists():
+        contratti = Contratto.objects.filter(Ditta=request.user.id)
+    else:
+        contratti = Contratto.objects.filter(Utente=request.user)
+    voci_giornale = Giornale.objects.filter(Contratto__in=contratti)
+
+    context = {'contratto': "all"} # Creo un context così da inizializzare il menù a tendina per filtrare le voci
+
+    if request.method == "POST":
+        # In base alla selezione nei menù a tendina, applico un filtro diverso alla lista delle misure
+        contratto = request.POST.get("Contratto")
+        if contratto != "all":
+            contratti_filt = contratti.filter(id=contratto)
+            voci_giornale = Giornale.objects.filter(Contratto__in=contratti_filt)
+            context["contratto"] = contratto
+
+    for voce in voci_giornale:
+        immagini = Images.objects.filter(Giornale=voce.id)
+        voce.Immagini = immagini
+
+    return render(request, 'contract_area/giornale_lavori.html', {'contratti': contratti, 'voci_giornale': voci_giornale, 'context':context})
 
 # Vista per lo Stato Avanzamento Lavori
 
+@login_required
 def statoavanzamento(request):
     if request.user.groups.filter(name="DirettoreLavori").exists():
         contratti = Contratto.objects.filter(Direttore=request.user.id)
@@ -80,6 +147,7 @@ def statoavanzamento(request):
 
 # Funzione utilizzata per calcolare la nuova percentuale di un lavoro a seguito di approvazione di misure nel registro
 
+@login_required
 def avanza_lavori(lavori_contratto, misure_aggregate, azzera):
     percentuale_parziale = 0
     for lavoro in lavori_contratto:  # Per ogni lavoro calcoliamo la percentuale di avanzamento
@@ -101,6 +169,7 @@ def avanza_lavori(lavori_contratto, misure_aggregate, azzera):
 
 # Vista per il Registro Contabilità
 
+@login_required
 def registrocont(request):
     if request.user.groups.filter(name="DirettoreLavori").exists():
         contratti = Contratto.objects.filter(Direttore=request.user.id)
@@ -244,6 +313,7 @@ class registrocontredirect(TemplateView):
 
 # Vista per inserire una nuova misura
 
+@login_required
 def nuovamisura(request):
     Contratti = Contratto.objects.filter(Direttore=request.user.id) # Prendo la lista dei contratti associati al direttore dei lavori che vuole inserire una misura
     if request.method == "POST":
@@ -315,6 +385,7 @@ class nuovamisuraredirect(TemplateView):
 
 # Vista per il Libretto delle Misure
 
+@login_required
 def librettomisure(request):
     if request.user.groups.filter(name="DirettoreLavori").exists():
         contratti = Contratto.objects.filter(Direttore=request.user.id)
@@ -372,6 +443,7 @@ def librettomisure(request):
 
 # Vista per un nuovo contratto
 
+@login_required
 def nuovocontratto(request):
     if request.method == "POST":
         response_data = {} # invieremo con questa variabile la risposta positiva o negativa dell'inserimento parziale/totale del contratto

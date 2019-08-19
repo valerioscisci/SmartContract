@@ -4,98 +4,100 @@
 
     </p>
     <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform" action="{% url 'libretto_misure' %}">{% csrf_token %}
-         <table class="row-override">
-             <tr>
-                 <td>
-                     <label for="id_contratto_sel">Seleziona Contratto:</label>
-                     <select id="id_contratto_sel" name="Contratto">
-                         <option value="all">---</option>
-                         {% for contratto in contratti %}
-                         <option value="{{ contratto.id }}">{{ contratto.Nome }}</option>
-                         {% endfor %}
-                     </select>
-                 </td>
-                 <td>
-                     <label for="id_lavoro_sel">Seleziona Lavoro:</label>
-                     <select id="id_lavoro_sel" name="Lavoro">
-                         <option value="all">---</option>
-                         {% for lavoro in lavori %}
-                         <option value="{{ lavoro.id }}">{{ lavoro.Nome }}</option>
-                         {% endfor %}
-                     </select>
-                 </td>
-                 <td>
-                     <label for="id_stato_sel">Seleziona Stato:</label>
-                     <select id="id_stato_sel" name="Stato">
-                         <option value="all">---</option>
-                         <option value="INSERITO_LIBRETTO">Inserita nel Libretto</option>
-                         <option value="INSERITO_LIBRETTO_RISERVA">Inserita nel Libretto con Riserva</option>
-                         <option value="CONFERMATO_LIBRETTO">Confermata nel Libretto</option>
-                         <option value="CONFERMATO_REGISTRO">Confermata nel Registro di Contabilità</option>
-                     </select>
-                 </td>
-             </tr>
-             <tr>
-                 <td colspan="3">
-                      <button id="sel_contratto" type="submit" class="button border-radius background-primary text-white margin-top-10 navbutton">Filtra Misure</button>
-                 </td>
-             </tr>
-        </table>
-     </form>
-     <table>
-        <tr>
-            <td class="text-strong">Codice di Tariffa</td>
-            <td class="text-strong">Data</td>
-            <td class="text-strong">Designazione dei Lavori</td>
-            <td class="text-strong">Parti Uguali</td>
-            <td class="text-strong">Larghezza</td>
-            <td class="text-strong">Lunghezza</td>
-            <td class="text-strong">Altezza/Peso</td>
-            <td class="text-strong">Positivi</td>
-            <td class="text-strong">Negativi</td>
-            <td class="text-strong">Riserva</td>
-            <td class="text-strong">Annotazioni</td>
-            <td class="text-strong">Stato</td>
-        </tr>
-        {% for misura in misure %}
-        <tr>
-            <td>
-                {{ misura.Codice_Tariffa }}
-            </td>
-            <td>
-                {{ misura.Data }}
-            </td>
-            <td>
-                {{ misura.Designazione_Lavori }}
-            </td>
-            <td>
-                {{ misura.Parti_Uguali }}
-            </td>
-            <td>
-                {{ misura.Larghezza }}
-            </td>
-            <td>
-                {{ misura.Lunghezza }}
-            </td>
-            <td>
-                {{ misura.Altezza_Peso }}
-            </td>
-            <td>
-                {{ misura.Positivi }}
-            </td>
-            <td>
-                {{ misura.Negativi }}
-            </td>
-            <td>
-                {{ misura.Riserva }}
-            </td>
-            <td>
-                {{ misura.Annotazioni }}
-            </td>
-            <td>
-                {{ misura.Stato }}
-            </td>
-        </tr>
-        {% endfor %}
+    <table class="row-override">
+         <tr>
+             <td>
+                 <label for="id_contratto_sel">Seleziona Contratto:</label>
+                 <select id="id_contratto_sel" name="Contratto">
+                     <option value="all">---</option>
+                     {% for contratto in contratti %}
+                     <option value="{{ contratto.id }}">{{ contratto.Nome }}</option>
+                     {% endfor %}
+                 </select>
+             </td>
+             <td>
+                 <label for="id_lavoro_sel">Seleziona Lavoro:</label>
+                 <select id="id_lavoro_sel" name="Lavoro">
+                     <option value="all">---</option>
+                     {% for lavoro in lavori %}
+                     <option value="{{ lavoro.id }}">{{ lavoro.Nome }}</option>
+                     {% endfor %}
+                 </select>
+             </td>
+             <td>
+                 <label for="id_stato_sel">Seleziona Stato:</label>
+                 <select id="id_stato_sel" name="Stato">
+                     <option value="all">---</option>
+                     <option value="INSERITO_LIBRETTO">Inserita nel Libretto</option>
+                     <option value="INSERITO_LIBRETTO_RISERVA">Inserita nel Libretto con Riserva</option>
+                     <option value="CONFERMATO_LIBRETTO">Confermata nel Libretto</option>
+                     <option value="CONFERMATO_REGISTRO">Confermata nel Registro di Contabilità</option>
+                 </select>
+             </td>
+         </tr>
+         <tr>
+             <td colspan="3">
+                  <button id="sel_contratto" type="submit" class="button border-radius background-primary text-white margin-top-10 navbutton">Filtra Misure</button>
+             </td>
+         </tr>
     </table>
+    </form>
+    <div id="table-scroll">
+         <table>
+            <tr>
+                <td class="text-strong">Codice di Tariffa</td>
+                <td class="text-strong">Data</td>
+                <td class="text-strong">Designazione dei Lavori</td>
+                <td class="text-strong">Parti Uguali</td>
+                <td class="text-strong">Larghezza</td>
+                <td class="text-strong">Lunghezza</td>
+                <td class="text-strong">Altezza/Peso</td>
+                <td class="text-strong">Positivi</td>
+                <td class="text-strong">Negativi</td>
+                <td class="text-strong">Riserva</td>
+                <td class="text-strong">Annotazioni</td>
+                <td class="text-strong">Stato</td>
+            </tr>
+            {% for misura in misure %}
+            <tr>
+                <td>
+                    {{ misura.Codice_Tariffa }}
+                </td>
+                <td>
+                    {{ misura.Data }}
+                </td>
+                <td>
+                    {{ misura.Designazione_Lavori }}
+                </td>
+                <td>
+                    {{ misura.Parti_Uguali }}
+                </td>
+                <td>
+                    {{ misura.Larghezza }}
+                </td>
+                <td>
+                    {{ misura.Lunghezza }}
+                </td>
+                <td>
+                    {{ misura.Altezza_Peso }}
+                </td>
+                <td>
+                    {{ misura.Positivi }}
+                </td>
+                <td>
+                    {{ misura.Negativi }}
+                </td>
+                <td>
+                    {{ misura.Riserva }}
+                </td>
+                <td>
+                    {{ misura.Annotazioni }}
+                </td>
+                <td>
+                    {{ misura.Stato }}
+                </td>
+            </tr>
+            {% endfor %}
+         </table>
+    </div>
 </div>

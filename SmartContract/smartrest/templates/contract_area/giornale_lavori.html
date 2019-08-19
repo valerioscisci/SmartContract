@@ -29,7 +29,9 @@
 {{ block.super }}  <!--contract_area.html js import-->
 
 <script type="text/javascript">
-
+    $( document ).ready(function() {
+        $("#id_contratto_sel option[value={{ context.contratto }}]").prop("selected", "selected");
+    });
 </script>
 
 {% endblock js %}

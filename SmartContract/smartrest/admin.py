@@ -1,5 +1,5 @@
 from django.contrib import admin
-from smartrest.models import Contracts_Abis, Contracts, User, Contratto, Lavoro, Misura, Soglia
+from smartrest.models import Contracts_Abis, Contracts, User, Contratto, Lavoro, Misura, Soglia, Giornale, Images
 
 # Registra i modelli nell'interfaccia dell'admin così da poterli modificare e interagirci
 
@@ -9,6 +9,8 @@ admin.site.register(Contratto)
 admin.site.register(Lavoro)
 admin.site.register(Misura)
 admin.site.register(Soglia)
+admin.site.register(Giornale)
+admin.site.register(Images)
 
 # Classe che impedisce all'amministratore di cambiare le password degli utenti
 

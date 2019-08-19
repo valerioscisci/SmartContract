@@ -33,10 +33,5 @@
     *aggiustare il funzionamento del salvataggio delle soglie
     *aggiungere le aliquote
 
--giornale lavori 
-    *creare model giornale lavori in base al pdf
-    *inserire la possibilità al direttore lavori di inserire voci nel giornale lavori
-    *creare giornale dei lavori consultabile da tutti
-
 -extra
     *aggiungere eventualmente dei riferimenti alle transazioni che sono state effettuate in blockchain
