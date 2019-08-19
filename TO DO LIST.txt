@@ -1,8 +1,5 @@
 -registrazione
     *Creare form di registrazione dell'utente e aggiornare il model di conseguenza
-
--home
-    *Modificare front end della home con qualcosa di relativo agli smart contract
     
 -areacontratti
     *aggiungere menu che scompare scorrendo in basso

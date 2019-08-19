@@ -2092,4 +2092,9 @@ canvas {
   max-height: 500px;
   overflow-x:scroll;
   overflow-y:scroll;
-  }
+}
+
+.img-home {
+  width: 100px;
+  height: auto;
+}

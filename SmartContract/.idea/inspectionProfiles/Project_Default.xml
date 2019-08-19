@@ -1,0 +1,29 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="E501" />
+          <option value="E266" />
+          <option value="E261" />
+          <option value="E722" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="smartrest.models.Images.objects" />
+          <option value="smartrest.models.Contratto.objects" />
+          <option value="smartrest.models.Giornale.objects" />
+          <option value="smartrest.models.Lavoro.objects" />
+          <option value="smartrest.models.Misura.objects" />
+          <option value="smartrest.models.Contracts.objects" />
+          <option value="web3.main.Web3.eth" />
+          <option value="web3.main.Web3.personal" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
