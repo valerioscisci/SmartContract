@@ -1,5 +1,31 @@
 from django import forms
+from django.contrib.auth.models import Group
+
 from .models import Contratto, User, Lavoro, Misura, Soglia, Giornale, Images
+
+# Definisce il form dove per la registrazione dell'utente
+
+class RegisterForm(forms.ModelForm):
+    groups = forms.ModelChoiceField(
+        queryset=Group.objects.all(),
+        widget=forms.Select(attrs={'class': 'required'}),
+    )
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email', 'password', 'groups', 'Account', 'Password_Block',)
+        labels = {
+            'Account': ('Account Blockchain'),
+            'Password_Block': ('Password Blockchain'),
+        }
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'required'}),
+            'password': forms.PasswordInput(attrs={'class': 'required'}),
+            'first_name': forms.TextInput(attrs={'class': 'notrequired'}),
+            'last_name': forms.TextInput(attrs={'class': 'notrequired'}),
+            'email': forms.EmailInput(attrs={'class': 'notrequired'}),
+            'Account': forms.TextInput(attrs={'class': 'required'}),
+            'Password_Block': forms.PasswordInput(attrs={'class': 'required'}),
+        }
 
 # Definisce il form che servirà per l'inserimento di una nuova voce nel Giornale dei Lavori
 

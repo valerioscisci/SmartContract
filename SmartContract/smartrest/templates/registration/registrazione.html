@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}{{ block.super }} - Registrazione{% endblock title %}
+
+{% block css %}
+
+{% endblock css %}
+
+{% block content %}
+
+<main role="main">
+    <!-- Header -->
+    <header class="padding-3x background-image text-center head-colour">
+
+    </header>
+
+    <section class="padding-2x background-white">
+        <div class="line text-center">
+            <h2 class="text-dark text-size-50 text-m-size-40">Registrazione</h2>
+        </div>
+    </section>
+
+    <!-- Authentication Form -->
+
+    <section>
+        <div class="line">
+            <div class="margin padding-2x">
+                <div class="s-12 m-10 l-8 center background-grey padding">
+                    <h3 class="text-size-30 margin-bottom-40 text-center"><b>Form di Registrazione</b></h3>
+                    <form class="customform" method="post" enctype="multipart/form-data" action="{% url 'registra' %}">{% csrf_token %}
+                        <table class="background-none">
+                            <tr>
+                                <td>
+                                    {{ form.username.errors }}
+                                    {{ form.username.label_tag }} {{ form.username }}
+                                </td>
+                                <td>
+                                    {{ form.password.errors }}
+                                    {{ form.password.label_tag }} {{ form.password }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {{ form.first_name.errors }}
+                                    {{ form.first_name.label_tag }} {{ form.first_name }}
+                                </td>
+                                <td>
+                                    {{ form.last_name.errors }}
+                                    {{ form.last_name.label_tag }} {{ form.last_name }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {{ form.email.errors }}
+                                    {{ form.email.label_tag }} {{ form.email }}
+                                </td>
+                                <td>
+                                    {{ form.groups.errors }}
+                                    {{ form.groups.label_tag }} {{ form.groups }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {{ form.Account.errors }}
+                                    {{ form.Account.label_tag }} {{ form.Account }}
+                                </td>
+                                <td>
+                                    {{ form.Password_Block.errors }}
+                                    {{ form.Password_Block.label_tag }} {{ form.Password_Block }}
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="line">
+                            <div class="s-6 center"><button class="button border-radius text-white background-primary" type="submit" value="register">Registrati</button></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+{% endblock content %}
+
+{% block js %}
+
+{% endblock js %}

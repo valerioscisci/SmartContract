@@ -16,7 +16,7 @@ admin.site.register(Images)
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ('username', 'first_name', 'last_name', 'email')
-    fields = ['username', 'password', 'first_name', 'last_name', 'email', 'groups', 'is_staff', 'is_superuser', 'is_active',"Account"]
+    fields = ['username', 'password', 'first_name', 'last_name', 'email', 'groups', 'is_staff', 'is_superuser', 'is_active', "Account", "Password_Block"]
 
     def get_readonly_fields(self, request, obj=None):
         if obj:  # when editing an object

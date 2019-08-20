@@ -2,11 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="76552703-d1cf-4781-bbbb-207a8846d17e" name="Default Changelist" comment="Aggiunti i file dei contratti e un file JSON di lavoro. Iniziata la parte di codice che creerà i contratti.">
+      <change afterPath="$PROJECT_DIR$/smartrest/templates/registration/registrazione.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SmartContract/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/SmartContract/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/smartrest/css/template-smart.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/smartrest/css/template-smart.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/views.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

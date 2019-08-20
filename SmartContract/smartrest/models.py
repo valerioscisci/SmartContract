@@ -26,6 +26,7 @@ class Contracts(models.Model):
 
 class User(AbstractUser):
     Account = models.CharField(max_length=100)
+    Password_Block = models.CharField(max_length=50)
 
 # Modello contenente un contratto creato dalla stazione appaltante
 

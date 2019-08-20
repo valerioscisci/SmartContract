@@ -1,16 +1,17 @@
 # DJANGO IMPORTS
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Max
 from django.forms import modelformset_factory
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse, HttpResponse
 # MODELS IMPORTS
 from .models import User, Contracts, Contratto, Lavoro, Misura, Soglia, Giornale, Images
 # FORMS IMPORTS
-from .forms import librettoForm, ContrattoForm, LavoroForm, SogliaForm, GiornaleForm, ImageForm
+from .forms import librettoForm, ContrattoForm, LavoroForm, SogliaForm, GiornaleForm, ImageForm, RegisterForm
 # OTHER IMPORTS
 import json
 from web3 import Web3
@@ -32,6 +33,26 @@ class AuthenticationView(TemplateView):
 
 class ContractAreaView(TemplateView):
     template_name = "contract_area/contract_area.html"
+
+# Vista per la Registrazione
+
+def registrazione(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password')
+            group = form.cleaned_data.get('groups')
+            user.set_password(raw_password) # Setta la il digest della password usando SHA2
+            user.save()
+            user.groups.add(group) # Aggiunge i gruppi di appartenenza delll'utente (In teoria se ne deve scegliere  solo uno)
+            user = authenticate(username=username, password=raw_password)
+            login(request, user) # Logga l'utente appena creato
+            return redirect('contract_area') # Lo rimanda alla sua area contratti
+    else:
+        form = RegisterForm()
+    return render(request, 'registration/registrazione.html', {'form': form})
 
 # Vista per inserire una nuova voce nel giornale
 
@@ -229,11 +250,14 @@ def registrocont(request):
             for contratto in contratti:
                 if contratto.Pagamento != 0:
                     ## sezione dedicata al lancio della funzione di pagamento in blockchain
-                    contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
-                    w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
-                    w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+                    user = request.user.username
+                    account = Web3.toChecksumAddress(request.user.Account)
+                    password = request.user.Password_Block
+                    contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                    w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
+                    w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
                     istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
-                    w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
+                    w3.personal.unlockAccount(account, password, 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
                     tx_nuovo_pagamento = istanza_contratto.functions.sendPagamento().transact({'gas': 100000})
                     try:
                         w3.eth.waitForTransactionReceipt(tx_nuovo_pagamento, timeout=20)
@@ -270,11 +294,14 @@ def registrocont(request):
                     # Se la soglia raggiunta è 100, vuol dire che il contratto è completo e viene quindi terminato in blockchain.
                     if contratto.Soglia == 100.0:
                         ## sezione dedicata al lancio della funzione che termina un contratto in blockchain
-                        contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
-                        w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
-                        w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+                        user = request.user.username
+                        account = Web3.toChecksumAddress(request.user.Account)
+                        password = request.user.Password_Block
+                        contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                        w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
+                        w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
                         istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
-                        w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract', 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
+                        w3.personal.unlockAccount(w3.eth.defaultAccount, password, 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
                         tx_termina_contratto = istanza_contratto.functions.killContratto().transact({'gas': 100000})
                         try:
                             w3.eth.waitForTransactionReceipt(tx_termina_contratto, timeout=20)
@@ -488,11 +515,14 @@ def nuovocontratto(request):
                     nuovo_lavoro.save()
 
                     ## sezione dedicata all'inserimento di ciascun lavoro in blockchain
-                    contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto') # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
-                    w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
-                    w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+                    user = request.user.username
+                    account = Web3.toChecksumAddress(request.user.Account)
+                    password = request.user.Password_Block
+                    contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto') # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                    w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
+                    w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
                     istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
-                    w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0) # Serve per sbloccare l'account prima di poter eseguire le transazioni
+                    w3.personal.unlockAccount(w3.eth.defaultAccount, password, 0) # Serve per sbloccare l'account prima di poter eseguire le transazioni
                     tx_nuovo_lavoro = istanza_contratto.functions.addLavoro(nuovo_lavoro.Nome).transact({'gas': 100000})
                     try:
                         w3.eth.waitForTransactionReceipt(tx_nuovo_lavoro, timeout=20)
@@ -530,11 +560,14 @@ def nuovocontratto(request):
                     nuova_soglia.save()
 
                     ## sezione dedicata all'inserimento di ciascuna soglia in blockchain
-                    contract = Contracts.objects.filter(Username='stazione', Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
-                    w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
-                    w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+                    user = request.user.username
+                    account = Web3.toChecksumAddress(request.user.Account)
+                    password = request.user.Password_Block
+                    contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                    w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
+                    w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
                     istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
-                    w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
+                    w3.personal.unlockAccount(account, password, 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
                     tx_nuova_soglia = istanza_contratto.functions.addSoglia(int(nuova_soglia.Importo_Pagamento), int(nuova_soglia.Percentuale_Da_Raggiungere)).transact({'gas': 100000})
                     try:
                         w3.eth.waitForTransactionReceipt(tx_nuova_soglia, timeout=20)

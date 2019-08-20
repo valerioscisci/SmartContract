@@ -1,6 +1,3 @@
--registrazione
-    *Creare form di registrazione dell'utente e aggiornare il model di conseguenza
-    
 -areacontratti
     *aggiungere menu che scompare scorrendo in basso
 
