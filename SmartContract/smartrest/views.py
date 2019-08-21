@@ -169,8 +169,9 @@ def statoavanzamento(request):
 # Funzione utilizzata per calcolare la nuova percentuale di un lavoro a seguito di approvazione di misure nel registro
 
 @login_required
-def avanza_lavori(lavori_contratto, misure_aggregate, azzera):
+def avanza_lavori(request, lavori_contratto, misure_aggregate, azzera):
     percentuale_parziale = 0
+    i = 1
     for lavoro in lavori_contratto:  # Per ogni lavoro calcoliamo la percentuale di avanzamento
         try:
             positivi_lavoro = misure_aggregate.filter(Lavoro=lavoro.id).values("Positivi")[0]['Positivi']  # Prendiamo le misure positive per quel lavoro
@@ -181,10 +182,30 @@ def avanza_lavori(lavori_contratto, misure_aggregate, azzera):
         else:  # Altrimento si calcola il l'avanzamento in percentuale in base agli elementi inseriti
             elementi_misurabili = lavoro.Importo / lavoro.Costo_Unitario
             percentuale_parziale += lavoro.Percentuale + (positivi_lavoro * 100 / elementi_misurabili)
-        if azzera:
+
+        if azzera: # Se viene passato il valore true, allora viene aggiornata la percentuale del lavoro e viene salvata la nuova percentuale in blockchain
             lavoro.Percentuale = percentuale_parziale
             lavoro.save()
+
+            ## sezione dedicata all'aggiornamento della percentuale in blockchain
+            user = request.user.username
+            account = Web3.toChecksumAddress(request.user.Account)
+            password = request.user.Password_Block
+            contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+            w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
+            w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+            istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
+            w3.personal.unlockAccount(w3.eth.defaultAccount, password, 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
+
+            if lavoro.Costo_Unitario == 0.0:  # Se il lavoro si misura in percentuale, si aggiunge la percentuale che è stata misurata
+                istanza_contratto.functions.updateLavoro(i, positivi_lavoro).transact({'gas': 100000}) # La i è il numero di lavoro
+            else:  # Altrimento si calcola il l'avanzamento in percentuale in base agli elementi inseriti
+                elementi_misurabili = lavoro.Importo / lavoro.Costo_Unitario
+                percentuale_avanzamento = (positivi_lavoro * 100 / elementi_misurabili)
+                istanza_contratto.functions.updateLavoro(i, percentuale_avanzamento).transact({'gas': 100000}) # La i è il numero di lavoro
+            ## fine lavoro in blockchain
             percentuale_parziale = 0
+            i += 1
 
     return percentuale_parziale
 
@@ -199,6 +220,7 @@ def registrocont(request):
     else:
         contratti = Contratto.objects.filter(Utente=request.user)
     lavori = Lavoro.objects.filter(Contratto__in=contratti)
+
     try:
         misure_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO").values("Codice_Tariffa", "Lavoro").annotate(Somma_Positivi=Sum("Positivi"), Sommae_Negativi=Sum("Negativi"), latest_date=Max('Data')) # Mi ricavo la lista delle misure che sono state giù approvate nel libretto e che l'utente ha diritto a visualizzare e le aggrego per Codice Tariffa in modo da vere il valore totale
         misure_non_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO")
@@ -224,7 +246,7 @@ def registrocont(request):
             lavori_contratto = Lavoro.objects.filter(Contratto=contratto.id) # Prendiamo i lavori del contratto in questione
             num_lavori = lavori_contratto.count() # Li contiamo
 
-            percentuale_parziale = avanza_lavori(lavori_contratto, misure_aggregate, False) # Calcola la percentuale senza far avanzare i lavori
+            percentuale_parziale = avanza_lavori(request, lavori_contratto, misure_aggregate, False) # Calcola la percentuale senza far avanzare i lavori
 
             percentuale_totale = percentuale_parziale / num_lavori # Calcoliamo la percentuale del contratto proporzionalmente al numero di lavori
             soglia_da_raggiungere = Soglia.objects.filter(Contratto=contratto.id, Attuale=True).values("Importo_Pagamento", "Percentuale_Da_Raggiungere").order_by("Percentuale_Da_Raggiungere") # Prendiamo le soglie e le ordiniamo in modo da sapere quale è la prossima da raggiungere
@@ -242,6 +264,7 @@ def registrocont(request):
     # Sezione dedicata all'approvazione delle misure contenute nel registro da parte della stazione
     if request.method == "POST" and misure_aggregate != {}:
         approva = request.POST.get("Approva")
+
         if approva == "Approva": # Se la stazione clicca sul pulsante di approvazione delle misure, aggiornoo le soglie, le percentuali dei lavori e lo stato delle misure.
 
             # Se tutto è andato a buon fine, scorro la lista dei contratti per vedere se ci sono dei pagamenti che devono essere effettuati a seguito dell'approvazione delle misure
@@ -282,7 +305,7 @@ def registrocont(request):
                                     pagamento -= debito
                                 lavoro.save()
 
-                        avanza_lavori(lavori_contratto, misure_aggregate, True)  # Calcola la nuova percentuale di ogni lavoro e la salva
+                        avanza_lavori(request, lavori_contratto, misure_aggregate, True)  # Calcola la nuova percentuale di ogni lavoro e la salva su db e in blockchain
 
                         # Viene creata una notifica da mandare alla ditta
                         utente_ditta = User.objects.get(id=contratto.Ditta)
@@ -466,7 +489,7 @@ def librettomisure(request):
                 misure = misure.filter(Stato=stato)
                 context["stato"] = stato
 
-    return render(request, 'contract_area/libretto_misure.html', {'misure': misure, 'contratti': contratti, 'lavori': lavori, 'context':context})
+    return render(request, 'contract_area/libretto_misure.html', {'misure': misure, 'contratti': contratti, 'lavori': lavori, 'context': context})
 
 # Vista per un nuovo contratto
 

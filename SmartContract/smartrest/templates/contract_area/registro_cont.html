@@ -22,17 +22,13 @@
 
 {% include "contract_area/blocco_registro.html" %}
 
-<table>
-    <tr>
-        <td>
-            <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 margin-top-20 text-center">Approva Misure nel Registro</h3>
-            <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform" action="{% url 'registro_cont' %}">{% csrf_token %}
-                <input type="hidden" name="Approva" value="Approva" id="id_Approva">
-                <button id="approva" type="submit" class="button border-radius background-primary text-white margin-top-10 navbutton center">Approva le misure</button>
-            </form>
-        </td>
-    </tr>
-</table>
+<div>
+    <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 margin-top-20 text-center">Approva Misure nel Registro</h3>
+    <form id="form1" method="POST" enctype="multipart/form-data" class="post-form customform" action="{% url 'registro_cont' %}">{% csrf_token %}
+        <input type="hidden" name="Approva" value="Approva" id="id_Approva">
+        <button id="approva" type="submit" class="button border-radius background-primary text-white margin-top-10 navbutton center">Approva le misure</button>
+    </form>
+</div>
 
 {% endblock pannello_stazione %}
 

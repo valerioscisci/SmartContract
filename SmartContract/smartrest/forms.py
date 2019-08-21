@@ -59,7 +59,7 @@ class SogliaForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'Contratto': forms.HiddenInput(),
-            'Importo_Pagamento': forms.NumberInput(attrs={'class': 'required'}),
+            'Importo_Pagamento': forms.NumberInput(attrs={'class': 'required importo'}),
             'Percentuale_Da_Raggiungere': forms.NumberInput(attrs={'class': 'required'}),
             'Attuale': forms.HiddenInput(),
         }
@@ -75,9 +75,9 @@ class LavoroForm(forms.ModelForm):
             'Contratto': forms.HiddenInput(),
             'Codice_Tariffa': forms.TextInput(attrs={'class': 'required'}),
             'Nome': forms.TextInput(attrs={'class': 'required'}),
-            'Importo': forms.NumberInput(attrs={'class': 'required'}),
-            'Costo_Unitario': forms.NumberInput(attrs={'class': 'notrequired'}),
-            'Debito': forms.HiddenInput(),
+            'Importo': forms.NumberInput(attrs={'class': 'required importo'}),
+            'Costo_Unitario': forms.NumberInput(attrs={'class': 'notrequired importo'}),
+            'Debito': forms.HiddenInput(attrs={'class': 'importo'}),
             'Percentuale': forms.HiddenInput(),
         }
 
@@ -101,7 +101,7 @@ class ContrattoForm(forms.ModelForm):
         widgets = {
             'Utente': forms.HiddenInput(),
             'Nome': forms.TextInput(attrs={'class': 'required'}),
-            'Importo': forms.NumberInput(attrs={'class': 'required'}),
+            'Importo': forms.NumberInput(attrs={'class': 'required importo'}),
             'Ditta': forms.Select(attrs={'class': 'required'}),
             'Direttore': forms.Select(attrs={'class': 'required'}),
             'Terminato': forms.HiddenInput(),

@@ -2092,9 +2092,15 @@ canvas {
   max-height: 500px;
   overflow-x:scroll;
   overflow-y:scroll;
+  display: block;
 }
 
 .img-home {
   width: 100px;
   height: auto;
+}
+
+.importo {
+    background: url("../img/euro.png") no-repeat scroll 11px 11px !important;
+    padding-left:30px !important;
 }

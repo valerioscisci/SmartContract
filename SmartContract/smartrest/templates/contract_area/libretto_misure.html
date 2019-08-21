@@ -75,67 +75,70 @@
             </td>
         </tr>
     </table>
-     <table>
-        <tr>
-            <td class="text-strong">Codice di Tariffa</td>
-            <td class="text-strong">Data</td>
-            <td class="text-strong">Designazione dei Lavori</td>
-            <td class="text-strong">Parti Uguali</td>
-            <td class="text-strong">Larghezza</td>
-            <td class="text-strong">Lunghezza</td>
-            <td class="text-strong">Altezza/Peso</td>
-            <td class="text-strong">Positivi</td>
-            <td class="text-strong">Negativi</td>
-            <td class="text-strong">Riserva</td>
-            <td class="text-strong">Annotazioni</td>
-            <td class="text-strong">Stato</td>
-        </tr>
-         {% if not misure %}
-        <tr class="text-center">
-            <td colspan="12">Nessuna misura presente nel libretto</td>
-        </tr>
-        {% endif %}
-        {% for misura in misure %}
-        <tr>
-            <td>
-                {{ misura.Codice_Tariffa }}
-            </td>
-            <td>
-                {{ misura.Data }}
-            </td>
-            <td>
-                {{ misura.Designazione_Lavori }}
-            </td>
-            <td>
-                {{ misura.Parti_Uguali }}
-            </td>
-            <td>
-                {{ misura.Larghezza }}
-            </td>
-            <td>
-                {{ misura.Lunghezza }}
-            </td>
-            <td>
-                {{ misura.Altezza_Peso }}
-            </td>
-            <td>
-                {{ misura.Positivi }}
-            </td>
-            <td>
-                {{ misura.Negativi }}
-            </td>
-            <td>
-                {{ misura.Riserva }}
-            </td>
-            <td>
-                {{ misura.Annotazioni }}
-            </td>
-            <td>
-                {{ misura.Stato }}
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+    <hr class="break">
+    <div id="table-scroll">
+        <table>
+            <tr>
+                <td class="text-strong">Codice di Tariffa</td>
+                <td class="text-strong">Data</td>
+                <td class="text-strong">Designazione dei Lavori</td>
+                <td class="text-strong">Parti Uguali</td>
+                <td class="text-strong">Larghezza</td>
+                <td class="text-strong">Lunghezza</td>
+                <td class="text-strong">Altezza/Peso</td>
+                <td class="text-strong">Positivi</td>
+                <td class="text-strong">Negativi</td>
+                <td class="text-strong">Riserva</td>
+                <td class="text-strong">Annotazioni</td>
+                <td class="text-strong">Stato</td>
+            </tr>
+             {% if not misure %}
+            <tr class="text-center">
+                <td colspan="12">Nessuna misura presente nel libretto</td>
+            </tr>
+            {% endif %}
+            {% for misura in misure %}
+            <tr>
+                <td>
+                    {{ misura.Codice_Tariffa }}
+                </td>
+                <td>
+                    {{ misura.Data }}
+                </td>
+                <td>
+                    {{ misura.Designazione_Lavori }}
+                </td>
+                <td>
+                    {{ misura.Parti_Uguali }}
+                </td>
+                <td>
+                    {{ misura.Larghezza }}
+                </td>
+                <td>
+                    {{ misura.Lunghezza }}
+                </td>
+                <td>
+                    {{ misura.Altezza_Peso }}
+                </td>
+                <td>
+                    {{ misura.Positivi }}
+                </td>
+                <td>
+                    {{ misura.Negativi }}
+                </td>
+                <td>
+                    {{ misura.Riserva }}
+                </td>
+                <td>
+                    {{ misura.Annotazioni }}
+                </td>
+                <td>
+                    {{ misura.Stato }}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 </div>
 
 {% endblock pannello_stazione %}

@@ -3,7 +3,6 @@
 
 -view nuovocontratto
     *Verificare come bloccare il form mentre si attende la risposta dalla blockchain visto che richiede tempo (https://stackoverflow.com/questions/46978302/how-to-handle-duplicate-form-submission-with-django)
-    *Inserire simbolo € negli importi
 
 -creare un metodo automatico per inserire i contratti in blockchain (usare le viste già presenti creacontratto e setcontratti)
 
@@ -22,8 +21,6 @@
     *aggiungere controllo che inserisce nella lista delle voci da aaprovare solo quelle che non hanno elementi negativi
     *nel verificare la soglia, verificare qual'è quella più grande che si è superata
     *aggiungere la possibilità di approvare le misure singolarmente o solo quelle selezionate
-    *inserire i filtri come in libretto misure
-    *aggiungere il salvataggio delle percentuali dei lavori in blockchain
     *aggiustare il funzionamento del salvataggio delle soglie
     *aggiungere le aliquote
 
