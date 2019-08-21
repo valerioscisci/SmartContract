@@ -1,28 +1,17 @@
--areacontratti
-    *aggiungere menu che scompare scorrendo in basso
-
--view nuovocontratto
-    *Verificare come bloccare il form mentre si attende la risposta dalla blockchain visto che richiede tempo (https://stackoverflow.com/questions/46978302/how-to-handle-duplicate-form-submission-with-django)
-
 -creare un metodo automatico per inserire i contratti in blockchain (usare le viste già presenti creacontratto e setcontratti)
 
--misureform
-    *inserire in modo automatico il N_Ordine che adesso è nascosto e impostato come id autoincrement 
+-misureform 
     *inserire la misura in blockchain
 
 -librettomisure
-    *aggiungere le aliquote
-    *quando cambio il contratto aggiornare in modo automatico la lista dei lavori per solo quel contratto con una richiesta ajax
+    *aliquote
     *aggiungere la possibilità di approvare le misure singolarmente o solo quelle selezionate
-    *aggiungere nome contratto per ogni misura
-    *aggiungere messaggio di conferma quando la stazione approva le misure
 
 -registro contabilità
-    *aggiungere controllo che inserisce nella lista delle voci da aaprovare solo quelle che non hanno elementi negativi
+    *aliquote
     *nel verificare la soglia, verificare qual'è quella più grande che si è superata
-    *aggiungere la possibilità di approvare le misure singolarmente o solo quelle selezionate
     *aggiustare il funzionamento del salvataggio delle soglie
-    *aggiungere le aliquote
+    *aggiungere la possibilità di approvare le misure singolarmente o solo quelle selezionate
 
 -extra
     *aggiungere eventualmente dei riferimenti alle transazioni che sono state effettuate in blockchain

@@ -65,7 +65,7 @@
         <tr>
             <td>
                 <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 margin-top-20 text-center">Approva Misure</h3>
-                <p id="messaggi_ajax_2" class="hidden text-dark background-error border-radius margin-bottom-20">
+                <p id="messaggi_ajax" class="hidden text-dark background-error border-radius margin-bottom-20">
 
                 </p>
                 <form id="form2" method="POST" enctype="multipart/form-data" class="post-form customform" action="{% url 'libretto_misure' %}">{% csrf_token %}
@@ -79,6 +79,7 @@
     <div id="table-scroll">
         <table>
             <tr>
+                <td class="text-strong">Contratto</td>
                 <td class="text-strong">Codice di Tariffa</td>
                 <td class="text-strong">Data</td>
                 <td class="text-strong">Designazione dei Lavori</td>
@@ -99,6 +100,9 @@
             {% endif %}
             {% for misura in misure %}
             <tr>
+                <td>
+                    {{ misura.Lavoro.Contratto.Nome }}
+                </td>
                 <td>
                     {{ misura.Codice_Tariffa }}
                 </td>
@@ -152,6 +156,31 @@
         $("#id_contratto_sel option[value={{ context.contratto }}]").prop("selected", "selected");
         $("#id_lavoro_sel option[value={{ context.lavoro }}]").prop("selected", "selected");
         $("#id_stato_sel option[value={{ context.stato }}]").prop("selected", "selected");
+
+        salvataggio = "{{ context.salvataggio }}"
+        if (salvataggio == "si"){
+            $('#messaggi_ajax').show().text("Misure approvate correttamente!").addClass('background-green').removeClass('background-error');
+        }
+
+        $("#id_contratto_sel").change(function(){
+            contratto = $('#id_contratto_sel').val();
+            $.ajax({
+                url : "{% url 'libretto_misure' %}", // the endpoint
+                type : "POST", // http method
+                data : {"contratto": contratto}, // inviamo il contratto selezionato al server
+                dataType: 'json',
+                success : function(json) {
+                    $('#id_lavoro_sel').children('option:not(:first)').remove();
+                    json.forEach(function(lavoro) {
+                        $("#id_lavoro_sel").append('<option value="' + lavoro.id + '">'+ lavoro.Nome +'</option>');
+                    });
+                },
+
+                error : function err() {
+                    $('#messaggi_ajax').show().text("Errore: server non raggiungibile, riprovare più tardi.").addClass('background-error').removeClass('background-green');
+                }
+            });
+        });
     });
 </script>
 

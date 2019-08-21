@@ -36,7 +36,7 @@
                     <div class="aside-nav minimize-on-small">
                         <p class="aside-nav-text">Menù Direttore Lavori</p>
                         <ul>
-                            <li class="minimize hidden"><span class="minimizespan">Nascondi</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
+                            <li class="minimize hidden"><span class="minimizespan">Mostra</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
                             <li>Lista Attività</li>
                             <ul>
                                 <li id="nuova_misura"><a href="{% url 'nuova_misura' %}">Inserisci Misura</a></li>
@@ -73,7 +73,7 @@
                     <div class="aside-nav minimize-on-small">
                         <p class="aside-nav-text">Menù Ditta Appaltatrice</p>
                         <ul>
-                            <li class="minimize hidden"><span class="minimizespan">Nascondi</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
+                            <li class="minimize hidden"><span class="minimizespan">Mostra</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
                             <li>Lista Attività</li>
                             <ul>
                                 <li id="libretto_ditta"><a href="{% url 'libretto_misure' %}">Libretto delle Misure</a></li>
@@ -108,7 +108,7 @@
                     <div class="aside-nav minimize-on-small">
                         <p class="aside-nav-text">Menu Stazione Appaltante</p>
                         <ul>
-                            <li class="minimize hidden"><span class="minimizespan">Nascondi</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
+                            <li class="minimize hidden"><span class="minimizespan">Mostra</span> <i class="icon-sli-arrow-down text-strong text-dark text-size-10"></i></li>
                             <li>Lista Attività</li>
                             <ul>
                                 <li id="new_project"><a href="{% url 'nuovo_contratto' %}">Nuovo Contratto</a></li>
@@ -161,6 +161,10 @@
     $( document ).ready(function() {
         $('.left-menu li:nth-child(2)').addClass('active-item');
 
+        $('.minimize').click(function(){
+            minimizeMenu();
+        });
+
         if ($('#backTop').length) {
             var scrollTrigger = 500, // px
                 backToTop = function () {
@@ -168,23 +172,18 @@
                     var docHeight = $(document).height();
                     var windowHeight = $(window).height();
                     var scrollTriggerDoc = 100;
-                     if (scrollTop > scrollTriggerDoc) {
-                        $('#linkCN, #linkPF, #linkPS').show(400);
-                    } else {
-                        $('#linkCN, #linkPF, #linkPS').hide(400);
-                    }
                     if (scrollTop > scrollTrigger) {
                         $('#backTop').show(400);
                     } else {
                         $('#backTop').hide(400);
                     }
                     if (scrollTop < scrollTrigger-50) {
-                        if (!$('.minimize').hasClass('minimizefixed') && $('.minimizespan').text() == "Show") {
+                        if (!$('.minimize').hasClass('minimizefixed') && $('.minimizespan').text() == "Nascondi") {
                             $('.minimize').trigger("click");
                         }
                     }
-                    if (scrollTop > scrollTrigger && (docHeight - (scrollTop + windowHeight)) > 600) {
-                        if (!$('.minimize').hasClass('minimizefixed') && $('.minimizespan').text() != "Show") {
+                    if (scrollTop > scrollTrigger && (docHeight - (scrollTop + windowHeight)) > 200) {
+                        if (!$('.minimize').hasClass('minimizefixed') && $('.minimizespan').text() != "Nascondi") {
                             $('.minimize').trigger("click");
                         }
                         $('.minimize').addClass('minimizefixed');

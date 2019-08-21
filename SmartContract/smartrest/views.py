@@ -445,9 +445,9 @@ def librettomisure(request):
         contratti = Contratto.objects.filter(Utente=request.user)
     lavori = Lavoro.objects.filter(Contratto__in=contratti)
     misure = Misura.objects.filter(Lavoro__in=lavori) # Ricavo la lista di tutte le misure visualizzabili dall'utente in base alla sua tipologia
-    context = {'contratto': "all", 'lavoro': "all", 'stato': "all"} # Creo un context così da inizializzare i menù a tendina per filtrare le misure
+    context = {'contratto': "all", 'lavoro': "all", 'stato': "all", 'salvataggio': 'no'} # Creo un context così da inizializzare i menù a tendina per filtrare le misure
 
-    if request.method == "POST":
+    if request.method == "POST" and not request.is_ajax():
         approva = request.POST.get("Approva")
         if approva == "Approva": # Se la stazione clicca sul pulsante di approvazione delle misure, scorro tutta la lista delle misure e aggiorno lo stato
             for misura in misure:
@@ -471,6 +471,7 @@ def librettomisure(request):
                     # Fine aggiornamento debito
 
                     misura.save()
+                    context["salvataggio"] = "si" # Serve per mandare la conferma di avvenuto salvataggio delle misure
         else:
             # In base alla selezione nei menù a tendina, applico un filtro diverso alla lista delle misure
             lavori_filt = lavori
@@ -489,6 +490,18 @@ def librettomisure(request):
                 misure = misure.filter(Stato=stato)
                 context["stato"] = stato
 
+    if request.is_ajax():
+        contratto = request.POST.get("contratto")
+        if contratto == "all":
+            contratti_filt = contratti
+        else:
+            contratti_filt = contratti.filter(id=contratto)
+        lavori_filt = list(Lavoro.objects.filter(Contratto__in=contratti_filt).values())
+
+        return HttpResponse(
+            json.dumps(lavori_filt),
+            content_type='application/json'
+        )
     return render(request, 'contract_area/libretto_misure.html', {'misure': misure, 'contratti': contratti, 'lavori': lavori, 'context': context})
 
 # Vista per un nuovo contratto
