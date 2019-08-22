@@ -185,9 +185,7 @@ def avanza_lavori(request, lavori_contratto, misure_aggregate, azzera):
             elementi_misurabili = lavoro.Importo / lavoro.Costo_Unitario
             percentuale_parziale += lavoro.Percentuale + (positivi_lavoro * 100 / elementi_misurabili)
 
-        print(str(lavoro.Percentuale) + " " + str(percentuale_parziale))
         if azzera: # Se viene passato il valore true, allora viene aggiornata la percentuale del lavoro e viene salvata la nuova percentuale in blockchain
-            print(str(lavoro.Percentuale) + " " + str(percentuale_parziale))
             try:
                 lavoro.Percentuale = percentuale_parziale
                 lavoro.save()
@@ -209,7 +207,7 @@ def avanza_lavori(request, lavori_contratto, misure_aggregate, azzera):
                     percentuale_avanzamento = (positivi_lavoro * 100 / elementi_misurabili)
                     istanza_contratto.functions.updateLavoro(i, int(percentuale_avanzamento)).transact({'gas': 100000}) # La i è il numero di lavoro
             except Exception as e:
-                print(e)
+                print(str(e))
             # fine lavoro in blockchain
             percentuale_parziale = 0
             i += 1
