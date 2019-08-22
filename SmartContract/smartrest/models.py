@@ -45,6 +45,7 @@ class Lavoro(models.Model):
     Codice_Tariffa = models.CharField(max_length=50)  # Codice di Tariffa del lavoro
     Nome = models.CharField(max_length=100)  # Nome del lavoro
     Importo = models.FloatField()  # Valore totale del lavoro in euro
+    Aliquota = models.FloatField()  # Indica il valore dell'aliquota per il lavoro specifico
     Costo_Unitario = models.FloatField(default=0.0) # Costo unitario di ogni componente del lavoro, che sarà 0 per lavori non divisibili
     Debito = models.FloatField(default=0.0) # Quantità di denaro che la ditta deve ricevere in un dato istante. Viene scalato se la quantità di denaro è erogata dalla stazione
     Percentuale = models.IntegerField(default=0.0) # Percentuale di completamente di un lavoro in un certo istante

@@ -1,4 +1,6 @@
 # DJANGO IMPORTS
+import traceback
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Max
@@ -145,7 +147,7 @@ def statoavanzamento(request):
 
         percentuale_totale = percentuale_parziale / num_lavori  # Calcoliamo la percentuale del contratto proporzionalmente al numero di lavori
 
-        contratto.Percentuale = percentuale_totale # Assegno la percentuale totale al contratto in questione
+        contratto.Percentuale = round(percentuale_totale, 3) # Assegno la percentuale totale al contratto in questione
 
     if request.method == "POST":
         response_data = {}  # invieremo con questa variabile la risposta alla chiamata ajax
@@ -174,7 +176,7 @@ def avanza_lavori(request, lavori_contratto, misure_aggregate, azzera):
     i = 1
     for lavoro in lavori_contratto:  # Per ogni lavoro calcoliamo la percentuale di avanzamento
         try:
-            positivi_lavoro = misure_aggregate.filter(Lavoro=lavoro.id).values("Positivi")[0]['Positivi']  # Prendiamo le misure positive per quel lavoro
+            positivi_lavoro = misure_aggregate.filter(Lavoro=lavoro.id).values("Somma_Positivi")[0]['Somma_Positivi']  # Prendiamo le misure positive per quel lavoro
         except:
             positivi_lavoro = 0
         if lavoro.Costo_Unitario == 0.0:  # Se il lavoro si misura in percentuale, si aggiunge la percentuale che è stata misurata
@@ -183,27 +185,32 @@ def avanza_lavori(request, lavori_contratto, misure_aggregate, azzera):
             elementi_misurabili = lavoro.Importo / lavoro.Costo_Unitario
             percentuale_parziale += lavoro.Percentuale + (positivi_lavoro * 100 / elementi_misurabili)
 
+        print(str(lavoro.Percentuale) + " " + str(percentuale_parziale))
         if azzera: # Se viene passato il valore true, allora viene aggiornata la percentuale del lavoro e viene salvata la nuova percentuale in blockchain
-            lavoro.Percentuale = percentuale_parziale
-            lavoro.save()
+            print(str(lavoro.Percentuale) + " " + str(percentuale_parziale))
+            try:
+                lavoro.Percentuale = percentuale_parziale
+                lavoro.save()
+                ## sezione dedicata all'aggiornamento della percentuale in blockchain
+                user = request.user.username
+                account = Web3.toChecksumAddress(request.user.Account)
+                password = request.user.Password_Block
+                contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
+                w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+                istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
+                w3.personal.unlockAccount(w3.eth.defaultAccount, password, 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
 
-            ## sezione dedicata all'aggiornamento della percentuale in blockchain
-            user = request.user.username
-            account = Web3.toChecksumAddress(request.user.Account)
-            password = request.user.Password_Block
-            contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
-            w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
-            w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
-            istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
-            w3.personal.unlockAccount(w3.eth.defaultAccount, password, 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
 
-            if lavoro.Costo_Unitario == 0.0:  # Se il lavoro si misura in percentuale, si aggiunge la percentuale che è stata misurata
-                istanza_contratto.functions.updateLavoro(i, positivi_lavoro).transact({'gas': 100000}) # La i è il numero di lavoro
-            else:  # Altrimento si calcola il l'avanzamento in percentuale in base agli elementi inseriti
-                elementi_misurabili = lavoro.Importo / lavoro.Costo_Unitario
-                percentuale_avanzamento = (positivi_lavoro * 100 / elementi_misurabili)
-                istanza_contratto.functions.updateLavoro(i, percentuale_avanzamento).transact({'gas': 100000}) # La i è il numero di lavoro
-            ## fine lavoro in blockchain
+                if lavoro.Costo_Unitario == 0.0:  # Se il lavoro si misura in percentuale, si aggiunge la percentuale che è stata misurata
+                    istanza_contratto.functions.updateLavoro(i, int(positivi_lavoro)).transact({'gas': 100000}) # La i è il numero di lavoro
+                else:  # Altrimento si calcola il l'avanzamento in percentuale in base agli elementi inseriti
+                    elementi_misurabili = lavoro.Importo / lavoro.Costo_Unitario
+                    percentuale_avanzamento = (positivi_lavoro * 100 / elementi_misurabili)
+                    istanza_contratto.functions.updateLavoro(i, int(percentuale_avanzamento)).transact({'gas': 100000}) # La i è il numero di lavoro
+            except Exception as e:
+                print(e)
+            # fine lavoro in blockchain
             percentuale_parziale = 0
             i += 1
 
@@ -221,18 +228,22 @@ def registrocont(request):
         contratti = Contratto.objects.filter(Utente=request.user)
     lavori = Lavoro.objects.filter(Contratto__in=contratti)
 
+    percentuali_contratto = {} # Mi creo un dict per inserirci le percentuali totali che mi servirà in fase di salvataggio delle soglie da raggiungere
+
     try:
-        misure_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO").values("Codice_Tariffa", "Lavoro").annotate(Somma_Positivi=Sum("Positivi"), Sommae_Negativi=Sum("Negativi"), latest_date=Max('Data')) # Mi ricavo la lista delle misure che sono state giù approvate nel libretto e che l'utente ha diritto a visualizzare e le aggrego per Codice Tariffa in modo da vere il valore totale
+        misure_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO").values("Codice_Tariffa", "Lavoro").annotate(Somma_Positivi=Sum("Positivi"), Somma_Negativi=Sum("Negativi"), latest_date=Max('Data')) # Mi ricavo la lista delle misure che sono state giù approvate nel libretto e che l'utente ha diritto a visualizzare e le aggrego per Codice Tariffa in modo da vere il valore totale
         misure_non_aggregate = Misura.objects.filter(Lavoro__in=lavori, Stato="CONFERMATO_LIBRETTO")
 
         # Sezione dedicata ad aggiungere dei campi alla queryset che contiene le misure aggregate
         Descrizione_Lavori = ""
-        for misura in misure_aggregate: # Prendo la lista delle ultime misure per ciascun codice tariffa, così da poter inserire nel template il costo unitario, il nome del lavoro e la descrizione di ciò che è stato fatto
+        for misura in misure_aggregate: # Prendo la lista delle ultime misure per ciascun codice tariffa, così da poter inserire nel template il costo unitario, il nome del lavoro, la descrizione di ciò che è stato fatto, il debito e l'aliquota
             misura["Lavoro_Nome"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Nome")[0]['Nome']
             misura["Prezzo_Unitario"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Costo_Unitario")[0]['Costo_Unitario']
             misura["Debito"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Debito")[0]['Debito']
             misura["Contratto"] = Lavoro.objects.filter(id=misura["Lavoro"]).values("Contratto")[0]['Contratto']
             misura["Contratto_Nome"] = Contratto.objects.filter(id=misura["Contratto"]).values("Nome")[0]['Nome']
+            aliquota = Lavoro.objects.filter(id=misura["Lavoro"]).values("Aliquota")[0]['Aliquota']
+            misura["Aliquota"] = "Valore: " + str(round(misura["Debito"] * aliquota / 100, 4)) + "€\nPercentuale: " + str(aliquota) + "%"
 
             for misura_non_aggregata in misure_non_aggregate:
                 if misura_non_aggregata.Codice_Tariffa == misura["Codice_Tariffa"] and misura_non_aggregata.Lavoro.id == misura["Lavoro"]:
@@ -247,20 +258,23 @@ def registrocont(request):
             num_lavori = lavori_contratto.count() # Li contiamo
 
             percentuale_parziale = avanza_lavori(request, lavori_contratto, misure_aggregate, False) # Calcola la percentuale senza far avanzare i lavori
-
             percentuale_totale = percentuale_parziale / num_lavori # Calcoliamo la percentuale del contratto proporzionalmente al numero di lavori
-            soglia_da_raggiungere = Soglia.objects.filter(Contratto=contratto.id, Attuale=True).values("Importo_Pagamento", "Percentuale_Da_Raggiungere").order_by("Percentuale_Da_Raggiungere") # Prendiamo le soglie e le ordiniamo in modo da sapere quale è la prossima da raggiungere
-            if soglia_da_raggiungere.values("Percentuale_Da_Raggiungere")[0]['Percentuale_Da_Raggiungere'] <= percentuale_totale:
-                contratto.Pagamento = soglia_da_raggiungere[0]["Importo_Pagamento"]
-                if soglia_da_raggiungere.values("Percentuale_Da_Raggiungere")[0]['Percentuale_Da_Raggiungere'] == 100.0:
-                    contratto.Soglia = 100.0
+            percentuali_contratto[contratto.id] = percentuale_totale # Assegno al dict creato precedentemente la percentuale totale del contratto in questione
+
+            soglie_da_raggiungere = Soglia.objects.filter(Contratto=contratto.id, Attuale=True).values("Importo_Pagamento", "Percentuale_Da_Raggiungere").order_by("Percentuale_Da_Raggiungere") # Prendiamo le soglie e le ordiniamo in modo da sapere quale è la prossima da raggiungere
+            contratto.Pagamento = 0 # Mi creo una variabile di appoggio per memorizzare a quanto ammonterà il pagamento
+            for soglia in soglie_da_raggiungere:
+                if soglia["Percentuale_Da_Raggiungere"] <= percentuale_totale:
+                    contratto.Pagamento += soglia["Importo_Pagamento"]
+                    if soglia["Percentuale_Da_Raggiungere"] == 100.0:
+                        contratto.Soglia = 100.0
+                    else:
+                        contratto.Soglia = 0
                 else:
-                    contratto.Soglia = 0
-            else:
-                contratto.Pagamento = 0
+                    contratto.Pagamento += 0
+
     except:
         misure_aggregate = {}
-
     # Sezione dedicata all'approvazione delle misure contenute nel registro da parte della stazione
     if request.method == "POST" and misure_aggregate != {}:
         approva = request.POST.get("Approva")
@@ -286,9 +300,11 @@ def registrocont(request):
                         w3.eth.waitForTransactionReceipt(tx_nuovo_pagamento, timeout=20)
                         pagamenti += "Per il contratto " + contratto.Nome + " è stato erogato un pagamento di " + str(contratto.Pagamento) + "€</br></br>"
 
-                        soglia_raggiunta = Soglia.objects.filter(Contratto=contratto.id, Attuale=True).order_by("Percentuale_Da_Raggiungere")[0]  # Prendiamo la soglia raggiunta in modo da aggiornarne lo stato
-                        soglia_raggiunta.Attuale = False
-                        soglia_raggiunta.save()
+                        soglie_raggiunte = Soglia.objects.filter(Contratto=contratto.id, Attuale=True).order_by("Percentuale_Da_Raggiungere")  # Prendiamo la soglia raggiunta in modo da aggiornarne lo stato
+                        for soglia_raggiunta in soglie_raggiunte:
+                            if soglia_raggiunta.Percentuale_Da_Raggiungere <= percentuali_contratto[contratto.id]:
+                                soglia_raggiunta.Attuale = False
+                                soglia_raggiunta.save()
 
                         # Aggiorniamo il debito dei lavori
                         pagamento = contratto.Pagamento
@@ -404,6 +420,7 @@ def nuovamisura(request):
                         response_data["percentuale"] = "Errore_Percentuale"
                         response_data["percentuale_rimanente"] = 100 - (misure_totali - nuova_misura.Positivi)
                     else:
+                        nuova_misura.Codice_Tariffa = lavoro_associato.Codice_Tariffa
                         nuova_misura.save()
                         response_data["misura"] = "Successo_2"  # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
                 else: # Caso in cui il lavoro si misura in elementi
@@ -413,6 +430,7 @@ def nuovamisura(request):
                         response_data["elementi"] = "Errore_Elementi"
                         response_data["elementi_rimanenti"] = elementi_totali - misure_totali + nuova_misura.Positivi
                     else:
+                        nuova_misura.Codice_Tariffa = lavoro_associato.Codice_Tariffa
                         nuova_misura.save()
                         response_data["misura"] = "Successo_2"  # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
             else:

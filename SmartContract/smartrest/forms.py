@@ -76,6 +76,7 @@ class LavoroForm(forms.ModelForm):
             'Codice_Tariffa': forms.TextInput(attrs={'class': 'required'}),
             'Nome': forms.TextInput(attrs={'class': 'required'}),
             'Importo': forms.NumberInput(attrs={'class': 'required importo'}),
+            'Aliquota': forms.NumberInput(attrs={'class': 'required'}),
             'Costo_Unitario': forms.NumberInput(attrs={'class': 'notrequired importo'}),
             'Debito': forms.HiddenInput(attrs={'class': 'importo'}),
             'Percentuale': forms.HiddenInput(),

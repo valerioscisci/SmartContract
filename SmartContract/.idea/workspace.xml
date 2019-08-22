@@ -4,10 +4,11 @@
     <list default="true" id="76552703-d1cf-4781-bbbb-207a8846d17e" name="Default Changelist" comment="Aggiunti i file dei contratti e un file JSON di lavoro. Iniziata la parte di codice che creerà i contratti.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smartrest/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_registro.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/blocco_registro.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/contract_area.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smartrest/templates/contract_area/libretto_misure.html" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/templates/contract_area/libretto_misure.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smartrest/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smartrest/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TO DO LIST.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../TO DO LIST.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
