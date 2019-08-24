@@ -1,5 +1,5 @@
 # DJANGO IMPORTS
-import traceback
+import re
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
@@ -11,11 +11,12 @@ from django.shortcuts import render, redirect
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse, HttpResponse
 # MODELS IMPORTS
-from .models import User, Contracts, Contratto, Lavoro, Misura, Soglia, Giornale, Images
+from .models import User, Contracts, Contratto, Lavoro, Misura, Soglia, Giornale, Images, Transazione
 # FORMS IMPORTS
 from .forms import librettoForm, ContrattoForm, LavoroForm, SogliaForm, GiornaleForm, ImageForm, RegisterForm
 # OTHER IMPORTS
 import json
+import fileinput
 from web3 import Web3
 from solcx import compile_files
 from notify.signals import notify
@@ -36,6 +37,13 @@ class AuthenticationView(TemplateView):
 class ContractAreaView(TemplateView):
     template_name = "contract_area/contract_area.html"
 
+# Vista per la Visualizzazione delle Transazioni
+
+def visualizzatransazioni(request):
+    lista_transazioni = Transazione.objects.all()
+
+    return render(request, 'transazioni.html', {"lista_transazioni": lista_transazioni})
+
 # Vista per la Registrazione
 
 def registrazione(request):
@@ -46,9 +54,9 @@ def registrazione(request):
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password')
             group = form.cleaned_data.get('groups')
-            user.set_password(raw_password) # Setta la il digest della password usando SHA2
+            user.set_password(raw_password) # Setta la il digest della password usando SHA2-256
             user.save()
-            user.groups.add(group) # Aggiunge i gruppi di appartenenza delll'utente (In teoria se ne deve scegliere  solo uno)
+            user.groups.add(group) # Aggiunge i gruppi di appartenenza delll'utente
             user = authenticate(username=username, password=raw_password)
             login(request, user) # Logga l'utente appena creato
             return redirect('contract_area') # Lo rimanda alla sua area contratti
@@ -190,22 +198,31 @@ def avanza_lavori(request, lavori_contratto, misure_aggregate, azzera):
                 lavoro.Percentuale = percentuale_parziale
                 lavoro.save()
                 ## sezione dedicata all'aggiornamento della percentuale in blockchain
-                user = request.user.username
                 account = Web3.toChecksumAddress(request.user.Account)
                 password = request.user.Password_Block
-                contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                contract = Contracts.objects.filter(Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
                 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
                 w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
                 istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
                 w3.personal.unlockAccount(w3.eth.defaultAccount, password, 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
 
-
                 if lavoro.Costo_Unitario == 0.0:  # Se il lavoro si misura in percentuale, si aggiunge la percentuale che è stata misurata
-                    istanza_contratto.functions.updateLavoro(i, int(positivi_lavoro)).transact({'gas': 100000}) # La i è il numero di lavoro
+                    tx_aggiorna_percentuale = istanza_contratto.functions.updateLavoro(i, int(positivi_lavoro)).transact({'gas': 100000}) # La i è il numero di lavoro
                 else:  # Altrimento si calcola il l'avanzamento in percentuale in base agli elementi inseriti
                     elementi_misurabili = lavoro.Importo / lavoro.Costo_Unitario
                     percentuale_avanzamento = (positivi_lavoro * 100 / elementi_misurabili)
-                    istanza_contratto.functions.updateLavoro(i, int(percentuale_avanzamento)).transact({'gas': 100000}) # La i è il numero di lavoro
+                    tx_aggiorna_percentuale = istanza_contratto.functions.updateLavoro(i, int(percentuale_avanzamento)).transact({'gas': 100000}) # La i è il numero di lavoro
+                tx_receipt = w3.eth.waitForTransactionReceipt(tx_aggiorna_percentuale, timeout=20)
+
+                # Aggiungo la transazione nel DB
+                transazione = Transazione()
+                transazione.Descrizione = mark_safe("È stata aggiornata la percentuale del lavoro <strong>" + str(lavoro.Nome) + "</strong> che ora ammonta a <strong>" + str(lavoro.Percentuale) + "%</strong> relativamente al contratto <strong>" + str(lavoro.Contratto.Nome) + "</strong>.")
+                transazione.Hash_Transazione = (tx_receipt["transactionHash"]).hex()
+                transazione.Numero_Blocco = tx_receipt["blockNumber"]
+                transazione.Mittente = tx_receipt["from"]
+                transazione.Destinatario = tx_receipt["to"]
+                transazione.save()
+
             except Exception as e:
                 print(str(e))
             # fine lavoro in blockchain
@@ -285,17 +302,26 @@ def registrocont(request):
             for contratto in contratti:
                 if contratto.Pagamento != 0:
                     ## sezione dedicata al lancio della funzione di pagamento in blockchain
-                    user = request.user.username
                     account = Web3.toChecksumAddress(request.user.Account)
                     password = request.user.Password_Block
-                    contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                    contract = Contracts.objects.filter(Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
                     w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
                     w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
                     istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
                     w3.personal.unlockAccount(account, password, 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
                     tx_nuovo_pagamento = istanza_contratto.functions.sendPagamento().transact({'gas': 100000})
                     try:
-                        w3.eth.waitForTransactionReceipt(tx_nuovo_pagamento, timeout=20)
+                        tx_receipt = w3.eth.waitForTransactionReceipt(tx_nuovo_pagamento, timeout=20)
+
+                        # Aggiungo la transazione nel DB
+                        transazione = Transazione()
+                        transazione.Descrizione = mark_safe("È stato erogato un pagamento di <strong>" + str(contratto.Pagamento) + "€</strong> relativamente al contratto <strong>" + str(contratto.Nome) + "</strong>.")
+                        transazione.Hash_Transazione = (tx_receipt["transactionHash"]).hex()
+                        transazione.Numero_Blocco = tx_receipt["blockNumber"]
+                        transazione.Mittente = tx_receipt["from"]
+                        transazione.Destinatario = tx_receipt["to"]
+                        transazione.save()
+
                         pagamenti += "Per il contratto " + contratto.Nome + " è stato erogato un pagamento di " + str(contratto.Pagamento) + "€</br></br>"
 
                         soglie_raggiunte = Soglia.objects.filter(Contratto=contratto.id, Attuale=True).order_by("Percentuale_Da_Raggiungere")  # Prendiamo la soglia raggiunta in modo da aggiornarne lo stato
@@ -331,17 +357,26 @@ def registrocont(request):
                     # Se la soglia raggiunta è 100, vuol dire che il contratto è completo e viene quindi terminato in blockchain.
                     if contratto.Soglia == 100.0:
                         ## sezione dedicata al lancio della funzione che termina un contratto in blockchain
-                        user = request.user.username
                         account = Web3.toChecksumAddress(request.user.Account)
                         password = request.user.Password_Block
-                        contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                        contract = Contracts.objects.filter(Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
                         w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
                         w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
                         istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
                         w3.personal.unlockAccount(w3.eth.defaultAccount, password, 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
                         tx_termina_contratto = istanza_contratto.functions.killContratto().transact({'gas': 100000})
                         try:
-                            w3.eth.waitForTransactionReceipt(tx_termina_contratto, timeout=20)
+                            tx_receipt = w3.eth.waitForTransactionReceipt(tx_termina_contratto, timeout=20)
+
+                            # Aggiungo la transazione nel DB
+                            transazione = Transazione()
+                            transazione.Descrizione = mark_safe("È stato terminato il contratto <strong>" + str(contratto.Nome) + "</strong>.")
+                            transazione.Hash_Transazione = (tx_receipt["transactionHash"]).hex()
+                            transazione.Numero_Blocco = tx_receipt["blockNumber"]
+                            transazione.Mittente = tx_receipt["from"]
+                            transazione.Destinatario = tx_receipt["to"]
+                            transazione.save()
+
                             contratto.Terminato = True
                             contratto.save()
                             pagamenti = "<p class=\"text-dark text-strong\">Il contratto " + contratto.Nome + " è stato concluso con successo.</p></br></br>" + pagamenti
@@ -380,9 +415,28 @@ class registrocontredirect(TemplateView):
 @login_required
 def nuovamisura(request):
     Contratti = Contratto.objects.filter(Direttore=request.user.id) # Prendo la lista dei contratti associati al direttore dei lavori che vuole inserire una misura
-    if request.method == "POST":
-        response_data = {}  # invieremo con questa variabile la risposta alla chiamata ajax
+    response_data = {}  # invieremo con questa variabile la risposta alla chiamata ajax
 
+    if request.method == "GET" and request.is_ajax():
+        lavoro = request.GET.get("lavoro")
+        lavoro_associato = Lavoro.objects.filter(id=lavoro)[0]  # Prendo il lavoro associato alla nuova misura
+        misure = Misura.objects.filter(Lavoro=lavoro, Stato__in={"INSERITO_LIBRETTO", "CONFERMATO_LIBRETTO", "CONFERMATO_REGISTRO"})  # Prendo la lista delle misure per il lavoro che stiamo verififcando
+        misure_totali = 0  # Mi creo una variabile di appoggio
+
+        for misura in misure:  # Scorro la lista delle misure
+            misure_totali += misura.Positivi  # Mi calcolo il totale delle misure fino ad ora
+
+        if lavoro_associato.Costo_Unitario == 0.0:
+            response_data["misure_rimanenti"] = 100 - (misure_totali)
+        else:
+            elementi_totali = lavoro_associato.Importo / lavoro_associato.Costo_Unitario  # Calcolo il numero totale di elementi misurabili per il lavoro in questione
+            response_data["misure_rimanenti"] = elementi_totali - misure_totali
+
+        return HttpResponse(
+            json.dumps(response_data),
+            content_type='application/json'
+        )
+    if request.method == "POST":
         contratto = request.POST.get("Contratto")
         misura = request.POST.get("Lavoro")
 
@@ -413,24 +467,27 @@ def nuovamisura(request):
 
                 misure_totali += nuova_misura.Positivi  # Aggiungo la misura appena inserita dal direttore
 
-                if lavoro_associato.Costo_Unitario == 0.0: # Caso in cui il lavoro si misura in percentuale
-                    if misure_totali > 100: # Se con la misura inserita si supera il totale del lavoro, si manda un errore
-                        response_data["percentuale"] = "Errore_Percentuale"
-                        response_data["percentuale_rimanente"] = 100 - (misure_totali - nuova_misura.Positivi)
-                    else:
-                        nuova_misura.Codice_Tariffa = lavoro_associato.Codice_Tariffa
-                        nuova_misura.save()
-                        response_data["misura"] = "Successo_2"  # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
-                else: # Caso in cui il lavoro si misura in elementi
-                    elementi_totali = lavoro_associato.Importo / lavoro_associato.Costo_Unitario # Calcolo il numero totale di elementi misurabili per il lavoro in questione
+                if nuova_misura.Positivi != 0:
+                    if lavoro_associato.Costo_Unitario == 0.0: # Caso in cui il lavoro si misura in percentuale
+                        if misure_totali > 100: # Se con la misura inserita si supera il totale del lavoro, si manda un errore
+                            response_data["percentuale"] = "Errore_Percentuale"
+                            response_data["percentuale_rimanente"] = 100 - (misure_totali - nuova_misura.Positivi)
+                        else:
+                            nuova_misura.Codice_Tariffa = lavoro_associato.Codice_Tariffa
+                            nuova_misura.save()
+                            response_data["misura"] = "Successo_2"  # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
+                    else: # Caso in cui il lavoro si misura in elementi
+                        elementi_totali = lavoro_associato.Importo / lavoro_associato.Costo_Unitario # Calcolo il numero totale di elementi misurabili per il lavoro in questione
 
-                    if misure_totali > elementi_totali: # Se con la misura inserita si supera il numero massimo di elementi misurabili, si manda un errore
-                        response_data["elementi"] = "Errore_Elementi"
-                        response_data["elementi_rimanenti"] = elementi_totali - misure_totali + nuova_misura.Positivi
-                    else:
-                        nuova_misura.Codice_Tariffa = lavoro_associato.Codice_Tariffa
-                        nuova_misura.save()
-                        response_data["misura"] = "Successo_2"  # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
+                        if misure_totali > elementi_totali: # Se con la misura inserita si supera il numero massimo di elementi misurabili, si manda un errore
+                            response_data["elementi"] = "Errore_Elementi"
+                            response_data["elementi_rimanenti"] = elementi_totali - misure_totali + nuova_misura.Positivi
+                        else:
+                            nuova_misura.Codice_Tariffa = lavoro_associato.Codice_Tariffa
+                            nuova_misura.save()
+                            response_data["misura"] = "Successo_2"  # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
+                else:
+                    response_data["misura"] = "Errore_Positivi"
             else:
                 response_data["misura"] = "Errore"
         else:
@@ -564,20 +621,30 @@ def nuovocontratto(request):
                 elif codiceripetuto: # Se ho già inserito quel codice tariffa, mando un errore
                     response_data["codice"] = "Errore_Codice"
                 else: # Se non ci sono stati errori e se bisogna inserire altri lavori, salvo l'ultimo lavoro
+                    response_data["importo_mancante"] = str(importo_tot - importo_lavori)
                     nuovo_lavoro.save()
 
                     ## sezione dedicata all'inserimento di ciascun lavoro in blockchain
-                    user = request.user.username
                     account = Web3.toChecksumAddress(request.user.Account)
                     password = request.user.Password_Block
-                    contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto') # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                    contract = Contracts.objects.filter(Contract_Type='Appalto') # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
                     w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
                     w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
                     istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
                     w3.personal.unlockAccount(w3.eth.defaultAccount, password, 0) # Serve per sbloccare l'account prima di poter eseguire le transazioni
                     tx_nuovo_lavoro = istanza_contratto.functions.addLavoro(nuovo_lavoro.Nome).transact({'gas': 100000})
                     try:
-                        w3.eth.waitForTransactionReceipt(tx_nuovo_lavoro, timeout=20)
+                        tx_receipt = w3.eth.waitForTransactionReceipt(tx_nuovo_lavoro, timeout=20)
+
+                        # Aggiungo la transazione nel DB
+                        transazione = Transazione()
+                        transazione.Descrizione = mark_safe("È stato inserito un nuovo lavoro (Nome: <strong>" + str(nuovo_lavoro.Nome) + "</strong>) relativamente al contratto <strong>" + str(nuovo_lavoro.Contratto.Nome) + "</strong>.")
+                        transazione.Hash_Transazione = (tx_receipt["transactionHash"]).hex()
+                        transazione.Numero_Blocco = tx_receipt["blockNumber"]
+                        transazione.Mittente = tx_receipt["from"]
+                        transazione.Destinatario = tx_receipt["to"]
+                        transazione.save()
+
                         response_data["msg"] = "Successo_2"  # Se il lavoro inserito è valido si manda l'ok per far inserire un nuovo lavoro o terminare
                         response_data["contratto"] = nuovo_lavoro.Contratto.pk  # Si ripassa l'id del nuovo contratto per associarci gli altri lavori che inserirà la stazione
                     except:
@@ -606,23 +673,34 @@ def nuovocontratto(request):
                 if importo_soglie > importo_contratto: # Se l'importo delle soglie supera il totale, mando un errore
                     response_data["importo"] = "Errore_Importo"
                     response_data["importo_attuale"] = str(importo_soglie - nuova_soglia.Importo_Pagamento)
+                    response_data["importo_totale"] = str(importo_contratto)
                 elif nuova_soglia.Percentuale_Da_Raggiungere > 100: # Se la percentuale da raggiungere dell'ultima soglia è maggiore di 100, mando un errore
                     response_data["percentuale"] = "Errore_Percentuale"
                 else:
+                    response_data["importo_mancante"] = str(importo_contratto - importo_soglie)
                     nuova_soglia.save()
 
                     ## sezione dedicata all'inserimento di ciascuna soglia in blockchain
-                    user = request.user.username
                     account = Web3.toChecksumAddress(request.user.Account)
                     password = request.user.Password_Block
-                    contract = Contracts.objects.filter(Username=user, Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
+                    contract = Contracts.objects.filter(Contract_Type='Appalto')  # Seleziona il contratto così da poter crearne un'istanza e poter lanciare le sue funzioni
                     w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
                     w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
                     istanza_contratto = w3.eth.contract(address=contract[0].Contract_Address, abi=contract[0].Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
                     w3.personal.unlockAccount(account, password, 0)  # Serve per sbloccare l'account prima di poter eseguire le transazioni
                     tx_nuova_soglia = istanza_contratto.functions.addSoglia(int(nuova_soglia.Importo_Pagamento), int(nuova_soglia.Percentuale_Da_Raggiungere)).transact({'gas': 100000})
                     try:
-                        w3.eth.waitForTransactionReceipt(tx_nuova_soglia, timeout=20)
+                        tx_receipt = w3.eth.waitForTransactionReceipt(tx_nuova_soglia, timeout=20)
+
+                        # Aggiungo la transazione nel DB
+                        transazione = Transazione()
+                        transazione.Descrizione = mark_safe("È stato inserito una nuovo soglia (Importo: <strong>" + str(nuova_soglia.Importo_Pagamento) + "€</strong>, Percentuale: <strong>" + str(nuova_soglia.Percentuale_Da_Raggiungere) + "%</strong>) relativamente al contratto <strong>" + str(nuova_soglia.Contratto.Nome) + "</strong>.")
+                        transazione.Hash_Transazione = (tx_receipt["transactionHash"]).hex()
+                        transazione.Numero_Blocco = tx_receipt["blockNumber"]
+                        transazione.Mittente = tx_receipt["from"]
+                        transazione.Destinatario = tx_receipt["to"]
+                        transazione.save()
+
                         response_data["msg"] = "Successo_3"  # Se la soglia inserita è valido si manda l'ok per far inserire una nuova soglia o terminare
                         response_data["contratto"] = nuova_soglia.Contratto.pk  # Si ripassa l'id del nuovo contratto per associarci le altre soglie che inserirà la stazione
                     except:
@@ -647,64 +725,24 @@ def nuovocontratto(request):
 class nuovocontrattoredirect(TemplateView):
     template_name = "contract_area/nuovo_contratto_redirect.html"
 
-# Vista predisposta alla creazione e all'inizializzazione di un nuovo insieme di smartcontract
-
-def creacontratto(request):
-    if request.method == "POST":
-        username = request.user.username # Salviamo l'utente in una variabile. Ci servirà per quando salveremo gli indirizzi dei contratti creati
-        # legge i contratti dai relativi file e li compila
-        compiled_contracts = compile_files(["." + static("smartrest/contracts/Appalto.sol"), "." + static("smartrest/contracts/Conforme.sol"), "." + static("smartrest/contracts/StringUtils.sol"), "." + static("smartrest/contracts/Valore.sol")])
-        w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:22000")) # Si connette al nodo per fare il deploy
-        w3.eth.defaultAccount = w3.eth.accounts[0] # Dice alla libreria web3 che il nodo in questione è quello che farà le transazioni
-        JSON_contracts = [] # Variabile che conterrà i dati dei contratti da andare a salvare nel file JSON
-        for contract_name, compiled_contract in compiled_contracts.items(): # Facciamo il deploy per ogni contratto
-            contract = w3.eth.contract(abi=compiled_contract['abi'], bytecode="0x" + compiled_contract['bin']) # Instanzia il contratto in questione e lo prepara al deploy
-            tx_hash = contract.constructor().transact() # Inviamo la transazione al nodo che farà il deploy del contratto. Ritornerà un valore hash
-            tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash) # Aspettiamo che la transazione sia minata prima di proseguire e salviamo la risposta
-            # Costruiamo il JSON contenente "contratto": "abi-address" di ogni contratto
-            JSON_contracts[contract_name] = { # prende abi, name e address di ogni contratto e li mette nel dict JSON_contracts
-                "abi": compiled_contract['abi'],
-                "contractAddress": tx_receipt["contractAddress"]
-            }
-        # Costruiamo il JSON he avrà le informazioni relative ai nuovi contratti creati per lo specifico utente
-        JSON_to_file = {
-            "user": username,
-            "contracts": JSON_contracts
-        }
-        with open(static("smartrest/utils/contracts.json")) as contracts_json: # Dobbiamo leggere il file per aggiugere i nuovi contratti in coda
-            data = json.load(contracts_json) # carica il file in una variabile
-        data.append(JSON_to_file) # Aggiunge i nuovi contratti in coda alla lista dei contratti che ci sono nel file
-        with open(static("smartrest/utils/contracts.json"), 'w') as filejson: # Salva il file contenente anche i nuovi contratti su disco
-            json.dump(data, filejson)
-        # Qui finisce la parte per deployare i contratti e salvarli, ora bisogna  inizializzarli
-        contract_instance = contract_addresses = []
-        for contract in JSON_contracts: # scorre i contratti appena deployati
-            # per ogni valore del dict JSON_contracts, w3.eth.contract(contractAddress, abi) genera un'istanza del relativo contratto
-            contract_instance.append(w3.eth.contract(contract["contractAddress"], contract["abi"])) # Aggiunge al vettore l'istanza del contratto in questione
-            contract_addresses.append(contract["contractAddress"]) # Aggiunge al vettore l'indirizzo del contratto in quetione
-        # a questo punto bisogna salvare i nuovi contratti sulla blockchain e bisogna salvare i nuovi indirizzi ottenuti
-        response = JsonResponse({'status': 'true', 'message': "La creazione dei nuovi contratti è andata a buon fine"})
-        return response # Ritorna un messaggio di sucesso qualora la creazione dia andata bene
-    else:
-        response = JsonResponse({'status': 'false', 'message': "Questo endpoint può essere chiamato solo tramite una request di tipo POST"}, status=500)
-        return response # Ritorna un errore se la request non usa il metodo POST
-
 # Vista predisposta alla inizializzazione dei contratti
 
 def setcontratti(request):
     if request.method != "POST":
-        w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))  # Si connette al nodo per fare il deploy
-        w3.eth.defaultAccount = w3.eth.accounts[0]  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
-        contracts = Contracts.objects.filter(Username='stazione')
+        account = Web3.toChecksumAddress(request.user.Account)
+        password = request.user.Password_Block
+        w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8547"))  # Si connette al nodo per fare il deploy
+        w3.eth.defaultAccount = account  # Dice alla libreria web3 che l'account della stazione è quello che farà le transazioni
+        contracts = Contracts.objects.all()
         i = 0
         indirizzi = [0] * 4
         istanze_contratti = [0] * 4
         for contract in contracts:
             indirizzi[i] = contract.Contract_Address
-            istanze_contratti[i] = w3.eth.contract(address=contract.Contract_Address,abi=contract.Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
+            istanze_contratti[i] = w3.eth.contract(address=contract.Contract_Address, abi=contract.Contract_Abi.Abi_Value)  # Crea un'istanza del contratto per porte eseguire i metodi
             i = i+1
 
-        w3.personal.unlockAccount(w3.eth.accounts[0], 'smartcontract',0) # Serve per sbloccare l'account prima di poter eseguire le transazioni
+        w3.personal.unlockAccount(account, password, 0) # Serve per sbloccare l'account prima di poter eseguire le transazioni
 
         # la seguente sezione setta gli indirizzi per i vari contratti prima di poterli utilizzare
 

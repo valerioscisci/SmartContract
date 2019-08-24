@@ -32,6 +32,11 @@
                 <td class="text-strong">Annotazioni Generali</td>
                 <td class="text-strong">Immagini</td>
             </tr>
+            {% if not voci_giornale %}
+            <tr class="text-center">
+                <td colspan="5">Nessuna voce presente nel giornale</td>
+            </tr>
+            {% endif %}
             {% for voce in voci_giornale %}
             <tr valign="top">
                 <td>

@@ -72,6 +72,7 @@
                     <div class="top-nav left-menu">
                         <ul class="right top-ul chevron">
                             <li><a href="{% url 'home' %}">Home</a></li>
+                            <li><a href="{% url 'visualizza_transazioni' %}">Lista Transazioni</a></li>
                             {% if user.is_authenticated %}
                             <li><a href="{% url 'contract_area' %}">Area Contratti</a></li>
                             {% endif %}

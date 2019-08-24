@@ -306,4 +306,3 @@ contract Appalto {
 
 
 
-

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ block.super }} - Lista Transazioni{% endblock title %}
+
+{% block css %}
+
+{% endblock css %}
+
+{% block content %}
+
+<main role="main">
+    <!-- Header -->
+    <header class="section-top-padding">
+    </header>
+    <section class="background-white">
+        <div class="line text-center">
+            <h2 class="text-dark text-size-50 text-m-size-40">Lista Transazioni</h2>
+            <hr class="break background-primary break-small break-center margin-bottom-50">
+        </div>
+        <div class="line">
+            <div class="margin2x">
+                <div class="s-12 m-12 l-12 margin-bottom-30">
+                    <table id="table-scroll" class="text-center">
+                        <tr>
+                            <td class="text-strong">Descrizione</td>
+                            <td class="text-strong">Hash Transazione</td>
+                            <td class="text-strong">Numero Blocco</td>
+                            <td class="text-strong">Mittente</td>
+                            <td class="text-strong">Destinatario</td>
+                        </tr>
+                        {% if not lista_transazioni %}
+                        <tr class="text-center">
+                            <td colspan="5">Nessuna transazioni presente in blockchain</td>
+                        </tr>
+                        {% endif %}
+                        {% for transazione in lista_transazioni %}
+                        <tr>
+                            <td>
+                                {{ transazione.Descrizione|safe }}
+                            </td>
+                            <td>
+                                {{ transazione.Hash_Transazione }}
+                            </td>
+                            <td>
+                                {{ transazione.Numero_Blocco }}
+                            </td>
+                            <td>
+                                {{ transazione.Mittente }}
+                            </td>
+                            <td>
+                                {{ transazione.Destinatario }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                     </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% endblock content %}
+
+{% block js %}
+
+{% endblock js %}

@@ -11,6 +11,7 @@
 <div class="margin-s-left-0 margin-m-left-30 margin-l-left-50 margin-xl-left-60 margin-left-80 margin-right-20 margin-s-right-0">
     <h3 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center form1">Inserisci Nuovo Contratto</h3>
     <h4 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center form2 hidden">Inserisci Nuovo Lavoro</h4>
+    <h4 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center form3 hidden">Inserisci Nuova Soglia</h4>
     <p id="messaggi_ajax" class="hidden text-dark background-error border-radius margin-bottom-20">
 
     </p>
@@ -38,8 +39,7 @@
                 </td>
             <tr>
                 <td colspan="2">
-                    <button id="form2_button" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci e Continua</button>
-                    <button id="form2_button_2" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci e Termina</button>
+                    <button id="form2_button" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci Lavoro</button>
                 </td>
             </tr>
         </table>
@@ -52,8 +52,7 @@
                 </td>
             <tr>
                 <td colspan="2">
-                    <button id="form3_button" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci e Continua</button>
-                    <button id="form3_button_2" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci e Termina</button>
+                    <button id="form3_button" type="submit" class="button border-radius background-primary text-white navbutton">Inserisci Soglia</button>
                 </td>
             </tr>
         </table>
@@ -101,15 +100,10 @@
         //quando si invia il secondo form al server tramite la chiamata ajax si svuota il form per inserire un nuovo lavoro o si termina l'inserimento
         $('#form2_button').click(function(event){
             event.preventDefault();
-            check_form2(true);
+            check_form2();
         });
 
-        $('#form2_button_2').click(function(event){
-            event.preventDefault();
-            check_form2(false);
-        });
-
-        function check_form2(nuovo_lavoro){
+        function check_form2(){
             var fd = $('#form2').serialize();
 
             $.ajax({
@@ -119,8 +113,8 @@
                 dataType: 'json',
                 success : function(json) {
                     if(json["msg"]=="Successo_2"){
-                        if (nuovo_lavoro && json["totale"] != "completo"){
-                            $('#messaggi_ajax').show().text("Lavoro inserito correttamente. Inserisci il prossimo.").addClass('background-green').removeClass('background-error');
+                        if (json["totale"] != "completo"){
+                            $('#messaggi_ajax').show().text("Lavoro inserito correttamente, inserisci il prossimo. Importo mancante: "+ json["importo_mancante"] + "€").addClass('background-green').removeClass('background-error');
                             $('#form2')[0].reset();
                             $('#form2').find('#id_Contratto').text(json["contratto"]);
                         } else {
@@ -150,15 +144,10 @@
         //quando si invia il terzo form al server tramite la chiamata ajax si svuota il form per inserire una nuova soglia o si termina l'inserimento
         $('#form3_button').click(function(event){
             event.preventDefault();
-            check_form3(true);
+            check_form3();
         });
 
-        $('#form3_button_2').click(function(event){
-            event.preventDefault();
-            check_form3(false);
-        });
-
-        function check_form3(nuova_soglia){
+        function check_form3(){
             var fd = $('#form3').serialize();
 
             $.ajax({
@@ -168,8 +157,8 @@
                 dataType: 'json',
                 success : function(json) {
                     if(json["msg"]=="Successo_3"){
-                        if (nuova_soglia && json["totale"] != "completo"){
-                            $('#messaggi_ajax').show().text("Nuova soglia inserita correttamente. Inserisci la prossima.").addClass('background-green').removeClass('background-error');
+                        if (json["totale"] != "completo"){
+                            $('#messaggi_ajax').show().text("Nuova soglia inserita correttamente, inserisci la prossima. Importo mancante: "+ json["importo_mancante"] + "€").addClass('background-green').removeClass('background-error');
                             $('#form3')[0].reset();
                             $('#form3').find('#id_Contratto').text(json["contratto"]);
                         } else {
@@ -178,7 +167,7 @@
                     } else if (json["msg"]=="Errore_Block") {
                         $('#messaggi_ajax').show().text("Errore: non è stato possibile inserire la soglia in blockchain.").addClass('background-error').removeClass('background-green');
                     } else if (json["importo"]=="Errore_Importo") {
-                        $('#messaggi_ajax').show().text("Errore: verificare l'importo inserito. La somma degli importi delle soglie, che ad ora ammonta a " + json["importo_attuale"] + "€, deve coincidere con l'importo totale del contratto.").addClass('background-error').removeClass('background-green');
+                        $('#messaggi_ajax').show().text("Errore: verificare l'importo inserito. La somma degli importi delle soglie, che ad ora ammonta a " + json["importo_attuale"] + "€, deve coincidere con l'importo totale del contratto di  " + json["importo_totale"] + "€.").addClass('background-error').removeClass('background-green');
                     } else if (json["percentuale"]=="Errore_Percentuale") {
                         $('#messaggi_ajax').show().text("Errore: verificare che la percentuale inserita sia minore o uguale a 100.").addClass('background-error').removeClass('background-green');
                     } else {

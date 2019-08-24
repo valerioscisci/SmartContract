@@ -54,6 +54,7 @@
                 </td>
                 <td>
                     <h4 class="text-strong text-size-20 text-line-height-1 margin-bottom-20 text-center">Quantità/Percentuale</h4>
+                    <p id="misure_rimanenti"></p>
                     {{ form.Positivi.errors }}
                     {{ form.Positivi.label_tag }} {{ form.Positivi }}
                     {{ form.Negativi.errors }}
@@ -112,6 +113,7 @@
                     if(lavori != "Errore"){
                         $('#form2').show();
                         $("#id_Lavoro").find('option').remove().end();
+                        $("#id_Lavoro").append('<option value='+""+'>---</option>');
                         $.each(lavori, function(key, value){
                             $("#id_Lavoro").append('<option value=' + value["id"] + '>' + value["Nome"] + '</option>');
                         });
@@ -150,6 +152,7 @@
                         if (nuova_misura){
                             $('#messaggi_ajax').show().text("Misura inserita correttamente.").addClass('background-green').removeClass('background-error');
                             $('#form2')[0].reset();
+                            $('#misure_rimanenti').show().text("");
                             $("html, body").stop().animate({scrollTop: $("#notification-box").offset().top }, 500, 'swing');
                         } else {
                             window.location='{% url 'nuova_misura_redirect' %}'
@@ -158,6 +161,8 @@
                         $('#messaggi_ajax').show().text("Errore: la percentauale inserita supera la percentuale di lavoro rimanente da misurare che ammonta a " + json["percentuale_rimanente"] + "%.").addClass('background-error').removeClass('background-green');
                     } else if (json["elementi"]=="Errore_Elementi") {
                         $('#messaggi_ajax').show().text("Errore: il numero di elementi misurati supera quelli rimanenti da misurare che ammontano a " + json["elementi_rimanenti"] + ".").addClass('background-error').removeClass('background-green');
+                    } else if (json["misura"]=="Errore_Positivi") {
+                        $('#messaggi_ajax').show().text("Errore: inserire nel campo positivi un valore diverso da 0.").addClass('background-error').removeClass('background-green');
                     } else {
                         $('#messaggi_ajax').show().text("Errore: controllare i dati inseriti.").addClass('background-error').removeClass('background-green');
                     }
@@ -169,6 +174,24 @@
                 }
             });
         };
+
+        $("#id_Lavoro").change(function(){
+            lavoro = $('#id_Lavoro option:selected').val();
+            console.log(lavoro);
+            $.ajax({
+                url : "{% url 'nuova_misura' %}", // the endpoint
+                type : "GET", // http method
+                data : {"lavoro": lavoro}, // inviamo il lavoro selezionato al server
+                dataType: 'json',
+                success : function(json) {
+                    $('#misure_rimanenti').show().text("Misure mancanti per completare il lavoro: " + json["misure_rimanenti"]).addClass('background-green');
+                },
+
+                error : function err() {
+                    $('#messaggi_ajax').show().text("Errore: server non raggiungibile, riprovare più tardi.").addClass('background-error').removeClass('background-green');
+                }
+            });
+        });
 
         //datepickers function
         $( function() {

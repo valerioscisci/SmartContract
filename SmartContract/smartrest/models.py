@@ -13,12 +13,13 @@ class Contracts_Abis(models.Model):
 # Modello per contenere informazioni relative ai contratti deployati sulla blockchain
 
 class Contracts(models.Model):
-    class Meta:
-        unique_together = (('Contract_ID', 'Username'),)
-
-    Contract_ID = models.IntegerField(default=1)  # Id per identificare il contratto
-    Username = models.CharField(max_length=75, default='', blank=True)  # Nome Utente del creatore del contratto
-    Contract_Type = models.CharField(max_length=50) # Indica il tipo di contratto (Appalto, Valore, Conforme, StringUtils)
+    Tipi_Contratto = (
+        ('Appalto', 'Appalto'),
+        ('Valore', 'Valore'),
+        ('Conforme', 'Conforme'),
+        ('StringUtils', 'StringUtils'),
+    )
+    Contract_Type = models.CharField(max_length=50, choices=Tipi_Contratto) # Indica il tipo di contratto (Appalto, Valore, Conforme, StringUtils)
     Contract_Address = models.CharField(max_length=100) # Indirizzo dove è deployato il contratto sulla blockchain
     Contract_Abi = models.ForeignKey(Contracts_Abis, on_delete=models.CASCADE) # Riferimento al relativo Abi
 
@@ -119,3 +120,12 @@ class Images(models.Model):
 
     Giornale = models.ForeignKey(Giornale, on_delete=models.CASCADE) # Riferimento al giornale dei lavori a cui appartiene l'immagine
     Image = models.ImageField(validators=[validate_file_extension, validate_file_size], upload_to=contract_directory_path, verbose_name='Image') # File immagine
+
+# Modello usato per contenere i riferimenti alle transazioni in blockchain in modo da poterle verificare in qualsiasi momento
+
+class Transazione(models.Model):
+    Descrizione = models.TextField(max_length=500) # Descrizione del contenuto della transazione
+    Hash_Transazione = models.CharField(max_length=100) # Hash della transazione
+    Numero_Blocco = models.IntegerField() # Numero del blocco in cui si trova la transazione
+    Mittente = models.CharField(max_length=100) # Indirizzo hex dell'account del mittente
+    Destinatario = models.CharField(max_length=100) # Indirizzo hex dell'account del destinatario
