@@ -1,6 +1,5 @@
 # DJANGO IMPORTS
-import re
-
+from Crypto.Signature.pkcs1_15 import PKCS115_SigScheme
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Max
@@ -8,18 +7,60 @@ from django.forms import modelformset_factory
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
-from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse, HttpResponse
+from django.conf import settings
 # MODELS IMPORTS
 from .models import User, Contracts, Contratto, Lavoro, Misura, Soglia, Giornale, Images, Transazione
 # FORMS IMPORTS
 from .forms import librettoForm, ContrattoForm, LavoroForm, SogliaForm, GiornaleForm, ImageForm, RegisterForm
 # OTHER IMPORTS
 import json
-import fileinput
 from web3 import Web3
-from solcx import compile_files
 from notify.signals import notify
+# DIGTAL SIGNATURE IMPORTS
+import os
+from Crypto.PublicKey import RSA
+from Crypto.Hash import SHA256
+from Crypto import Random
+import base64
+
+# Metodo per generare le chiavi pubblica e privata di RSA
+
+def gen_rsakeys(user):
+    user_id = user.id
+    media_root = settings.MEDIA_ROOT
+    path = media_root + "\\keys\\" + str(user_id) + "\\" # Crea il path dove salvare la chiave
+    os.makedirs(os.path.dirname(path), exist_ok=True) # Se la cartella non esiste  la crea
+    length = 1024
+    privatekey = RSA.generate(length, Random.new().read) # Genera la chiave privata
+    publickey = privatekey.publickey() # Genera la chiave pubblica
+
+    # Salva le chiavi generate di un utente in un file
+    with open(path + 'rsakey.pem', 'wb') as file:
+        file.write(privatekey.exportKey(format='PEM'))
+
+    with open(path + 'rsapub.pem', 'wb') as file:
+        file.write(publickey.exportKey(format='PEM'))
+
+    return
+
+# Metodo usato per firmare dei dati con una chiave privata di RSA
+
+def sign(privatekey, hash):
+    signer = PKCS115_SigScheme(privatekey)
+    signature = signer.sign(hash)
+    return base64.b64encode(signature)
+
+# Metodo usato per verificare la firma applicata a dei dati con una chiave pubblica di RSA
+
+def verify(publickey, hash, signature):
+    signer = PKCS115_SigScheme(publickey)
+    try:
+        signer.verify(hash, signature)
+        verify = True
+    except:
+        verify = False
+    return verify
 
 # Vista per la Homepage
 
@@ -40,7 +81,7 @@ class ContractAreaView(TemplateView):
 # Vista per la Visualizzazione delle Transazioni
 
 def visualizzatransazioni(request):
-    lista_transazioni = Transazione.objects.all()
+    lista_transazioni = Transazione.objects.all().order_by("-Numero_Blocco")
 
     return render(request, 'transazioni.html', {"lista_transazioni": lista_transazioni})
 
@@ -57,6 +98,8 @@ def registrazione(request):
             user.set_password(raw_password) # Setta la il digest della password usando SHA2-256
             user.save()
             user.groups.add(group) # Aggiunge i gruppi di appartenenza delll'utente
+            if user.groups.filter(name__in={"DirettoreLavori", "StazioneAppaltante"}).exists():
+                gen_rsakeys(user)
             user = authenticate(username=username, password=raw_password)
             login(request, user) # Logga l'utente appena creato
             return redirect('contract_area') # Lo rimanda alla sua area contratti
@@ -474,6 +517,16 @@ def nuovamisura(request):
                             response_data["percentuale_rimanente"] = 100 - (misure_totali - nuova_misura.Positivi)
                         else:
                             nuova_misura.Codice_Tariffa = lavoro_associato.Codice_Tariffa
+
+                            # Sezione dedicata alla firma digitale
+                            media_root = settings.MEDIA_ROOT
+                            path = media_root + "\\keys\\" + str(request.user.id) + "\\"
+                            f = open(path + 'rsakey.pem', 'rb')
+                            privatekey = RSA.importKey(f.read()) # Importa la chiave privata dal file dove è salvata
+                            data = SHA256.new(bytes(nuova_misura.Positivi)) # Genera un hash si una parte della misura
+                            nuova_misura.Firma_Direttore = sign(privatekey, data) # Applica la firma
+                            # Fine firma digitale
+
                             nuova_misura.save()
                             response_data["misura"] = "Successo_2"  # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
                     else: # Caso in cui il lavoro si misura in elementi
@@ -484,6 +537,16 @@ def nuovamisura(request):
                             response_data["elementi_rimanenti"] = elementi_totali - misure_totali + nuova_misura.Positivi
                         else:
                             nuova_misura.Codice_Tariffa = lavoro_associato.Codice_Tariffa
+
+                            # Sezione dedicata alla firma digitale
+                            media_root = settings.MEDIA_ROOT
+                            path = media_root + "\\keys\\" + str(request.user.id) + "\\"
+                            f = open(path + 'rsakey.pem', 'rb')
+                            privatekey = RSA.importKey(f.read())
+                            data = SHA256.new(bytes(nuova_misura.Positivi))
+                            nuova_misura.Firma_Direttore = sign(privatekey, data)
+                            # Fine firma digitale
+
                             nuova_misura.save()
                             response_data["misura"] = "Successo_2"  # Se la misura inserita è valida si manda l'ok per far inserire una nuova misura o per terminare
                 else:
@@ -542,6 +605,25 @@ def librettomisure(request):
                     lavoro.Debito += aggiunta
                     lavoro.save()
                     # Fine aggiornamento debito
+
+                    # Sezione dedicata alla verifica della firma del direttore
+                    utente = misura.Lavoro.Contratto.Direttore
+                    media_root = settings.MEDIA_ROOT
+                    path = media_root + "\\keys\\" + str(utente) + "\\"
+                    f = open(path + 'rsapub.pem', 'rb')
+                    publickey = RSA.importKey(f.read())
+                    data = SHA256.new(bytes(misura.Positivi))
+                    verifica = verify(publickey, data, misura.Firma_Direttore)
+                    # Fine verifica firma digitale
+
+                    # Sezione dedicata alla firma digitale della stazione
+                    media_root = settings.MEDIA_ROOT
+                    path = media_root + "\\keys\\" + str(request.user.id) + "\\"
+                    f = open(path + 'rsakey.pem', 'rb')
+                    privatekey = RSA.importKey(f.read())
+                    data = SHA256.new(bytes(misura.Positivi))
+                    misura.Firma_Stazione = sign(privatekey, data)
+                    # Fine firma digitale
 
                     misura.save()
                     context["salvataggio"] = "si" # Serve per mandare la conferma di avvenuto salvataggio delle misure

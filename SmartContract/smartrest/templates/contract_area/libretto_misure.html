@@ -92,6 +92,8 @@
                 <td class="text-strong">Riserva</td>
                 <td class="text-strong">Annotazioni</td>
                 <td class="text-strong">Stato</td>
+                <td class="text-strong">Firma Direttore</td>
+                <td class="text-strong">Firma Stazione</td>
             </tr>
             {% if not misure %}
             <tr class="text-center">
@@ -138,6 +140,12 @@
                 </td>
                 <td>
                     {{ misura.Stato }}
+                </td>
+                <td>
+                    {{ misura.Firma_Direttore }}
+                </td>
+                <td>
+                    {{ misura.Firma_Stazione }}
                 </td>
             </tr>
             {% endfor %}

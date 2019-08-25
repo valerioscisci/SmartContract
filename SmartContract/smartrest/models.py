@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 
 # Modello per contenere gli abi dei contratti
@@ -85,6 +84,8 @@ class Misura(models.Model):
         ('CONFERMATO_REGISTRO', 'Confermata nel Registro di Contabilità'),
     )
     Stato = models.CharField(max_length=100, choices=Stati_Possibili, default = 'INSERITO_LIBRETTO') # Indica lo stato attuale della misura
+    Firma_Direttore = models.CharField(max_length=200, default="", blank=True) # Contiene la firma applicata dal direttore
+    Firma_Stazione = models.CharField(max_length=200, default="", blank=True)  # Contiene la firma applicata dalla stazione
 
 # Modello contenente le voci inserite nel giornale dei lavori
 

@@ -129,4 +129,6 @@ class librettoForm(forms.ModelForm):
             'Riserva': forms.Select(attrs={'class': 'required'}),
             'Annotazioni': forms.Textarea(attrs={'class': 'notrequired'}),
             'Stato': forms.HiddenInput(),
+            'Firma_Direttore': forms.HiddenInput(),
+            'Firma_Stazione': forms.HiddenInput(),
         }
