@@ -94,6 +94,7 @@ class Giornale(models.Model):
     Data = models.DateField() # Data di inserimento della voce
     Meteo = models.CharField(max_length=150, blank=True) # Meteo osservato nel giorno indicato
     Annotazioni_Generali = models.TextField(max_length=2000) # Annotazioni e avvenimenti particolari osservati dal direttore
+    Firma_Direttore = models.CharField(max_length=200, default="", blank=True)  # Contiene la firma applicata dal direttore
 
 # Modello Usato per contenere le immagini inserite nelle voci del giornale dei lavori
 

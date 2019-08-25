@@ -27,8 +27,12 @@
         <p class="text-error">
             * I campi segnati in rosso sulla sinistra sono obbligatori.
         </p><hr class="break">
-        {% for field in voceform %}
-            {{ field.errors }}{{ field.label_tag }} {{ field }} <br />
+        {% for field in voceform.hidden_fields %}
+            {{ field }}
+        {% endfor %}
+
+        {% for field in voceform.visible_fields %}
+        {{ field.label }} {{ field }}</br>
         {% endfor %}
 
         {{ formset.management_form }}

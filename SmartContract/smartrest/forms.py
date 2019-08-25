@@ -38,6 +38,7 @@ class GiornaleForm(forms.ModelForm):
             'Data': forms.DateInput(attrs={'class': 'required'}),
             'Meteo': forms.TextInput(attrs={'class': 'notrequired'}),
             'Annotazioni_Generali': forms.Textarea(attrs={'class': 'required'}),
+            'Firma_Direttore': forms.HiddenInput(),
         }
 
 # Definisce il form dove l'utente potrà inserire le immagini

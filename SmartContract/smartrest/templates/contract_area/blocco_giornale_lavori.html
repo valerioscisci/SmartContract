@@ -31,6 +31,7 @@
                 <td class="text-strong">Meteo</td>
                 <td class="text-strong">Annotazioni Generali</td>
                 <td class="text-strong">Immagini</td>
+                <td class="text-strong">Firma Direttore</td>
             </tr>
             {% if not voci_giornale %}
             <tr class="text-center">
@@ -55,6 +56,9 @@
                     {% for immagine in voce.Immagini %}
                     <a href="{{ immagine.Image.url }}" target="_blank"><img class="img-giornale margin-bottom-10" src="{{ immagine.Image.url }}"></a>
                     {% endfor %}
+                </td>
+                <td class="firma">
+                    {{ voce.Firma_Direttore }}
                 </td>
             </tr>
             {% endfor %}

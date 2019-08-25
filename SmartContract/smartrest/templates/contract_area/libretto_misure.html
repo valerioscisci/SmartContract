@@ -141,10 +141,10 @@
                 <td>
                     {{ misura.Stato }}
                 </td>
-                <td>
+                <td class="firma">
                     {{ misura.Firma_Direttore }}
                 </td>
-                <td>
+                <td class="firma">
                     {{ misura.Firma_Stazione }}
                 </td>
             </tr>
@@ -164,6 +164,14 @@
         $("#id_contratto_sel option[value={{ context.contratto }}]").prop("selected", "selected");
         $("#id_lavoro_sel option[value={{ context.lavoro }}]").prop("selected", "selected");
         $("#id_stato_sel option[value={{ context.stato }}]").prop("selected", "selected");
+
+        $('.firma').each(function(){
+            if ($.trim($(this).text()) != ""){
+                $(this).empty().append("<i class='icon-sli-check text-success text-size-40'></i>");
+            } else {
+                $(this).empty().append("<i class='icon-sli-close text-error text-size-40'></i>");
+            }
+        });
 
         salvataggio = "{{ context.salvataggio }}"
         if (salvataggio == "si"){

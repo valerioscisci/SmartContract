@@ -122,6 +122,16 @@ def nuovavocegiornale(request):
 
         if voceform.is_valid() and formset.is_valid(): # Controllo che entrambi siano validi
             voce = voceform.save(commit=False) # Salva la nuova voce dle giornale
+
+            # Sezione dedicata alla firma digitale
+            media_root = settings.MEDIA_ROOT
+            path = media_root + "\\keys\\" + str(request.user.id) + "\\"
+            f = open(path + 'rsakey.pem', 'rb')
+            privatekey = RSA.importKey(f.read())  # Importa la chiave privata dal file dove è salvata
+            data = SHA256.new(bytes(voce.Annotazioni_Generali, encoding='utf8'))  # Genera un hash si una parte della voce
+            voce.Firma_Direttore = sign(privatekey, data)  # Applica la firma
+            # Fine firma digitale
+
             voce.save()
 
             for form in formset.cleaned_data: # Scorre tutte le immagini inserite e le salva

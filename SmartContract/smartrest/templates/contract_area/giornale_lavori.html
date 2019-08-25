@@ -31,6 +31,13 @@
 <script type="text/javascript">
     $( document ).ready(function() {
         $("#id_contratto_sel option[value={{ context.contratto }}]").prop("selected", "selected");
+        $('.firma').each(function(){
+            if ($.trim($(this).text()) != ""){
+                $(this).empty().append("<i class='icon-sli-check text-success text-size-40'></i>");
+            } else {
+                $(this).empty().append("<i class='icon-sli-close text-error text-size-40'></i>");
+            }
+        });
     });
 </script>
 
